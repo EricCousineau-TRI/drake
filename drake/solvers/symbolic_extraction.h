@@ -75,6 +75,18 @@ void DecomposeQuadraticExpressionWithMonomialToCoeffMap(
     const std::unordered_map<symbolic::Variable::Id, int>& map_var_to_index, int
     num_variables, Eigen::MatrixXd* Q, Eigen::VectorXd* b, double* c);
 
+/**
+ * Given a vector of linear expressions v, decompose it to
+ * \f$ v = A vars + b \f$
+ * @param[in] v A vector of linear expressions
+ * @param[out] A The matrix containing the linear coefficients.
+ * @param[out] b The vector containing all the constant terms.
+ * @param[out] vars All variables.
+ */
+void DecomposeLinearExpression(
+    const Eigen::Ref<const VectorX<symbolic::Expression>>& v,
+    Eigen::MatrixXd* A, Eigen::VectorXd* b, VectorXDecisionVariable* vars);
+
 /** Decomposes a linear combination @p e = c0 + c1 * v1 + ... cn * vn into
  *  the followings:
  *

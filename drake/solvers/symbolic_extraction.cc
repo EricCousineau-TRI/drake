@@ -82,17 +82,10 @@ void ExtractAndAppendVariablesFromExpression(const Expression& e,
   }
 }
 
-/**
- * Given a vector of linear expressions v, decompose it to
- * \f$ v = A vars + b \f$
- * @param[in] v A vector of linear expressions
- * @param[out] A The matrix containing the linear coefficients.
- * @param[out] b The vector containing all the constant terms.
- * @param[out] vars All variables.
- */
 void DecomposeLinearExpression(const Eigen::Ref<const VectorX<Expression>>& v,
-                               Eigen::MatrixXd* A, Eigen::VectorXd* b,
-                               VectorXDecisionVariable* vars) {
+                               Eigen::MatrixXd *A,
+                               Eigen::VectorXd *b,
+                               VectorXDecisionVariable *vars) {
   // 0. Setup map_var_to_index and var_vec.
   unordered_map<Variable::Id, int> map_var_to_index;
   for (int i = 0; i < v.size(); ++i) {
@@ -109,11 +102,6 @@ void DecomposeLinearExpression(const Eigen::Ref<const VectorX<Expression>>& v,
   }
 }
 
-// Given an expression `e`, extracts all variables inside `e`.
-// @param[in] e A symbolic expression.
-// @retval pair pair.first is the variables in `e`. pair.second is the mapping
-// from the variable ID to the index in pair.first, such that
-// pair.second[pair.first(i).get_id()] = i
 pair<VectorXDecisionVariable, unordered_map<Variable::Id, int>>
 ExtractVariablesFromExpression(const Expression& e) {
   int var_count = 0;
