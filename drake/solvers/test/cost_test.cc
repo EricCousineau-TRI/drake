@@ -38,7 +38,7 @@ template <typename From, typename To>
 struct check_ptr_convertible {
   typedef std::unique_ptr<From> FromPtr;
   typedef std::shared_ptr<To> ToPtr;
-  //static constexpr bool std_value =
+  // static constexpr bool std_value =
   //    std::is_convertible<FromPtr, ToPtr>::value;
   static constexpr bool workaround_value =
       is_convertible_workaround<FromPtr, ToPtr>::value;
@@ -50,10 +50,8 @@ struct C : B {};
 
 GTEST_TEST(testCost, testIsConvertibleWorkaround) {
   EXPECT_TRUE((is_convertible_workaround<C*, B*>::value));
-  EXPECT_TRUE((is_convertible_workaround<shared_ptr<C>,
-                                         shared_ptr<B>>::value));
-  EXPECT_TRUE((is_convertible_workaround<unique_ptr<C>,
-                                         unique_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<shared_ptr<C>, shared_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<unique_ptr<C>, unique_ptr<B>>::value));
   EXPECT_TRUE((is_convertible_workaround<Binding<LinearConstraint>,
                                          Binding<Constraint>>::value));
   EXPECT_FALSE((is_convertible_workaround<Binding<LinearConstraint>,
@@ -63,17 +61,17 @@ GTEST_TEST(testCost, testIsConvertibleWorkaround) {
 
   // // TODO(eric.cousineau): Determine exact conditions. Difficult to pinpoint
   // // via __GLIBCXX__ or __GNUC_* version macros
-  //#if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
+  // #if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
   //    __GNUC_PATCHLEVEL__ <= 3
   //  // Bug in libstdc++ 4.9.x
   //  // Unable to easily determine libstdc++ version from macros at present:
   //  // https://patchwork.ozlabs.org/patch/716321/
   //  cout << "Checking for libstdc++-4.9 bug since GCC 4.9.[0-3] was detected."
-  //       << endl;
+  //        << endl;
   //  EXPECT_TRUE((check_ptr_convertible<A, B>::std_value));
-  //#else
-  //  EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
-  //#endif
+  // #else
+  //   EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
+  // #endif
 }
 
 // For a given Constraint, return the equivalent Cost type
