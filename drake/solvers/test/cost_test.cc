@@ -57,21 +57,10 @@ GTEST_TEST(testCost, testIsConvertibleWorkaround) {
   EXPECT_FALSE((is_convertible_workaround<Binding<LinearConstraint>,
                                           Binding<Cost>>::value));
 
+  // TODO(eric.cousineau): Determine exact conditions for failure in GCC.
+  // Difficult to pinpoint in a multi-platform fashion via __GLIBCXX__ or
+  // __GNUC_* version macros
   EXPECT_FALSE((check_ptr_convertible<A, B>::workaround_value));
-
-  // // TODO(eric.cousineau): Determine exact conditions. Difficult to pinpoint
-  // // via __GLIBCXX__ or __GNUC_* version macros
-  // #if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
-  //    __GNUC_PATCHLEVEL__ <= 3
-  //  // Bug in libstdc++ 4.9.x
-  //  // Unable to easily determine libstdc++ version from macros at present:
-  //  // https://patchwork.ozlabs.org/patch/716321/
-  //  cout << "Checking for libstdc++-4.9 bug since GCC 4.9.[0-3] was detected."
-  //        << endl;
-  //  EXPECT_TRUE((check_ptr_convertible<A, B>::std_value));
-  // #else
-  //   EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
-  // #endif
 }
 
 // For a given Constraint, return the equivalent Cost type
