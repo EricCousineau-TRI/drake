@@ -48,6 +48,7 @@ drake_cc_library(
     srcs = ["symbolic_extraction.cc"],
     hdrs = ["symbolic_extraction.h"],
     deps = [
+        ":decision_variable",
         "//drake/common",
         "//drake/common:autodiff",
         "//drake/common:monomial",

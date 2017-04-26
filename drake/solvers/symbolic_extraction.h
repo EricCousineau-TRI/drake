@@ -18,7 +18,7 @@
 
 namespace drake {
 namespace solvers {
-namespace symbolic {
+namespace internal {
 
 class SymbolicError : public std::runtime_error {
  public:
@@ -111,7 +111,7 @@ DecomposeLinearExpression(
   if (!e.is_polynomial()) {
     std::ostringstream oss;
     oss << "Expression " << e << "is not a polynomial.\n";
-    throw runtime_error(oss.str());
+    throw std::runtime_error(oss.str());
   }
   const symbolic::Variables& vars = e.GetVariables();
   const auto& monomial_to_coeff_map =

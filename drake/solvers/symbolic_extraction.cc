@@ -16,18 +16,10 @@
 #include "drake/common/monomial.h"
 #include "drake/common/symbolic_expression.h"
 #include "drake/math/matrix_util.h"
-#include "drake/solvers/equality_constrained_qp_solver.h"
-#include "drake/solvers/gurobi_solver.h"
-#include "drake/solvers/ipopt_solver.h"
-#include "drake/solvers/linear_system_solver.h"
-#include "drake/solvers/moby_lcp_solver.h"
-#include "drake/solvers/mosek_solver.h"
-#include "drake/solvers/nlopt_solver.h"
-#include "drake/solvers/snopt_solver.h"
 
 namespace drake {
 namespace solvers {
-namespace symbolic {
+namespace internal {
 
 using std::enable_if;
 using std::endl;

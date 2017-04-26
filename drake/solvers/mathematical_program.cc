@@ -52,6 +52,12 @@ using symbolic::Expression;
 using symbolic::Formula;
 using symbolic::Variable;
 
+using internal::DecomposeLinearExpression;
+using internal::DecomposeQuadraticExpressionWithMonomialToCoeffMap;
+using internal::ExtractAndAppendVariablesFromExpression;
+using internal::ExtractVariablesFromExpression;
+using internal::SymbolicError;
+
 namespace {
 
 // Solver for simple linear systems of equalities
@@ -248,12 +254,12 @@ Binding<LinearCost> MathematicalProgram::AddCost(
 }
 
 Binding<LinearCost> MathematicalProgram::AddLinearCost(const Expression& e) {
-  auto p = symbolic::ExtractVariablesFromExpression(e);
+  auto p = ExtractVariablesFromExpression(e);
   const VectorXDecisionVariable& var = p.first;
   const auto& map_var_to_index = p.second;
   Eigen::RowVectorXd c(var.size());
   double constant_term;
-  symbolic::DecomposeLinearExpression(e, map_var_to_index, c, &constant_term);
+  DecomposeLinearExpression(e, map_var_to_index, c, &constant_term);
   // The constant term is ignored now.
   // TODO(hongkai.dai): support adding constant term to the cost.
   return AddLinearCost(c, var);
@@ -294,7 +300,7 @@ Binding<QuadraticCost> AddQuadraticCostWithMonomialToCoeffMap(
   Eigen::MatrixXd Q(vars_vec.size(), vars_vec.size());
   Eigen::VectorXd b(vars_vec.size());
   double constant_term;
-  symbolic::DecomposeQuadraticExpressionWithMonomialToCoeffMap(
+  DecomposeQuadraticExpressionWithMonomialToCoeffMap(
       monomial_to_coeff_map, map_var_to_index, vars_vec.size(), &Q, &b,
       &constant_term);
   // Now add the quadratic constraint 0.5 * x' * Q * x + b' * x
@@ -305,7 +311,7 @@ Binding<QuadraticCost> MathematicalProgram::AddQuadraticCost(
     const Expression& e) {
   // First build an Eigen vector, that contains all the bound variables.
   const symbolic::Variables& vars = e.GetVariables();
-  auto p = symbolic::ExtractVariablesFromExpression(e);
+  auto p = ExtractVariablesFromExpression(e);
   const auto& vars_vec = p.first;
   const auto& map_var_to_index = p.second;
 
@@ -375,7 +381,7 @@ Binding<Cost> MathematicalProgram::AddCost(const Expression& e) {
     total_degree = std::max(total_degree, p.first.total_degree());
   }
 
-  auto e_extracted = symbolic::ExtractVariablesFromExpression(e);
+  auto e_extracted = ExtractVariablesFromExpression(e);
   const VectorXDecisionVariable& vars_vec = e_extracted.first;
   const auto& map_var_to_index = e_extracted.second;
 
@@ -452,8 +458,7 @@ Binding<LinearConstraint> MathematicalProgram::AddLinearConstraint(
   unordered_map<Variable::Id, int> map_var_to_index;
   VectorXDecisionVariable vars(0);
   for (int i = 0; i < v.size(); ++i) {
-    symbolic::ExtractAndAppendVariablesFromExpression(v(i), &vars,
-                                                      &map_var_to_index);
+    ExtractAndAppendVariablesFromExpression(v(i), &vars, &map_var_to_index);
   }
 
   // Construct A, new_lb, new_ub. map_var_to_index is used here.
@@ -465,12 +470,12 @@ Binding<LinearConstraint> MathematicalProgram::AddLinearConstraint(
   bool is_v_bounding_box = true;
   for (int i = 0; i < v.size(); ++i) {
     double constant_term = 0;
-    int num_vi_variables = symbolic::DecomposeLinearExpression(
-        v(i), map_var_to_index, A.row(i), &constant_term);
+    int num_vi_variables = DecomposeLinearExpression(v(i), map_var_to_index,
+                                                     A.row(i), &constant_term);
     if (num_vi_variables == 0 &&
         !(lb(i) <= constant_term && constant_term <= ub(i))) {
       // Unsatisfiable constraint with no variables, such as 1 <= 0 <= 2
-      throw symbolic::SymbolicError(v(i), lb(i), ub(i),
+      throw SymbolicError(v(i), lb(i), ub(i),
                           "unsatisfiable but called with AddLinearConstraint");
 
     } else {
@@ -697,16 +702,14 @@ MathematicalProgram::DoAddLinearEqualityConstraint(
   VectorXDecisionVariable vars(0);
   unordered_map<Variable::Id, int> map_var_to_index;
   for (int i = 0; i < v.rows(); ++i) {
-    symbolic::ExtractAndAppendVariablesFromExpression(v(i), &vars,
-                                                      &map_var_to_index);
+    ExtractAndAppendVariablesFromExpression(v(i), &vars, &map_var_to_index);
   }
   // TODO(hongkai.dai): use sparse matrix.
   Eigen::MatrixXd A = Eigen::MatrixXd::Zero(v.rows(), vars.rows());
   Eigen::VectorXd beq = Eigen::VectorXd::Zero(v.rows());
   for (int i = 0; i < v.rows(); ++i) {
     double constant_term(0);
-    symbolic::DecomposeLinearExpression(v(i), map_var_to_index, A.row(i),
-                                        &constant_term);
+    DecomposeLinearExpression(v(i), map_var_to_index, A.row(i), &constant_term);
     beq(i) = b(i) - constant_term;
   }
   return AddLinearEqualityConstraint(A, beq, vars);
@@ -751,15 +754,14 @@ Binding<LorentzConeConstraint> MathematicalProgram::AddLorentzConeConstraint(
   Eigen::MatrixXd A{};
   Eigen::VectorXd b(v.size());
   VectorXDecisionVariable vars{};
-  symbolic::DecomposeLinearExpression(v, &A, &b, &vars);
+  DecomposeLinearExpression(v, &A, &b, &vars);
   DRAKE_DEMAND(vars.rows() >= 1);
   return AddLorentzConeConstraint(A, b, vars);
 }
 
 Binding<LorentzConeConstraint> MathematicalProgram::AddLorentzConeConstraint(
     const Expression& linear_expr, const Expression& quadratic_expr) {
-  const auto& quadratic_p = symbolic::ExtractVariablesFromExpression(
-      quadratic_expr);
+  const auto& quadratic_p = ExtractVariablesFromExpression(quadratic_expr);
   const auto& quadratic_vars = quadratic_p.first;
   const auto& quadratic_var_to_index_map = quadratic_p.second;
   const auto& monomial_to_coeff_map = symbolic::DecomposePolynomialIntoMonomial(
@@ -767,7 +769,7 @@ Binding<LorentzConeConstraint> MathematicalProgram::AddLorentzConeConstraint(
   Eigen::MatrixXd Q(quadratic_vars.size(), quadratic_vars.size());
   Eigen::VectorXd b(quadratic_vars.size());
   double a;
-  symbolic::DecomposeQuadraticExpressionWithMonomialToCoeffMap(
+  DecomposeQuadraticExpressionWithMonomialToCoeffMap(
       monomial_to_coeff_map, quadratic_var_to_index_map, quadratic_vars.size(),
       &Q, &b, &a);
   // The constraint that the linear expression v1 satisfying
@@ -894,7 +896,7 @@ MathematicalProgram::AddRotatedLorentzConeConstraint(
   Eigen::MatrixXd A{};
   Eigen::VectorXd b(v.size());
   VectorXDecisionVariable vars{};
-  symbolic::DecomposeLinearExpression(v, &A, &b, &vars);
+  DecomposeLinearExpression(v, &A, &b, &vars);
   DRAKE_DEMAND(vars.rows() >= 1);
   return AddRotatedLorentzConeConstraint(A, b, vars);
 }
