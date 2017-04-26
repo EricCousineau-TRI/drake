@@ -18,7 +18,7 @@
 
 namespace drake {
 namespace solvers {
-namespace internal {
+namespace symbolic {
 
 class SymbolicError : public std::runtime_error {
  public:
@@ -32,6 +32,19 @@ class SymbolicError : public std::runtime_error {
   static std::string make_string(const symbolic::Expression& e, const double lb,
                                  const double ub, const std::string& msg);
 };
+
+// Given an expression `e`, extract all variables inside `e`, append these
+// variables to `vars` if they are not included in `vars` yet.
+// @param[in] e  A symbolic expression.
+// @param[in,out] vars  As an input, `vars` contain the variables before
+// extracting expression `e`. As an output, the variables in `e` that were not
+// included in `vars`, will be appended to the end of `vars`.
+// @param[in,out] map_var_to_index. map_var_to_index is of the same size as
+// `vars`, and map_var_to_index[vars(i).get_id()] = i. This invariance holds
+// for map_var_to_index both as the input and as the output.
+void ExtractAndAppendVariablesFromExpression(
+    const symbolic::Expression& e, VectorXDecisionVariable* vars,
+    std::unordered_map<symbolic::Variable::Id, int>* map_var_to_index);
 
 // Given an expression `e`, extracts all variables inside `e`.
 // @param[in] e A symbolic expression.
@@ -87,15 +100,16 @@ void DecomposeQuadraticExpressionWithMonomialToCoeffMap(
  * has 1 variable, 2 * x(0) + 3 * x(1) - 2 * x(0) has 1 variable.
  */
 template <typename Derived>
-typename enable_if<is_same<typename Derived::Scalar, double>::value, int>::type
+typename std::enable_if<std::is_same<typename Derived::Scalar, double>::value,
+                   int>::type
 DecomposeLinearExpression(
-    const Expression& e,
-    const unordered_map<Variable::Id, int>& map_var_to_index,
+    const symbolic::Expression& e,
+    const std::unordered_map<symbolic::Variable::Id, int>& map_var_to_index,
     const Eigen::MatrixBase<Derived>& coeffs, double* constant_term) {
   DRAKE_DEMAND(coeffs.rows() == 1);
   DRAKE_DEMAND(coeffs.cols() == static_cast<int>(map_var_to_index.size()));
   if (!e.is_polynomial()) {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "Expression " << e << "is not a polynomial.\n";
     throw runtime_error(oss.str());
   }
@@ -108,14 +122,14 @@ DecomposeLinearExpression(
     DRAKE_ASSERT(is_constant(p.second));
     const double p_coeff = symbolic::get_constant_value(p.second);
     if (p_monomial.total_degree() > 1) {
-      ostringstream oss;
+      std::stringstream oss;
       oss << "Expression " << e << " is non-linear.";
-      throw runtime_error(oss.str());
+      throw std::runtime_error(oss.str());
     } else if (p_monomial.total_degree() == 1) {
       // Linear coefficient.
       const auto& p_monomial_powers = p_monomial.get_powers();
       DRAKE_DEMAND(p_monomial_powers.size() == 1);
-      const Variable::Id var_id = p_monomial_powers.begin()->first;
+      const symbolic::Variable::Id var_id = p_monomial_powers.begin()->first;
       const_cast<Eigen::MatrixBase<Derived>&>(coeffs)(
           map_var_to_index.at(var_id)) = p_coeff;
       if (p_coeff != 0) {
@@ -129,6 +143,6 @@ DecomposeLinearExpression(
   return num_variable;
 }
 
-} // namespace internal
+} // namespace symbolic
 } // namespace solvers
 } // namespace drake

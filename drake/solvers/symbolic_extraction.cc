@@ -1,4 +1,4 @@
-#include "symbolic_extract.h"
+#include "drake/solvers/symbolic_extraction.h"
 
 #include <algorithm>
 #include <memory>
@@ -27,7 +27,7 @@
 
 namespace drake {
 namespace solvers {
-namespace internal {
+namespace symbolic {
 
 using std::enable_if;
 using std::endl;
@@ -76,18 +76,10 @@ SymbolicError::SymbolicError(const symbolic::Expression& e,
     : runtime_error{make_string(e, lb, ub, msg)}
 {}
 
-// Given an expression `e`, extract all variables inside `e`, append these
-// variables to `vars` if they are not included in `vars` yet.
-// @param[in] e  A symbolic expression.
-// @param[in,out] vars  As an input, `vars` contain the variables before
-// extracting expression `e`. As an output, the variables in `e` that were not
-// included in `vars`, will be appended to the end of `vars`.
-// @param[in,out] map_var_to_index. map_var_to_index is of the same size as
-// `vars`, and map_var_to_index[vars(i).get_id()] = i. This invariance holds
-// for map_var_to_index both as the input and as the output.
-void ExtractAndAppendVariablesFromExpression(
-    const Expression& e, VectorXDecisionVariable* vars,
-    unordered_map<Variable::Id, int>* map_var_to_index) {
+void ExtractAndAppendVariablesFromExpression(const Expression& e,
+                                             VectorXDecisionVariable *vars,
+                                             unordered_map<Variable::Id,
+                                                           int> *map_var_to_index) {
   DRAKE_DEMAND(static_cast<int>(map_var_to_index->size()) == vars->size());
   for (const Variable& var : e.GetVariables()) {
     if (map_var_to_index->find(var.get_id()) == map_var_to_index->end()) {
@@ -199,11 +191,6 @@ void DecomposeQuadraticExpressionWithMonomialToCoeffMap(
   }
 }
 
-
-}
-} // namespace solvers
-} // namespace drake
-
-
-
-
+}  // namespace symbolic
+}  // namespace solvers
+}  // namespace drake
