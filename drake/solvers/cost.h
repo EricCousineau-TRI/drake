@@ -1,7 +1,9 @@
 #pragma once
 
+#include <limits>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "drake/solvers/constraint.h"
 #include "drake/solvers/function.h"
@@ -17,17 +19,22 @@ namespace solvers {
  * Using an internal implementation permits child costs to inherit directly
  * from cost, thus be convertible to a cost.
  */
-class Cost : public Constraint {
+class Cost : public EvaluatorBase {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Cost)
 
-  explicit Cost(const std::shared_ptr<Constraint>& impl)
-      : Constraint(impl->num_constraints(), impl->num_vars()), impl_(impl) {
+  Cost(size_t num_vars)
+    : EvaluatorBase(1, num_vars) {}
+};
+
+class CostShimBase : public Cost {
+ protected:
+  explicit CostShimBase(const std::shared_ptr<Constraint>& impl)
+      : Cost(impl->num_vars()), impl_(impl) {
     // Costs may only be scalar.
     DRAKE_DEMAND(impl->num_constraints() == 1);
   }
 
- protected:
   void DoEval(const Eigen::Ref<const Eigen::VectorXd>& x,
               // TODO(#2274) Fix NOLINTNEXTLINE(runtime/references).
               Eigen::VectorXd& y) const override;
@@ -36,7 +43,6 @@ class Cost : public Constraint {
               // TODO(#2274) Fix NOLINTNEXTLINE(runtime/references).
               AutoDiffVecXd& y) const override;
 
- private:
   std::shared_ptr<Constraint> impl_;
 };
 
@@ -46,13 +52,18 @@ class Cost : public Constraint {
  * @tparam C Constraint type to inherit from.
  */
 template <typename C>
-class CostShim : public Cost {
+class CostShim : public CostShimBase {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(CostShim)
 
   template <typename... Args>
   explicit CostShim(Args&&... args)
-      : Cost(std::make_shared<C>(std::forward<Args>(args)...)) {}
+      : CostShimBase(std::make_shared<C>(std::forward<Args>(args)...)) {
+    constraint_ = std::dynamic_pointer_cast<C>(impl_);
+  }
+
+ protected:
+  std::shared_ptr<C> constraint_;
 };
 
 /**
@@ -62,8 +73,17 @@ class LinearCost : public CostShim<LinearConstraint> {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(LinearCost)
 
-  // Inherit forwarding constructor.
-  using CostShim::CostShim;
+  // NOLINTNEXTLINE(runtime/explicit).
+  LinearCost(const Eigen::Ref<const Eigen::VectorXd>& c)
+      : CostShim(c.transpose(), Vector1<double>::Constant(
+                                    -std::numeric_limits<double>::infinity()),
+                 Vector1<double>::Constant(
+                     std::numeric_limits<double>::infinity())) {}
+
+  Eigen::SparseMatrix<double> GetSparseMatrix() const {
+    return constraint_->GetSparseMatrix();
+  }
+  const Eigen::MatrixXd& A() const { return constraint_->A(); }
 };
 
 /**
@@ -73,8 +93,27 @@ class QuadraticCost : public CostShim<QuadraticConstraint> {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(QuadraticCost)
 
-  // Inherit forwarding constructor.
-  using CostShim::CostShim;
+  template <typename DerivedQ, typename Derivedb>
+  QuadraticCost(const Eigen::MatrixBase<DerivedQ>& Q,
+                const Eigen::MatrixBase<Derivedb>& f)
+      : CostShim(Q, f, -std::numeric_limits<double>::infinity(),
+                 std::numeric_limits<double>::infinity()) {}
+
+  const Eigen::MatrixXd& Q() const { return constraint_->Q(); }
+
+  const Eigen::VectorXd& b() const { return constraint_->b(); }
+
+  /**
+   * Updates the quadratic and linear term of the constraint. The new
+   * matrices need to have the same dimension as before.
+   * @param new_Q new quadratic term
+   * @param new_b new linear term
+   */
+  template <typename DerivedQ, typename DerivedB>
+  void UpdateQuadraticAndLinearTerms(const Eigen::MatrixBase<DerivedQ>& new_Q,
+                                     const Eigen::MatrixBase<DerivedB>& new_b) {
+    constraint_->UpdateQuadraticAndLinearTerms(new_Q, new_b);
+  }
 };
 
 /**
@@ -90,8 +129,19 @@ class PolynomialCost : public CostShim<PolynomialConstraint> {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(PolynomialCost)
 
-  // Inherit forwarding constructor.
-  using CostShim::CostShim;
+  PolynomialCost(const VectorXPoly& polynomials,
+                 const std::vector<Polynomiald::VarType>& poly_vars)
+      : CostShim(
+            polynomials, poly_vars,
+            Vector1<double>::Constant(-std::numeric_limits<double>::infinity()),
+            Vector1<double>::Constant(
+                std::numeric_limits<double>::infinity())) {}
+
+  const VectorXPoly& polynomials() const { return constraint_->polynomials(); }
+
+  const std::vector<Polynomiald::VarType>& poly_vars() const {
+    return constraint_->poly_vars();
+  }
 };
 
 /**

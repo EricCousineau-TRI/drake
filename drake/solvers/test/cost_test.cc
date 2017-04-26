@@ -10,19 +10,21 @@
 #include "drake/math/autodiff.h"
 #include "drake/math/autodiff_gradient.h"
 #include "drake/solvers/create_cost.h"
-#include "drake/solvers/decision_variable.h"
 #include "drake/solvers/test/generic_trivial_costs.h"
 
 using std::cout;
 using std::endl;
 using std::make_shared;
 using std::make_unique;
+using std::shared_ptr;
+using std::unique_ptr;
 using std::vector;
 
 using Eigen::Ref;
 using drake::Vector1d;
 using Eigen::Vector2d;
 using Eigen::VectorXd;
+using drake::solvers::detail::is_convertible_workaround;
 using drake::solvers::test::GenericTrivialCost2;
 
 namespace drake {
@@ -35,25 +37,28 @@ template <typename From, typename To>
 struct check_ptr_convertible {
   typedef std::unique_ptr<From> FromPtr;
   typedef std::shared_ptr<To> ToPtr;
-  static constexpr bool std_value = std::is_convertible<FromPtr, ToPtr>::value;
+  // static constexpr bool std_value =
+  //    std::is_convertible<FromPtr, ToPtr>::value;
   static constexpr bool workaround_value =
-      detail::is_convertible_workaround<FromPtr, ToPtr>::value;
+      is_convertible_workaround<FromPtr, ToPtr>::value;
 };
 
+struct A {};
+struct B {};
+struct C : B {};
+
 GTEST_TEST(testCost, testIsConvertibleWorkaround) {
-  struct A {};
-  struct B {};
-#if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
-    __GNUC_PATCHLEVEL__ <= 3
-  // Bug in libstdc++ 4.9.x
-  // Unable to easily determine libstdc++ version from macros at present:
-  // https://patchwork.ozlabs.org/patch/716321/
-  cout << "Checking for libstdc++-4.9 bug since GCC 4.9.[0-3] was detected."
-       << endl;
-  EXPECT_TRUE((check_ptr_convertible<A, B>::std_value));
-#else
-  EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
-#endif
+  EXPECT_TRUE((is_convertible_workaround<C*, B*>::value));
+  EXPECT_TRUE((is_convertible_workaround<shared_ptr<C>, shared_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<unique_ptr<C>, unique_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<Binding<LinearConstraint>,
+                                         Binding<Constraint>>::value));
+  EXPECT_FALSE((is_convertible_workaround<Binding<LinearConstraint>,
+                                          Binding<Cost>>::value));
+
+  // TODO(eric.cousineau): Determine exact conditions for failure in GCC.
+  // Difficult to pinpoint in a multi-platform fashion via __GLIBCXX__ or
+  // __GNUC_* version macros
   EXPECT_FALSE((check_ptr_convertible<A, B>::workaround_value));
 }
 
@@ -84,11 +89,14 @@ auto make_vector(std::initializer_list<T> items) {
   return vector<std::decay_t<T>>(items);
 }
 
-template <typename C, typename... Args>
+template <typename C, typename BoundType, typename... Args>
 void VerifyRelatedCost(const Ref<const VectorXd>& x_value, Args&&... args) {
   // Ensure that a constraint constructed in a particular fashion yields
   // equivalent results to its shim, and the related cost
-  C constraint(std::forward<Args>(args)...);
+  const auto inf = std::numeric_limits<double>::infinity();
+  auto lb = -BoundType(-inf);
+  auto ub = BoundType(inf);
+  C constraint(std::forward<Args>(args)..., lb, ub);
   typename related_cost<C>::type cost(std::forward<Args>(args)...);
   VectorXd y_expected, y;
   constraint.Eval(x_value, y);
@@ -98,21 +106,17 @@ void VerifyRelatedCost(const Ref<const VectorXd>& x_value, Args&&... args) {
 
 GTEST_TEST(testCost, testCostShim) {
   // Test CostShim's by means of the related constraints
-  const auto inf = std::numeric_limits<double>::infinity();
 
-  VerifyRelatedCost<LinearConstraint>(Vector1d(2), Vector1d(3),
-                                      -Vector1d::Constant(inf),
-                                      Vector1d::Constant(inf));
+  VerifyRelatedCost<LinearConstraint, Vector1d>(Vector1d(2), Vector1d(3));
 
-  VerifyRelatedCost<QuadraticConstraint>(Vector1d(2), Vector1d(3), Vector1d(4),
-                                         -inf, inf);
+  VerifyRelatedCost<QuadraticConstraint, double>(Vector1d(2), Vector1d(3),
+                                                 Vector1d(4));
 
   const Polynomiald x("x");
   const auto poly = (x - 1) * (x - 1);
-  const auto var_mapping = make_vector({x.GetSimpleVariable()});
-  VerifyRelatedCost<PolynomialConstraint>(
-      Vector1d(2), VectorXPoly::Constant(1, poly), var_mapping,
-      Vector1d::Constant(2), Vector1d::Constant(2));
+  const auto var_mapping = {x.GetSimpleVariable()};
+  VerifyRelatedCost<PolynomialConstraint, Vector1d>(
+      Vector1d(2), VectorXPoly::Constant(1, poly), var_mapping);
 }
 
 template <typename T, bool is_dereferencable>
@@ -135,8 +139,6 @@ template <bool is_pointer, typename F>
 void VerifyFunctionCost(F&& f, const Ref<const VectorXd>& x_value) {
   auto cost = CreateFunctionCost(std::forward<F>(f));
   EXPECT_TRUE(is_dynamic_castable<Cost>(cost));
-  // TODO(eric.cousineau): Remove when shim is removed
-  EXPECT_TRUE(is_dynamic_castable<Constraint>(cost));
   // Compare values
   Eigen::VectorXd y_expected(1), y;
   to_const_ref<is_pointer>(f).eval(x_value, y_expected);
@@ -148,7 +150,9 @@ GTEST_TEST(testCost, testFunctionCost) {
   // Test that we can construct FunctionCosts with different signatures
   Eigen::Vector2d x(1, 2);
   VerifyFunctionCost<false>(GenericTrivialCost2(), x);
-  const GenericTrivialCost2 obj_const;
+  // Ensure that we explictly call the default constructor for a const class
+  // @ref http://stackoverflow.com/a/28338123/7829525
+  const GenericTrivialCost2 obj_const{};
   VerifyFunctionCost<false>(obj_const, x);
   VerifyFunctionCost<true>(make_shared<GenericTrivialCost2>(), x);
   VerifyFunctionCost<true>(make_unique<GenericTrivialCost2>(), x);
