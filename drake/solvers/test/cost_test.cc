@@ -17,12 +17,15 @@ using std::cout;
 using std::endl;
 using std::make_shared;
 using std::make_unique;
+using std::shared_ptr;
+using std::unique_ptr;
 using std::vector;
 
 using Eigen::Ref;
 using drake::Vector1d;
 using Eigen::Vector2d;
 using Eigen::VectorXd;
+using drake::solvers::detail::is_convertible_workaround;
 using drake::solvers::test::GenericTrivialCost2;
 
 namespace drake {
@@ -35,26 +38,42 @@ template <typename From, typename To>
 struct check_ptr_convertible {
   typedef std::unique_ptr<From> FromPtr;
   typedef std::shared_ptr<To> ToPtr;
-  static constexpr bool std_value = std::is_convertible<FromPtr, ToPtr>::value;
+  //static constexpr bool std_value =
+  //    std::is_convertible<FromPtr, ToPtr>::value;
   static constexpr bool workaround_value =
-      detail::is_convertible_workaround<FromPtr, ToPtr>::value;
+      is_convertible_workaround<FromPtr, ToPtr>::value;
 };
 
+struct A {};
+struct B {};
+struct C : B {};
+
 GTEST_TEST(testCost, testIsConvertibleWorkaround) {
-  struct A {};
-  struct B {};
-#if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
-    __GNUC_PATCHLEVEL__ <= 3
-  // Bug in libstdc++ 4.9.x
-  // Unable to easily determine libstdc++ version from macros at present:
-  // https://patchwork.ozlabs.org/patch/716321/
-  cout << "Checking for libstdc++-4.9 bug since GCC 4.9.[0-3] was detected."
-       << endl;
-  EXPECT_TRUE((check_ptr_convertible<A, B>::std_value));
-#else
-  EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
-#endif
+  EXPECT_TRUE((is_convertible_workaround<C*, B*>::value));
+  EXPECT_TRUE((is_convertible_workaround<shared_ptr<C>,
+                                         shared_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<unique_ptr<C>,
+                                         unique_ptr<B>>::value));
+  EXPECT_TRUE((is_convertible_workaround<Binding<LinearConstraint>,
+                                         Binding<Constraint>>::value));
+  EXPECT_FALSE((is_convertible_workaround<Binding<LinearConstraint>,
+                                          Binding<Cost>>::value));
+
   EXPECT_FALSE((check_ptr_convertible<A, B>::workaround_value));
+
+  // // TODO(eric.cousineau): Determine exact conditions. Difficult to pinpoint
+  // // via __GLIBCXX__ or __GNUC_* version macros
+  //#if !defined(__clang__) && __GNUC__ == 4 && __GNUC_MINOR__ == 9 && \
+  //    __GNUC_PATCHLEVEL__ <= 3
+  //  // Bug in libstdc++ 4.9.x
+  //  // Unable to easily determine libstdc++ version from macros at present:
+  //  // https://patchwork.ozlabs.org/patch/716321/
+  //  cout << "Checking for libstdc++-4.9 bug since GCC 4.9.[0-3] was detected."
+  //       << endl;
+  //  EXPECT_TRUE((check_ptr_convertible<A, B>::std_value));
+  //#else
+  //  EXPECT_FALSE((check_ptr_convertible<A, B>::std_value));
+  //#endif
 }
 
 // For a given Constraint, return the equivalent Cost type
