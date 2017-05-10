@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "drake/common/drake_copyable.h"
 #include "drake/solvers/decision_variable.h"
@@ -66,5 +67,32 @@ class Binding {
   std::shared_ptr<C> constraint_;
   VectorXDecisionVariable vars_;
 };
+
+namespace internal {
+
+/*
+ * Create binding, inferring the type from the provided pointer.
+ * @tparam C Cost or Constraint type to be bound.
+ * @note Since this forwards arguments, this will not be usable with
+ * `std::intializer_list`.
+ */
+template <typename C, typename... Args>
+Binding<C> CreateBinding(const std::shared_ptr<C>& c, Args&&... args) {
+  return Binding<C>(c, std::forward<Args>(args)...);
+}
+
+/*
+ * A bundle of bindings that are created.
+ */
+template <typename C, typename CExtra = C>
+struct BindingBundle {
+  Binding<C> binding;
+  std::vector<Binding<CExtra>> extra_bindings {};
+  VectorXDecisionVariable new_vars {};
+  VarType new_vars_type {VarType::CONTINUOUS};
+};
+
+}  // namespace internal
+
 }  // namespace solvers
 }  // namespace drake

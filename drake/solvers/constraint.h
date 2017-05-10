@@ -430,6 +430,16 @@ class PolynomialConstraint : public Constraint {
   mutable std::map<Polynomiald::VarType, AutoDiffXd> taylor_evaluation_point_;
 };
 
+/**
+ * Create a polynomial constraint, possibly dispatching to simpler types
+ * given the structure of the polynomial.
+ */
+std::shared_ptr<Constraint> MakePolynomialConstraint(
+    const VectorXPoly& polynomials,
+    const std::vector<Polynomiald::VarType>& poly_vars,
+    const Eigen::VectorXd& lb, const Eigen::VectorXd& ub);
+
+
 // todo: consider implementing DifferentiableConstraint,
 // TwiceDifferentiableConstraint, ComplementarityConstraint,
 // IntegerConstraint, ...
@@ -498,6 +508,14 @@ class LinearConstraint : public Constraint {
               AutoDiffVecXd& y) const override;
 };
 
+template <typename DerivedA, typename DerivedLB, typename DerivedUB>
+std::shared_ptr<LinearConstraint> MakeLinearConstraint(
+    const Eigen::MatrixBase<DerivedA>& a,
+    const Eigen::MatrixBase<DerivedLB>& lb,
+    const Eigen::MatrixBase<DerivedUB>& ub) {
+  return std::make_shared<LinearConstraint>(a, lb, ub);
+}
+
 /**
  * Implements a constraint of the form @f Ax = b @f
  */
@@ -509,6 +527,10 @@ class LinearEqualityConstraint : public LinearConstraint {
   LinearEqualityConstraint(const Eigen::MatrixBase<DerivedA>& Aeq,
                            const Eigen::MatrixBase<DerivedB>& beq)
       : LinearConstraint(Aeq, beq, beq) {}
+
+  LinearEqualityConstraint(const Eigen::Ref<const Eigen::RowVectorXd>& a,
+                           double beq)
+      : LinearEqualityConstraint(a, Vector1d(beq)) {}
 
   ~LinearEqualityConstraint() override {}
 

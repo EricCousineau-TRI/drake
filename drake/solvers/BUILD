@@ -59,18 +59,37 @@ drake_cc_library(
 )
 
 drake_cc_library(
-    name = "create_cost",
-    srcs = [],
-    hdrs = ["create_cost.h"],
+    name = "create_constraint",
+    srcs = ["create_constraint.cc"],
+    hdrs = ["create_constraint.h"],
     deps = [
         ":binding",
         ":cost",
+        ":symbolic_extraction",
         "//drake/common",
         "//drake/common:autodiff",
         "//drake/common:monomial",
         "//drake/common:number_traits",
         "//drake/common:polynomial",
         "//drake/common:symbolic",
+    ],
+)
+
+drake_cc_library(
+    name = "create_cost",
+    srcs = ["create_cost.cc"],
+    hdrs = ["create_cost.h"],
+    deps = [
+        ":binding",
+        ":cost",
+        ":symbolic_extraction",
+        "//drake/common",
+        "//drake/common:autodiff",
+        "//drake/common:monomial",
+        "//drake/common:number_traits",
+        "//drake/common:polynomial",
+        "//drake/common:symbolic",
+        "//drake/common:unused",
     ],
 )
 
@@ -130,6 +149,7 @@ drake_cc_library(
     ],
     deps = [
         ":binding",
+        ":create_constraint",
         ":create_cost",
         ":decision_variable",
         ":gurobi_solver",
@@ -216,8 +236,8 @@ drake_cc_library(
     srcs = ["test/mathematical_program_test_util.cc"],
     hdrs = ["test/mathematical_program_test_util.h"],
     deps = [
-        ":mathematical_program",
         "@gtest//:main",
+        ":mathematical_program",
     ],
 )
 
@@ -227,10 +247,10 @@ drake_cc_library(
     srcs = ["test/optimization_examples.cc"],
     hdrs = ["test/optimization_examples.h"],
     deps = [
+        "@gtest//:main",
         ":mathematical_program",
         ":mathematical_program_test_util",
         "//drake/common:eigen_matrix_compare",
-        "@gtest//:main",
     ],
 )
 
@@ -270,6 +290,7 @@ drake_cc_library(
     ],
     deps = [
         ":binding",
+        ":create_constraint",
         ":create_cost",
         ":decision_variable",
         ":function",
@@ -372,9 +393,9 @@ drake_cc_library(
     srcs = ["nlopt_solver.cc"],
     hdrs = ["nlopt_solver.h"],
     deps = [
+        "@nlopt//:lib",
         ":mathematical_program_api",
         "//drake/math:autodiff",
-        "@nlopt//:lib",
     ],
 )
 
@@ -400,6 +421,7 @@ drake_cc_googletest(
     ],
 )
 
+# TODO(eric.cousineau): Remove dependence on create_cost
 drake_cc_googletest(
     name = "cost_test",
     deps = [
@@ -418,6 +440,29 @@ drake_cc_googletest(
         ":symbolic_extraction",
         "//drake/common:eigen_matrix_compare",
         "//drake/common:symbolic_test_util",
+    ],
+)
+
+drake_cc_googletest(
+    name = "create_constraint_test",
+    deps = [
+        ":constraint",
+        ":create_constraint",
+        "//drake/common:eigen_matrix_compare",
+        "//drake/common:is_dynamic_castable",
+        "//drake/common:symbolic_test_util",
+        "//drake/math:gradient",
+    ],
+)
+
+drake_cc_googletest(
+    name = "create_cost_test",
+    deps = [
+        ":cost",
+        ":create_cost",
+        "//drake/common:eigen_matrix_compare",
+        "//drake/common:is_dynamic_castable",
+        "//drake/math:gradient",
     ],
 )
 
