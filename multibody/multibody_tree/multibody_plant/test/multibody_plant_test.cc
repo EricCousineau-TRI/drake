@@ -277,14 +277,6 @@ class AcrobotPlantTests : public ::testing::Test {
     // it.
     DRAKE_DEMAND(plant_->get_source_id() != nullopt);
 
-    // Verify that methods with pre-Finalize() conditions throw accordingly.
-    DRAKE_EXPECT_THROWS_MESSAGE(
-        plant_->get_geometry_poses_output_port(),
-        std::logic_error,
-        /* Verify this method is throwing for the right reasons. */
-        "Pre-finalize calls to '.*' are not allowed; "
-        "you must call Finalize\\(\\) first.");
-
     DRAKE_EXPECT_THROWS_MESSAGE(
         plant_->get_continuous_state_output_port(),
         std::logic_error,
