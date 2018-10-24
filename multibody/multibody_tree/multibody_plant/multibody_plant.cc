@@ -1615,25 +1615,9 @@ template <typename T>
 void MultibodyPlant<T>::DeclareSceneGraphPorts() {
   geometry_query_port_ =
       this->DeclareAbstractInputPort("geometry_query").get_index();
-  // Allocate pose port.
-  typename systems::LeafOutputPort<T>::AllocCallback pose_alloc = [this]() {
-    // This presupposes that the source id has been assigned and _all_ frames
-    // have been registered.
-    std::vector<FrameId> ids;
-    for (auto it : this->body_index_to_frame_id_) {
-      if (it.first == world_index()) continue;
-      ids.push_back(it.second);
-    }
-    return systems::AbstractValue::Make(
-        FramePoseVector<T>(*this->source_id_, ids));
-  };
-  typename systems::LeafOutputPort<T>::CalcCallback pose_callback = [this](
-      const Context<T>& context, systems::AbstractValue* value) {
-    this->CalcFramePoseOutput(
-        context, &value->GetMutableValue<FramePoseVector<T>>());
-  };
-  geometry_pose_port_ = this->DeclareAbstractOutputPort(
-      "geometry_pose", pose_alloc, pose_callback).get_index();
+  geometry_pose_port_ =
+      this->DeclareAbstractOutputPort(
+          "geometry_pose", &MultibodyPlant::CalcFramePoseOutput).get_index();
 }
 
 template <typename T>
@@ -1641,15 +1625,20 @@ void MultibodyPlant<T>::CalcFramePoseOutput(
     const Context<T>& context, FramePoseVector<T>* poses) const {
   DRAKE_MBP_THROW_IF_NOT_FINALIZED();
   DRAKE_ASSERT(source_id_ != nullopt);
-  // NOTE: The body index to frame id map *always* includes the world body but
-  // the world body does *not* get reported in the frame poses; only dynamic
-  // frames do.
-  DRAKE_ASSERT(
-      poses->size() == static_cast<int>(body_index_to_frame_id_.size() - 1));
+
   const PositionKinematicsCache<T>& pc = EvalPositionKinematics(context);
 
   // TODO(amcastro-tri): Make use of Body::EvalPoseInWorld(context) once caching
   // lands.
+  // TODO(jwnimmer-tri): The FrameKinematicsVector APIs make the below overly
+  // verbose.  A simple add(id, value) call would make it more concise.
+  std::vector<FrameId> ids;
+  ids.reserve(this->body_index_to_frame_id_.size());
+  for (auto it : this->body_index_to_frame_id_) {
+    if (it.first == world_index()) continue;
+    ids.push_back(it.second);
+  }
+  *poses = FramePoseVector<T>(*this->source_id_, ids);
   poses->clear();
   for (const auto it : body_index_to_frame_id_) {
     const BodyIndex body_index = it.first;

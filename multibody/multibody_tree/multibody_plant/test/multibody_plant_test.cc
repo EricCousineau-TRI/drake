@@ -577,13 +577,13 @@ TEST_F(AcrobotPlantTests, VisualGeometryRegistration) {
   unique_ptr<AbstractValue> poses_value =
       plant_->get_geometry_poses_output_port().Allocate();
   EXPECT_NO_THROW(poses_value->GetValueOrThrow<FramePoseVector<double>>());
+
+  // Compute the poses for each geometry in the model.
+  plant_->get_geometry_poses_output_port().Calc(*context, poses_value.get());
   const FramePoseVector<double>& poses =
       poses_value->GetValueOrThrow<FramePoseVector<double>>();
   EXPECT_EQ(poses.source_id(), plant_->get_source_id());
   EXPECT_EQ(poses.size(), 2);  // Only two frames move.
-
-  // Compute the poses for each geometry in the model.
-  plant_->get_geometry_poses_output_port().Calc(*context, poses_value.get());
 
   const MultibodyTree<double>& tree = plant_->tree();
   std::vector<Isometry3<double >> X_WB_all;
@@ -990,13 +990,13 @@ GTEST_TEST(MultibodyPlantTest, CollisionGeometryRegistration) {
   unique_ptr<AbstractValue> poses_value =
       plant.get_geometry_poses_output_port().Allocate();
   EXPECT_NO_THROW(poses_value->GetValueOrThrow<FramePoseVector<double>>());
+
+  // Compute the poses for each geometry in the model.
+  plant.get_geometry_poses_output_port().Calc(*context, poses_value.get());
   const FramePoseVector<double>& pose_data =
       poses_value->GetValueOrThrow<FramePoseVector<double>>();
   EXPECT_EQ(pose_data.source_id(), plant.get_source_id());
   EXPECT_EQ(pose_data.size(), 2);  // Only two frames move.
-
-  // Compute the poses for each geometry in the model.
-  plant.get_geometry_poses_output_port().Calc(*context, poses_value.get());
 
   const MultibodyTree<double>& model = plant.tree();
   std::vector<Isometry3<double >> X_WB_all;
