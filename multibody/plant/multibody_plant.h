@@ -21,6 +21,7 @@
 #include "drake/multibody/tree/rigid_body.h"
 #include "drake/multibody/tree/uniform_gravity_field_element.h"
 #include "drake/multibody/tree/weld_joint.h"
+#include "drake/systems/framework/diagram_builder.h"
 #include "drake/systems/framework/leaf_system.h"
 #include "drake/systems/framework/scalar_conversion_traits.h"
 
@@ -3164,6 +3165,25 @@ using MultibodyPlant
     = ::drake::multibody::MultibodyPlant<T>;
 }  // namespace multibody_plant
 #endif  // DRAKE_DOXYGEN_CXX
+
+/// Adds a MultibodyPlant and a SceneGraph instance to a diagram builder,
+/// connecting the geometry ports.
+/// @param[in,out] builder
+///   Builder to add to.
+/// @param[in] plant (optional)
+///   Constructed plant (e.g. for using a discrete plant). By default, a
+///   continuous plant is used.
+/// @param[in] scene_graph (optional)
+///   Constructed scene graph. If none is provided, one will be created and
+///   used.
+/// @return Pair of the registered plant and scene graph.
+/// @pre `builder` must be non-null.
+template <typename T>
+std::pair<MultibodyPlant<T>*, geometry::SceneGraph<T>*>
+AddMultibodyPlantSceneGraph(
+    systems::DiagramBuilder<T>* builder,
+    std::unique_ptr<MultibodyPlant<T>> plant = nullptr,
+    std::unique_ptr<geometry::SceneGraph<T>> scene_graph = nullptr);
 
 }  // namespace multibody
 }  // namespace drake
