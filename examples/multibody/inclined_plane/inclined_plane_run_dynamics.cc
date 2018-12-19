@@ -60,8 +60,7 @@ int do_main() {
 
   auto pair = AddMultibodyPlantSceneGraph(
       &builder, std::make_unique<MultibodyPlant<double>>(FLAGS_time_step));
-  MultibodyPlant<double>& plant = *pair.first;
-  SceneGraph<double>& scene_graph = *pair.second;
+  MultibodyPlant<double>& plant = pair.plant;
   AddInclinedPlaneToPlant(
       radius, mass, slope, surface_friction, g, &plant);
   plant.Finalize();
@@ -72,7 +71,7 @@ int do_main() {
   DRAKE_DEMAND(plant.num_velocities() == 6);
   DRAKE_DEMAND(plant.num_positions() == 7);
 
-  geometry::ConnectDrakeVisualizer(&builder, scene_graph);
+  geometry::ConnectDrakeVisualizer(&builder, pair.scene_graph);
   auto diagram = builder.Build();
 
   // Create a context for this system:

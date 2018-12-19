@@ -63,9 +63,8 @@ GTEST_TEST(Box, UnderStiction) {
 
   const std::string full_name = FindResourceOrThrow(
       "drake/multibody/plant/test/box.sdf");
-  auto pair = AddMultibodyPlantSceneGraph(
+  MultibodyPlant<double>& plant = AddMultibodyPlantSceneGraph(
       &builder, std::make_unique<MultibodyPlant<double>>(time_step));
-  MultibodyPlant<double>& plant = *pair.first;
   Parser(&plant).AddModelFromFile(full_name);
 
   // Add gravity to the model.

@@ -1772,7 +1772,7 @@ T MultibodyPlant<T>::StribeckModel::step5(const T& x) {
 }
 
 template <typename T>
-std::pair<MultibodyPlant<T>*, geometry::SceneGraph<T>*>
+AddMultibodyPlantSceneGraphResult<T>
 AddMultibodyPlantSceneGraph(
     systems::DiagramBuilder<T>* builder,
     std::unique_ptr<MultibodyPlant<T>> plant,
@@ -1801,14 +1801,14 @@ AddMultibodyPlantSceneGraph(
 
 // Add explicit instantiations for `AddMultibodyPlantSceneGraph`.
 template
-std::pair<MultibodyPlant<double>*, geometry::SceneGraph<double>*>
+AddMultibodyPlantSceneGraphResult<double>
 AddMultibodyPlantSceneGraph(
     systems::DiagramBuilder<double>* builder,
     std::unique_ptr<MultibodyPlant<double>> plant,
     std::unique_ptr<geometry::SceneGraph<double>> scene_graph);
 
 template
-std::pair<MultibodyPlant<AutoDiffXd>*, geometry::SceneGraph<AutoDiffXd>*>
+AddMultibodyPlantSceneGraphResult<AutoDiffXd>
 AddMultibodyPlantSceneGraph(
     systems::DiagramBuilder<AutoDiffXd>* builder,
     std::unique_ptr<MultibodyPlant<AutoDiffXd>> plant,
@@ -1819,3 +1819,5 @@ AddMultibodyPlantSceneGraph(
 
 DRAKE_DEFINE_CLASS_TEMPLATE_INSTANTIATIONS_ON_DEFAULT_NONSYMBOLIC_SCALARS(
     class drake::multibody::MultibodyPlant)
+DRAKE_DEFINE_CLASS_TEMPLATE_INSTANTIATIONS_ON_DEFAULT_NONSYMBOLIC_SCALARS(
+    class drake::multibody::AddMultibodyPlantSceneGraphResult)

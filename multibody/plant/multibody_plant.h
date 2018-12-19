@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -3166,6 +3167,80 @@ using MultibodyPlant
 }  // namespace multibody_plant
 #endif  // DRAKE_DOXYGEN_CXX
 
+/// The return type of AddMultibodyPlantSceneGraph.  There are several
+/// recommended ways to use this class.
+///
+/// Assign to a MultibodyPlant reference (ignoring the SceneGraph):
+/// @code
+///   MultibodyPlant<double>& plant = AddMultibodyPlantSceneGraph(&builder);
+///   plant.DoFoo(...);
+/// @endcode
+/// This flavor is the simplest, when the SceneGraph is not explicitly needed.
+/// (It can always be retrieved later via GetSubsystemByName("scene_graph").)
+///
+/// Assign to auto, and use the named public fields:
+/// @code
+///   auto items = AddMultibodyPlantSceneGraph(&builder);
+///   items.plant.DoFoo(...);
+///   items.scene_graph.DoBar(...);
+/// @endcode
+/// or
+/// @code
+///   auto items = AddMultibodyPlantSceneGraph(&builder);
+///   MultibodyPlant<double>& plant = items.plant;
+///   SceneGraph<double>& scene_graph = items.scene_graph;
+///   ...
+///   plant.DoFoo(...);
+///   scene_graph.DoBar(...);
+/// @endcode
+/// This is the easiest way to use both the plant and scene_graph.
+///
+/// Assign to already-declared pointer variables:
+/// @code
+///   MultibodyPlant<double>* plant{};
+///   SceneGraph<double>* scene_graph{};
+///   std::tie(plant, scene_graph) = AddMultibodyPlantSceneGraph(&builder);
+///   plant->DoFoo(...);
+///   scene_graph->DoBar(...);
+/// @endcode
+/// This flavor is most useful when the pointers are class member fields
+/// (and so perhaps cannot be references).
+///
+template <typename T>
+struct AddMultibodyPlantSceneGraphResult final {
+  MultibodyPlant<T>& plant;
+  geometry::SceneGraph<T>& scene_graph;
+
+  /// For assignment to std::tie of pointers.
+  operator std::tuple<MultibodyPlant<T>*&, geometry::SceneGraph<T>*&>() {
+    return std::tie(plant_ptr, scene_graph_ptr);
+  }
+
+  /// For assignment to a plant reference (ignoring the scene graph).
+  operator MultibodyPlant<T>&() {
+    return plant;
+  }
+
+#ifndef DRAKE_DOXYGEN_CXX
+  AddMultibodyPlantSceneGraphResult(
+      MultibodyPlant<T>* plant_in, geometry::SceneGraph<T>* scene_graph_in)
+      : plant(*plant_in), scene_graph(*scene_graph_in),
+        plant_ptr(plant_in), scene_graph_ptr(scene_graph_in) {}
+
+  // Only the move constructor is enabled; copy/assign/move-assign are deleted.
+  AddMultibodyPlantSceneGraphResult(
+      AddMultibodyPlantSceneGraphResult&&) = default;
+  AddMultibodyPlantSceneGraphResult(
+      const AddMultibodyPlantSceneGraphResult&) = delete;
+  void operator=(const AddMultibodyPlantSceneGraphResult&) = delete;
+  void operator=(AddMultibodyPlantSceneGraphResult&&) = delete;
+#endif
+
+ private:
+  MultibodyPlant<T>* plant_ptr{};
+  geometry::SceneGraph<T>* scene_graph_ptr{};
+};
+
 /// Adds a MultibodyPlant and a SceneGraph instance to a diagram builder,
 /// connecting the geometry ports.
 /// @param[in,out] builder
@@ -3179,7 +3254,7 @@ using MultibodyPlant
 /// @return Pair of the registered plant and scene graph.
 /// @pre `builder` must be non-null.
 template <typename T>
-std::pair<MultibodyPlant<T>*, geometry::SceneGraph<T>*>
+AddMultibodyPlantSceneGraphResult<T>
 AddMultibodyPlantSceneGraph(
     systems::DiagramBuilder<T>* builder,
     std::unique_ptr<MultibodyPlant<T>> plant = nullptr,

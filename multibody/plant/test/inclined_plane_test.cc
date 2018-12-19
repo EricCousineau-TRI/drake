@@ -88,9 +88,8 @@ TEST_P(InclinedPlaneTest, RollingSphereTest) {
   const CoulombFriction<double> surface_friction(
       1.0 /* static friction */, 0.5 /* dynamic friction */);
 
-  auto pair = AddMultibodyPlantSceneGraph(
+  MultibodyPlant<double>& plant = AddMultibodyPlantSceneGraph(
       &builder, std::make_unique<MultibodyPlant<double>>(time_step_));
-  MultibodyPlant<double>& plant = *pair.first;
   AddInclinedPlaneToPlant(
       radius, mass, slope, surface_friction, g, &plant);
   plant.Finalize();

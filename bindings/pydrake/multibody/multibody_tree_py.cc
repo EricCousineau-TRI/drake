@@ -1035,10 +1035,10 @@ void init_multibody_plant(py::module m) {
         py::object builder_py = py::cast(builder, py_reference);
         // Keep alive, ownership: `plant` keeps `builder` alive.
         py::object plant_py =
-            py::cast(pair.first, py_reference_internal, builder_py);
+            py::cast(pair.plant, py_reference_internal, builder_py);
         // Keep alive, ownership: `scene_graph` keeps `builder` alive.
         py::object scene_graph_py =
-            py::cast(pair.second, py_reference_internal, builder_py);
+            py::cast(pair.scene_graph, py_reference_internal, builder_py);
         return py::make_tuple(plant_py, scene_graph_py);
       },
       py::arg("builder"), py::arg("plant") = nullptr,
