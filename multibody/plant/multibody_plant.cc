@@ -1460,6 +1460,9 @@ void MultibodyPlant<T>::CalcImplicitStribeckResults(
   const int nq = this->num_positions();
   const int nv = this->num_velocities();
 
+  // Quick exit if all geometry is anchored to the world.
+  if (nv == 0) return;
+
   // Get the system state as raw Eigen vectors
   // (solution at the previous time step).
   auto x0 = context0.get_discrete_state(0).get_value();
