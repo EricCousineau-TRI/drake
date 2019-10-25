@@ -267,7 +267,8 @@ class Rod2DDAETest : public ::testing::Test {
 TEST_F(Rod2DDAETest, NamedStateVectorsNoThrow) {
   DRAKE_EXPECT_NO_THROW(Rod2D<double>::get_mutable_state(context_.get()));
   DRAKE_EXPECT_NO_THROW(Rod2D<double>::get_state(*context_));
-  DRAKE_EXPECT_NO_THROW(Rod2D<double>::get_state(context_->get_continuous_state()));
+  DRAKE_EXPECT_NO_THROW(
+      Rod2D<double>::get_state(context_->get_continuous_state()));
   DRAKE_EXPECT_NO_THROW(Rod2D<double>::get_mutable_state(
       &context_->get_mutable_continuous_state()));
 }

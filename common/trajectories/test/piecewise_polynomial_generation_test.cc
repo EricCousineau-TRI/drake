@@ -567,7 +567,8 @@ void TestNoThrows(const std::vector<double>& breaks,
                   const std::vector<MatrixX<CoefficientType>>& knots) {
   DRAKE_EXPECT_NO_THROW(
       PiecewisePolynomial<double>::ZeroOrderHold(breaks, knots));
-  DRAKE_EXPECT_NO_THROW(PiecewisePolynomial<double>::FirstOrderHold(breaks, knots));
+  DRAKE_EXPECT_NO_THROW(
+      PiecewisePolynomial<double>::FirstOrderHold(breaks, knots));
   DRAKE_EXPECT_NO_THROW(PiecewisePolynomial<double>::Pchip(breaks, knots));
   DRAKE_EXPECT_NO_THROW(PiecewisePolynomial<double>::Cubic(breaks, knots));
 }

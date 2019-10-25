@@ -489,7 +489,8 @@ TEST_F(CacheTest, Clone) {
     // Test that the new cache entry is valid and is owned by the new context.
     // This is also a unit test for ThrowIfBadCacheEntryValue().
     DRAKE_EXPECT_NO_THROW(value.ThrowIfBadCacheEntryValue(&context_));
-    DRAKE_EXPECT_NO_THROW(clone_value.ThrowIfBadCacheEntryValue(&clone_context));
+    DRAKE_EXPECT_NO_THROW(
+        clone_value.ThrowIfBadCacheEntryValue(&clone_context));
     EXPECT_THROW(clone_value.ThrowIfBadCacheEntryValue(&context_),
                  std::logic_error);
 

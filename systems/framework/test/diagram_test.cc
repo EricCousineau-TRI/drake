@@ -2646,7 +2646,8 @@ GTEST_TEST(MutateSubcontextTest, DiagramRecalculatesOnSubcontextChange) {
 
   // Time & accuracy changes are allowed at the root (diagram) level.
   DRAKE_EXPECT_NO_THROW(diagram_context->SetTime(1.));
-  DRAKE_EXPECT_NO_THROW(diagram_context->SetTimeAndContinuousState(2., init_state));
+  DRAKE_EXPECT_NO_THROW(
+      diagram_context->SetTimeAndContinuousState(2., init_state));
   auto diagram_context_clone = diagram_context->Clone();
   DRAKE_EXPECT_NO_THROW(
       diagram_context->SetTimeStateAndParametersFrom(*diagram_context_clone));

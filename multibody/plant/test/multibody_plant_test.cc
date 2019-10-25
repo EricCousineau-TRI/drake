@@ -407,7 +407,8 @@ GTEST_TEST(ActuationPortsTest, CheckActuation) {
   context->FixInputPort(
       plant.get_actuation_input_port(cylinder_instance).get_index(),
       VectorXd(0));
-  DRAKE_EXPECT_NO_THROW(plant.CalcTimeDerivatives(*context, continuous_state.get()));
+  DRAKE_EXPECT_NO_THROW(
+      plant.CalcTimeDerivatives(*context, continuous_state.get()));
 }
 
 GTEST_TEST(MultibodyPlant, UniformGravityFieldElementTest) {

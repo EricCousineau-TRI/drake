@@ -206,8 +206,9 @@ GTEST_TEST(CacheEntryAllocTest, EmptyPrerequisiteListForbidden) {
   MySystemBase system;
   DRAKE_EXPECT_NO_THROW(
       system.DeclareCacheEntry("default prerequisites", Alloc3, Calc99));
-  DRAKE_EXPECT_NO_THROW(system.DeclareCacheEntry("no prerequisites", Alloc3, Calc99,
-                                           {system.nothing_ticket()}));
+  DRAKE_EXPECT_NO_THROW(
+      system.DeclareCacheEntry(
+          "no prerequisites", Alloc3, Calc99, {system.nothing_ticket()}));
   DRAKE_EXPECT_THROWS_MESSAGE(
       system.DeclareCacheEntry("empty prerequisites", Alloc3, Calc99, {}),
       std::logic_error,
