@@ -133,7 +133,6 @@ def print_build_file(file):
 
 
 def func(file):
-    print(file)
     with open(file) as f:
         text = f.read()
     if add_include in text:

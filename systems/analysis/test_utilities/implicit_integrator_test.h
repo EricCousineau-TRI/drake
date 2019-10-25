@@ -1,3 +1,4 @@
+#include "drake/common/test_utilities/expect_no_throw.h"
 #pragma once
 
 #include <limits>
@@ -706,8 +707,8 @@ TYPED_TEST_P(ImplicitIntegratorTest, AccuracyEstAndErrorControl) {
   Integrator integrator(this->spring(), &this->context());
 
   EXPECT_EQ(integrator.supports_error_estimation(), true);
-  EXPECT_NO_THROW(integrator.set_target_accuracy(1e-1));
-  EXPECT_NO_THROW(integrator.request_initial_step_size_target(this->dt()));
+  DRAKE_EXPECT_NO_THROW(integrator.set_target_accuracy(1e-1));
+  DRAKE_EXPECT_NO_THROW(integrator.request_initial_step_size_target(this->dt()));
 }
 
 
