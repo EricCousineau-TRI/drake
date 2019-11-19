@@ -1138,7 +1138,7 @@ class MathematicalProgram {
    * available, as it may require the use of a significantly more
    * expensive solver.
    *
-   * @exclude_from_pydrake_mkdoc{Not bound in pydrake.}
+   * @pydrake_mkdoc_identifier{custom_plz}
    */
   template <typename C>
   auto AddConstraint(std::shared_ptr<C> con,

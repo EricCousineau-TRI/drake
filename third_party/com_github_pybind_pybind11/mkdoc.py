@@ -1102,6 +1102,9 @@ def main():
             if fnmatch(include_file, p):
                 break
         else:
+            # HACK
+            if "mathematical_program.h" not in include_file:
+                continue
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
