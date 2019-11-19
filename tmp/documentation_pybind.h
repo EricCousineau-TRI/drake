@@ -27,7 +27,7 @@ calling solvers::Solve() function, and obtain the results of the
 optimization.)""";
         // Symbol: drake::solvers::MathematicalProgram::AddBoundingBoxConstraint
         struct /* AddBoundingBoxConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1544
+          // Source: drake/solvers/mathematical_program.h:1542
           const char* doc_3args_lb_ub_vars =
 R"""(Adds bounding box constraints referencing potentially a subset of the
 decision variables.
@@ -43,7 +43,7 @@ Parameter ``vars``:
 
 Returns:
     The newly constructed BoundingBoxConstraint.)""";
-          // Source: drake/solvers/mathematical_program.h:1555
+          // Source: drake/solvers/mathematical_program.h:1553
           const char* doc_3args_lb_ub_var =
 R"""(Adds bounds for a single variable.
 
@@ -55,7 +55,7 @@ Parameter ``ub``:
 
 Parameter ``var``:
     The decision variable.)""";
-          // Source: drake/solvers/mathematical_program.h:1611
+          // Source: drake/solvers/mathematical_program.h:1609
           const char* doc_3args_double_double_constEigenMatrixBase =
 R"""(Adds the same scalar lower and upper bound to every variable in
 ``vars``.
@@ -131,11 +131,6 @@ find numerical bounds of ``e1`` and ``e2`` where ``f`` = e1 ≃ e2. We
 allow ``e1`` and ``e2`` to be infinite but only if there are no other
 terms. For example, ``x <= ∞`` is allowed. However, ``x - ∞ <= 0`` is
 not allowed because ``x ↦ ∞`` introduces ``nan`` in the evaluation.)""";
-          // Source: drake/solvers/mathematical_program.h:1144
-          const char* doc_custom_plz =
-R"""(Adds a generic constraint to the program. This should only be used if
-a more specific type of constraint is not available, as it may require
-the use of a significantly more expensive solver.)""";
         } AddConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddCost
         struct /* AddCost */ {
@@ -165,7 +160,7 @@ Raises:
         } AddDecisionVariables;
         // Symbol: drake::solvers::MathematicalProgram::AddEqualityConstraintBetweenPolynomials
         struct /* AddEqualityConstraintBetweenPolynomials */ {
-          // Source: drake/solvers/mathematical_program.h:2224
+          // Source: drake/solvers/mathematical_program.h:2222
           const char* doc =
 R"""(Constraining that two polynomials are the same (i.e., they have the
 same coefficients for each monomial). This function is often used in
@@ -187,7 +182,7 @@ Parameter ``p2``:
         } AddEqualityConstraintBetweenPolynomials;
         // Symbol: drake::solvers::MathematicalProgram::AddExponentialConeConstraint
         struct /* AddExponentialConeConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2249
+          // Source: drake/solvers/mathematical_program.h:2247
           const char* doc_3args =
 R"""(Adds an exponential cone constraint, that z = A * vars + b should be
 in the exponential cone. Namely {z₀, z₁, z₂ | z₀ ≥ z₁ * exp(z₂ / z₁),
@@ -201,7 +196,7 @@ Parameter ``b``:
 
 Parameter ``vars``:
     The variables bound with this constraint.)""";
-          // Source: drake/solvers/mathematical_program.h:2259
+          // Source: drake/solvers/mathematical_program.h:2257
           const char* doc_1args =
 R"""(Add the constraint that z is in the exponential cone.
 
@@ -241,18 +236,18 @@ R"""(Adds a cost term of the form | Ax - b |^2.)""";
         } AddL2NormCost;
         // Symbol: drake::solvers::MathematicalProgram::AddLinearComplementarityConstraint
         struct /* AddLinearComplementarityConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1955
+          // Source: drake/solvers/mathematical_program.h:1953
           const char* doc =
 R"""(Adds a linear complementarity constraints referencing a subset of the
 decision variables.)""";
         } AddLinearComplementarityConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddLinearConstraint
         struct /* AddLinearConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1162
+          // Source: drake/solvers/mathematical_program.h:1160
           const char* doc_4args_A_lb_ub_vars =
 R"""(Adds linear constraints referencing potentially a subset of the
 decision variables (defined in the vars parameter).)""";
-          // Source: drake/solvers/mathematical_program.h:1190
+          // Source: drake/solvers/mathematical_program.h:1188
           const char* doc_4args_a_lb_ub_vars =
 R"""(Adds one row of linear constraint referencing potentially a subset of
 the decision variables (defined in the vars parameter). lb <= a*vars
@@ -269,7 +264,7 @@ Parameter ``ub``:
 
 Parameter ``vars``:
     The decision variables on which to impose the linear constraint.)""";
-          // Source: drake/solvers/mathematical_program.h:1225
+          // Source: drake/solvers/mathematical_program.h:1223
           const char* doc_3args_e_lb_ub =
 R"""(Adds one row of linear constraint lb <= e <= ub where ``e`` is a
 symbolic expression.
@@ -288,12 +283,12 @@ Parameter ``lb``:
 
 Parameter ``ub``:
     A scalar, the upper bound.)""";
-          // Source: drake/solvers/mathematical_program.h:1233
+          // Source: drake/solvers/mathematical_program.h:1231
           const char* doc_3args_v_lb_ub =
 R"""(Adds linear constraints represented by symbolic expressions to the
 program. It throws if @v includes a non-linear expression or ``lb <= v
 <= ub`` includes trivial/unsatisfiable constraints.)""";
-          // Source: drake/solvers/mathematical_program.h:1263
+          // Source: drake/solvers/mathematical_program.h:1261
           const char* doc_1args_f =
 R"""(Add a linear constraint represented by a symbolic formula to the
 program. The input formula ``f`` can be of the following forms:
@@ -317,7 +312,7 @@ such as "2 <= 1". 4. It is not possible to find numerical bounds of
 be infinite but only if there are no other terms. For example, ``x <=
 ∞`` is allowed. However, ``x - ∞ <= 0`` is not allowed because ``x ↦
 ∞`` introduces ``nan`` in the evaluation.)""";
-          // Source: drake/solvers/mathematical_program.h:1294
+          // Source: drake/solvers/mathematical_program.h:1292
           const char* doc_1args_constEigenArrayBase =
 R"""(Add a linear constraint represented by an
 Eigen::Array<symbolic::Formula> to the program. A common use-case of
@@ -374,7 +369,7 @@ variables and pushes onto the linear cost data structure.)""";
         } AddLinearCost;
         // Symbol: drake::solvers::MathematicalProgram::AddLinearEqualityConstraint
         struct /* AddLinearEqualityConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1330
+          // Source: drake/solvers/mathematical_program.h:1328
           const char* doc_2args =
 R"""(Adds one row of linear constraint e = b where ``e`` is a symbolic
 expression.
@@ -393,7 +388,7 @@ Parameter ``b``:
 Returns:
     The newly added linear equality constraint, together with the
     bound variable.)""";
-          // Source: drake/solvers/mathematical_program.h:1343
+          // Source: drake/solvers/mathematical_program.h:1341
           const char* doc_1args =
 R"""(Adds a linear equality constraint represented by a symbolic formula to
 the program. The input formula ``f`` is either an equality formula
@@ -403,7 +398,7 @@ It throws an exception if
 
 1. ``f`` is neither an equality formula nor a conjunction of equalities.
 2. ``f`` includes a non-linear expression.)""";
-          // Source: drake/solvers/mathematical_program.h:1454
+          // Source: drake/solvers/mathematical_program.h:1452
           const char* doc_3args =
 R"""(AddLinearEqualityConstraint
 
@@ -428,13 +423,13 @@ the elements of x, you could use
         } AddLinearEqualityConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddLinearMatrixInequalityConstraint
         struct /* AddLinearMatrixInequalityConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2069
+          // Source: drake/solvers/mathematical_program.h:2067
           const char* doc =
 R"""(Adds a linear matrix inequality constraint to the program.)""";
         } AddLinearMatrixInequalityConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddLorentzConeConstraint
         struct /* AddLorentzConeConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1656
+          // Source: drake/solvers/mathematical_program.h:1654
           const char* doc =
 R"""(Adds Lorentz cone constraint referencing potentially a subset of the
 decision variables.
@@ -496,7 +491,7 @@ Note:
         } AddMaximizeLogDeterminantSymmetricMatrixCost;
         // Symbol: drake::solvers::MathematicalProgram::AddPolynomialConstraint
         struct /* AddPolynomialConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1975
+          // Source: drake/solvers/mathematical_program.h:1973
           const char* doc =
 R"""(Adds a polynomial constraint to the program referencing a subset of
 the decision variables (defined in the vars parameter).)""";
@@ -515,7 +510,7 @@ Returns:
         } AddPolynomialCost;
         // Symbol: drake::solvers::MathematicalProgram::AddPositiveDiagonallyDominantMatrixConstraint
         struct /* AddPositiveDiagonallyDominantMatrixConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2106
+          // Source: drake/solvers/mathematical_program.h:2104
           const char* doc =
 R"""(Adds the constraint that a symmetric matrix is diagonally dominant
 with non-negative diagonal entries. A symmetric matrix X is diagonally
@@ -542,7 +537,7 @@ Returns:
         } AddPositiveDiagonallyDominantMatrixConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddPositiveSemidefiniteConstraint
         struct /* AddPositiveSemidefiniteConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2018
+          // Source: drake/solvers/mathematical_program.h:2016
           const char* doc_1args_symmetric_matrix_var =
 R"""(Adds a positive semidefinite constraint on a symmetric matrix.
 
@@ -552,7 +547,7 @@ Raises:
 
 Parameter ``symmetric_matrix_var``:
     A symmetric MatrixDecisionVariable object.)""";
-          // Source: drake/solvers/mathematical_program.h:2037
+          // Source: drake/solvers/mathematical_program.h:2035
           const char* doc_1args_constEigenMatrixBase =
 R"""(Adds a positive semidefinite constraint on a symmetric matrix of
 symbolic expressions ``e``. We create a new symmetric matrix of
@@ -601,7 +596,7 @@ R"""(Adds a cost term of the form (x-x_desired)'*Q*(x-x_desired).)""";
         } AddQuadraticErrorCost;
         // Symbol: drake::solvers::MathematicalProgram::AddRotatedLorentzConeConstraint
         struct /* AddRotatedLorentzConeConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:1828
+          // Source: drake/solvers/mathematical_program.h:1826
           const char* doc_4args_linear_expression1_linear_expression2_quadratic_expression_tol =
 R"""(Adds rotated Lorentz cone constraint on the linear expression v1, v2
 and quadratic expression u, such that v1 * v2 >= u, v1 >= 0, v2 >= 0
@@ -646,7 +641,7 @@ non-negative for any x.
 
 Raises:
     RuntimeError if the preconditions are not satisfied.)""";
-          // Source: drake/solvers/mathematical_program.h:1846
+          // Source: drake/solvers/mathematical_program.h:1844
           const char* doc_1args_v =
 R"""(Adds a constraint that a symbolic expression
 
@@ -663,7 +658,7 @@ Parameter ``v``:
 Returns ``binding``:
     The newly added rotated Lorentz cone constraint, together with the
     bound variables.)""";
-          // Source: drake/solvers/mathematical_program.h:1868
+          // Source: drake/solvers/mathematical_program.h:1866
           const char* doc_3args_A_b_vars =
 R"""(Adds a rotated Lorentz cone constraint referencing potentially a
 subset of decision variables, The linear expression :math:`z=Ax+b` is
@@ -685,7 +680,7 @@ Parameter ``b``:
 
 Parameter ``vars``:
     The decision variables on which the constraint is imposed.)""";
-          // Source: drake/solvers/mathematical_program.h:1913
+          // Source: drake/solvers/mathematical_program.h:1911
           const char* doc_1args_vars =
 R"""(Impose that a vector :math:`x\in\mathbb{R}^m` is in rotated Lorentz
 cone. Namely
@@ -700,7 +695,7 @@ Returns:
         } AddRotatedLorentzConeConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddScaledDiagonallyDominantMatrixConstraint
         struct /* AddScaledDiagonallyDominantMatrixConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2145
+          // Source: drake/solvers/mathematical_program.h:2143
           const char* doc_was_unable_to_choose_unambiguous_names =
 R"""(This is an overloaded variant of addsdd "scaled diagonally dominant
 matrix constraint"
@@ -726,13 +721,13 @@ j, M[i][j] is the zero matrix.)""";
         } AddScaledDiagonallyDominantMatrixConstraint;
         // Symbol: drake::solvers::MathematicalProgram::AddSosConstraint
         struct /* AddSosConstraint */ {
-          // Source: drake/solvers/mathematical_program.h:2168
+          // Source: drake/solvers/mathematical_program.h:2166
           const char* doc_2args_p_monomial_basis =
 R"""(Adds constraints that a given polynomial ``p`` is a sums-of-squares
 (SOS), that is, ``p`` can be decomposed into ``mᵀQm``, where m is the
 ``monomial_basis``. It returns the coefficients matrix Q, which is
 positive semidefinite.)""";
-          // Source: drake/solvers/mathematical_program.h:2182
+          // Source: drake/solvers/mathematical_program.h:2180
           const char* doc_1args_p =
 R"""(Adds constraints that a given polynomial ``p`` is a sums-of-squares
 (SOS), that is, ``p`` can be decomposed into ``mᵀQm``, where m is a
@@ -741,7 +736,7 @@ of constraint bindings expressing:
 
 - The coefficients matrix Q, which is positive semidefinite.
  - The monomial basis m.)""";
-          // Source: drake/solvers/mathematical_program.h:2192
+          // Source: drake/solvers/mathematical_program.h:2190
           const char* doc_2args_e_monomial_basis =
 R"""(Adds constraints that a given symbolic expression ``e`` is a
 sums-of-squares (SOS), that is, ``p`` can be decomposed into ``mᵀQm``,
@@ -749,7 +744,7 @@ where m is the ``monomial_basis``. Note that it decomposes ``e`` into
 a polynomial with respect to ``indeterminates()`` in this mathematical
 program. It returns the coefficients matrix Q, which is positive
 semidefinite.)""";
-          // Source: drake/solvers/mathematical_program.h:2206
+          // Source: drake/solvers/mathematical_program.h:2204
           const char* doc_1args_e =
 R"""(Adds constraints that a given symbolic expression ``e`` is a
 sums-of-squares (SOS), that is, ``e`` can be decomposed into ``mᵀQm``.
@@ -803,7 +798,7 @@ Returns ``new_prog``:
         } Clone;
         // Symbol: drake::solvers::MathematicalProgram::EvalBinding
         struct /* EvalBinding */ {
-          // Source: drake/solvers/mathematical_program.h:2587
+          // Source: drake/solvers/mathematical_program.h:2585
           const char* doc =
 R"""(Evaluates the value of some binding, for some input value for all
 decision variables.
@@ -819,7 +814,7 @@ Raises:
         } EvalBinding;
         // Symbol: drake::solvers::MathematicalProgram::EvalBindingAtInitialGuess
         struct /* EvalBindingAtInitialGuess */ {
-          // Source: drake/solvers/mathematical_program.h:2677
+          // Source: drake/solvers/mathematical_program.h:2675
           const char* doc =
 R"""(Evaluates the evaluator in ``binding`` at the initial guess.
 
@@ -828,7 +823,7 @@ Returns:
         } EvalBindingAtInitialGuess;
         // Symbol: drake::solvers::MathematicalProgram::EvalBindings
         struct /* EvalBindings */ {
-          // Source: drake/solvers/mathematical_program.h:2619
+          // Source: drake/solvers/mathematical_program.h:2617
           const char* doc =
 R"""(Evaluates a set of bindings (plural version of ``EvalBinding``).
 
@@ -848,7 +843,7 @@ Raises:
         } EvalBindings;
         // Symbol: drake::solvers::MathematicalProgram::EvalVisualizationCallbacks
         struct /* EvalVisualizationCallbacks */ {
-          // Source: drake/solvers/mathematical_program.h:2646
+          // Source: drake/solvers/mathematical_program.h:2644
           const char* doc =
 R"""(Evaluates all visualization callbacks registered with the
 MathematicalProgram.
@@ -861,7 +856,7 @@ Raises:
         } EvalVisualizationCallbacks;
         // Symbol: drake::solvers::MathematicalProgram::FindDecisionVariableIndex
         struct /* FindDecisionVariableIndex */ {
-          // Source: drake/solvers/mathematical_program.h:2549
+          // Source: drake/solvers/mathematical_program.h:2547
           const char* doc =
 R"""(Returns the index of the decision variable. Internally the solvers
 thinks all variables are stored in an array, and it accesses each
@@ -874,7 +869,7 @@ Precondition:
         } FindDecisionVariableIndex;
         // Symbol: drake::solvers::MathematicalProgram::FindDecisionVariableIndices
         struct /* FindDecisionVariableIndices */ {
-          // Source: drake/solvers/mathematical_program.h:2560
+          // Source: drake/solvers/mathematical_program.h:2558
           const char* doc =
 R"""(Returns the indices of the decision variables. Internally the solvers
 thinks all variables are stored in an array, and it accesses each
@@ -887,7 +882,7 @@ Precondition:
         } FindDecisionVariableIndices;
         // Symbol: drake::solvers::MathematicalProgram::FindIndeterminateIndex
         struct /* FindIndeterminateIndex */ {
-          // Source: drake/solvers/mathematical_program.h:2573
+          // Source: drake/solvers/mathematical_program.h:2571
           const char* doc =
 R"""(Returns the index of the indeterminate. Internally a solver thinks all
 indeterminates are stored in an array, and it accesses each individual
@@ -900,7 +895,7 @@ Precondition:
         } FindIndeterminateIndex;
         // Symbol: drake::solvers::MathematicalProgram::GetAllConstraints
         struct /* GetAllConstraints */ {
-          // Source: drake/solvers/mathematical_program.h:2509
+          // Source: drake/solvers/mathematical_program.h:2507
           const char* doc =
 R"""(Getter for returning all constraints.
 
@@ -912,7 +907,7 @@ Note:
         } GetAllConstraints;
         // Symbol: drake::solvers::MathematicalProgram::GetAllCosts
         struct /* GetAllCosts */ {
-          // Source: drake/solvers/mathematical_program.h:2484
+          // Source: drake/solvers/mathematical_program.h:2482
           const char* doc =
 R"""(Getter returning all costs.
 
@@ -924,7 +919,7 @@ Note:
         } GetAllCosts;
         // Symbol: drake::solvers::MathematicalProgram::GetAllLinearConstraints
         struct /* GetAllLinearConstraints */ {
-          // Source: drake/solvers/mathematical_program.h:2497
+          // Source: drake/solvers/mathematical_program.h:2495
           const char* doc =
 R"""(Getter returning all linear constraints (both linear equality and
 inequality constraints).
@@ -934,7 +929,7 @@ Returns:
         } GetAllLinearConstraints;
         // Symbol: drake::solvers::MathematicalProgram::GetInitialGuess
         struct /* GetInitialGuess */ {
-          // Source: drake/solvers/mathematical_program.h:2267
+          // Source: drake/solvers/mathematical_program.h:2265
           const char* doc_1args_decision_variable =
 R"""(Gets the initial guess for a single variable.
 
@@ -944,7 +939,7 @@ Precondition:
 
 Raises:
     RuntimeError if the pre condition is not satisfied.)""";
-          // Source: drake/solvers/mathematical_program.h:2280
+          // Source: drake/solvers/mathematical_program.h:2278
           const char* doc_1args_constEigenMatrixBase =
 R"""(Gets the initial guess for some variables.
 
@@ -957,17 +952,17 @@ Raises:
         } GetInitialGuess;
         // Symbol: drake::solvers::MathematicalProgram::GetSolverOptionsDouble
         struct /* GetSolverOptionsDouble */ {
-          // Source: drake/solvers/mathematical_program.h:2389
+          // Source: drake/solvers/mathematical_program.h:2387
           const char* doc = R"""()""";
         } GetSolverOptionsDouble;
         // Symbol: drake::solvers::MathematicalProgram::GetSolverOptionsInt
         struct /* GetSolverOptionsInt */ {
-          // Source: drake/solvers/mathematical_program.h:2394
+          // Source: drake/solvers/mathematical_program.h:2392
           const char* doc = R"""()""";
         } GetSolverOptionsInt;
         // Symbol: drake::solvers::MathematicalProgram::GetSolverOptionsStr
         struct /* GetSolverOptionsStr */ {
-          // Source: drake/solvers/mathematical_program.h:2399
+          // Source: drake/solvers/mathematical_program.h:2397
           const char* doc = R"""()""";
         } GetSolverOptionsStr;
         // Symbol: drake::solvers::MathematicalProgram::MakeCost
@@ -1362,7 +1357,7 @@ R"""(< A scaled-diagonally dominant sum-of-squares polynomial.)""";
         } NonnegativePolynomial;
         // Symbol: drake::solvers::MathematicalProgram::SetDecisionVariableValueInVector
         struct /* SetDecisionVariableValueInVector */ {
-          // Source: drake/solvers/mathematical_program.h:2341
+          // Source: drake/solvers/mathematical_program.h:2339
           const char* doc_3args_decision_variable_decision_variable_new_value_values =
 R"""(Updates the value of a single ``decision_variable`` inside the
 ``values`` vector to be ``decision_variable_new_value``. The other
@@ -1376,7 +1371,7 @@ Parameter ``decision_variable_new_value``:
 
 Parameter ``values``:
     The vector to be tweaked; must be of size num_vars().)""";
-          // Source: drake/solvers/mathematical_program.h:2355
+          // Source: drake/solvers/mathematical_program.h:2353
           const char* doc_3args_decision_variables_decision_variables_new_values_values =
 R"""(Updates the values of some ``decision_variables`` inside the
 ``values`` vector to be ``decision_variables_new_values``. The other
@@ -1394,7 +1389,7 @@ Parameter ``values``:
         } SetDecisionVariableValueInVector;
         // Symbol: drake::solvers::MathematicalProgram::SetInitialGuess
         struct /* SetInitialGuess */ {
-          // Source: drake/solvers/mathematical_program.h:2301
+          // Source: drake/solvers/mathematical_program.h:2299
           const char* doc_2args_decision_variable_variable_guess_value =
 R"""(Sets the initial guess for a single variable ``decision_variable``.
 The guess is stored as part of this program.
@@ -1405,7 +1400,7 @@ Precondition:
 
 Raises:
     RuntimeError if precondition is not satisfied.)""";
-          // Source: drake/solvers/mathematical_program.h:2310
+          // Source: drake/solvers/mathematical_program.h:2308
           const char* doc_2args_constEigenMatrixBase_constEigenMatrixBase =
 R"""(Sets the initial guess for the decision variables stored in
 ``decision_variable_mat`` to be ``x0``. The guess is stored as part of
@@ -1413,7 +1408,7 @@ this program.)""";
         } SetInitialGuess;
         // Symbol: drake::solvers::MathematicalProgram::SetInitialGuessForAllVariables
         struct /* SetInitialGuessForAllVariables */ {
-          // Source: drake/solvers/mathematical_program.h:2328
+          // Source: drake/solvers/mathematical_program.h:2326
           const char* doc =
 R"""(Set the initial guess for ALL decision variables. Note that variables
 begin with a default initial guess of NaN to indicate that no guess is
@@ -1424,12 +1419,12 @@ Parameter ``x0``:
         } SetInitialGuessForAllVariables;
         // Symbol: drake::solvers::MathematicalProgram::SetSolverOption
         struct /* SetSolverOption */ {
-          // Source: drake/solvers/mathematical_program.h:2360
+          // Source: drake/solvers/mathematical_program.h:2358
           const char* doc = R"""()""";
         } SetSolverOption;
         // Symbol: drake::solvers::MathematicalProgram::SetSolverOptions
         struct /* SetSolverOptions */ {
-          // Source: drake/solvers/mathematical_program.h:2380
+          // Source: drake/solvers/mathematical_program.h:2378
           const char* doc =
 R"""(Overwrite the stored solver options inside MathematicalProgram with
 the provided solver options.)""";
@@ -1441,18 +1436,18 @@ the provided solver options.)""";
         } VarType;
         // Symbol: drake::solvers::MathematicalProgram::bounding_box_constraints
         struct /* bounding_box_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2525
+          // Source: drake/solvers/mathematical_program.h:2523
           const char* doc = R"""(Getter for all bounding box constraints)""";
         } bounding_box_constraints;
         // Symbol: drake::solvers::MathematicalProgram::decision_variable
         struct /* decision_variable */ {
-          // Source: drake/solvers/mathematical_program.h:2687
+          // Source: drake/solvers/mathematical_program.h:2685
           const char* doc =
 R"""(Getter for the decision variable with index ``i`` in the program.)""";
         } decision_variable;
         // Symbol: drake::solvers::MathematicalProgram::decision_variable_index
         struct /* decision_variable_index */ {
-          // Source: drake/solvers/mathematical_program.h:2710
+          // Source: drake/solvers/mathematical_program.h:2708
           const char* doc =
 R"""(Returns the mapping from a decision variable to its index in the
 vector, containing all the decision variables in the optimization
@@ -1460,120 +1455,120 @@ program.)""";
         } decision_variable_index;
         // Symbol: drake::solvers::MathematicalProgram::decision_variables
         struct /* decision_variables */ {
-          // Source: drake/solvers/mathematical_program.h:2682
+          // Source: drake/solvers/mathematical_program.h:2680
           const char* doc =
 R"""(Getter for all decision variables in the program.)""";
         } decision_variables;
         // Symbol: drake::solvers::MathematicalProgram::exponential_cone_constraints
         struct /* exponential_cone_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2475
+          // Source: drake/solvers/mathematical_program.h:2473
           const char* doc =
 R"""(Getter for exponential cone constraints.)""";
         } exponential_cone_constraints;
         // Symbol: drake::solvers::MathematicalProgram::generic_constraints
         struct /* generic_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2422
+          // Source: drake/solvers/mathematical_program.h:2420
           const char* doc = R"""(Getter for all generic constraints)""";
         } generic_constraints;
         // Symbol: drake::solvers::MathematicalProgram::generic_costs
         struct /* generic_costs */ {
-          // Source: drake/solvers/mathematical_program.h:2415
+          // Source: drake/solvers/mathematical_program.h:2413
           const char* doc = R"""(Getter for all generic costs.)""";
         } generic_costs;
         // Symbol: drake::solvers::MathematicalProgram::indeterminate
         struct /* indeterminate */ {
-          // Source: drake/solvers/mathematical_program.h:2695
+          // Source: drake/solvers/mathematical_program.h:2693
           const char* doc =
 R"""(Getter for the indeterminate with index ``i`` in the program.)""";
         } indeterminate;
         // Symbol: drake::solvers::MathematicalProgram::indeterminates
         struct /* indeterminates */ {
-          // Source: drake/solvers/mathematical_program.h:2692
+          // Source: drake/solvers/mathematical_program.h:2690
           const char* doc =
 R"""(Getter for all indeterminates in the program.)""";
         } indeterminates;
         // Symbol: drake::solvers::MathematicalProgram::initial_guess
         struct /* initial_guess */ {
-          // Source: drake/solvers/mathematical_program.h:2540
+          // Source: drake/solvers/mathematical_program.h:2538
           const char* doc = R"""(Getter for the initial guess)""";
         } initial_guess;
         // Symbol: drake::solvers::MathematicalProgram::linear_complementarity_constraints
         struct /* linear_complementarity_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2532
+          // Source: drake/solvers/mathematical_program.h:2530
           const char* doc =
 R"""(Getter for all linear complementarity constraints.)""";
         } linear_complementarity_constraints;
         // Symbol: drake::solvers::MathematicalProgram::linear_constraints
         struct /* linear_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2445
+          // Source: drake/solvers/mathematical_program.h:2443
           const char* doc = R"""(Getter for linear constraints.)""";
         } linear_constraints;
         // Symbol: drake::solvers::MathematicalProgram::linear_costs
         struct /* linear_costs */ {
-          // Source: drake/solvers/mathematical_program.h:2435
+          // Source: drake/solvers/mathematical_program.h:2433
           const char* doc = R"""(Getter for linear costs.)""";
         } linear_costs;
         // Symbol: drake::solvers::MathematicalProgram::linear_equality_constraints
         struct /* linear_equality_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2430
+          // Source: drake/solvers/mathematical_program.h:2428
           const char* doc = R"""(Getter for linear equality constraints.)""";
         } linear_equality_constraints;
         // Symbol: drake::solvers::MathematicalProgram::linear_matrix_inequality_constraints
         struct /* linear_matrix_inequality_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2469
+          // Source: drake/solvers/mathematical_program.h:2467
           const char* doc =
 R"""(Getter for linear matrix inequality constraints.)""";
         } linear_matrix_inequality_constraints;
         // Symbol: drake::solvers::MathematicalProgram::lorentz_cone_constraints
         struct /* lorentz_cone_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2450
+          // Source: drake/solvers/mathematical_program.h:2448
           const char* doc = R"""(Getter for Lorentz cone constraints.)""";
         } lorentz_cone_constraints;
         // Symbol: drake::solvers::MathematicalProgram::num_indeterminates
         struct /* num_indeterminates */ {
-          // Source: drake/solvers/mathematical_program.h:2564
+          // Source: drake/solvers/mathematical_program.h:2562
           const char* doc =
 R"""(Gets the number of indeterminates in the optimization program)""";
         } num_indeterminates;
         // Symbol: drake::solvers::MathematicalProgram::num_vars
         struct /* num_vars */ {
-          // Source: drake/solvers/mathematical_program.h:2537
+          // Source: drake/solvers/mathematical_program.h:2535
           const char* doc =
 R"""(Getter for number of variables in the optimization program)""";
         } num_vars;
         // Symbol: drake::solvers::MathematicalProgram::positive_semidefinite_constraints
         struct /* positive_semidefinite_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2463
+          // Source: drake/solvers/mathematical_program.h:2461
           const char* doc =
 R"""(Getter for positive semidefinite constraints.)""";
         } positive_semidefinite_constraints;
         // Symbol: drake::solvers::MathematicalProgram::quadratic_costs
         struct /* quadratic_costs */ {
-          // Source: drake/solvers/mathematical_program.h:2440
+          // Source: drake/solvers/mathematical_program.h:2438
           const char* doc = R"""(Getter for quadratic costs.)""";
         } quadratic_costs;
         // Symbol: drake::solvers::MathematicalProgram::required_capabilities
         struct /* required_capabilities */ {
-          // Source: drake/solvers/mathematical_program.h:2701
+          // Source: drake/solvers/mathematical_program.h:2699
           const char* doc =
 R"""(Getter for the required capability on the solver, given the
 cost/constraint/variable types in the program.)""";
         } required_capabilities;
         // Symbol: drake::solvers::MathematicalProgram::rotated_lorentz_cone_constraints
         struct /* rotated_lorentz_cone_constraints */ {
-          // Source: drake/solvers/mathematical_program.h:2457
+          // Source: drake/solvers/mathematical_program.h:2455
           const char* doc =
 R"""(Getter for rotated Lorentz cone constraints.)""";
         } rotated_lorentz_cone_constraints;
         // Symbol: drake::solvers::MathematicalProgram::solver_options
         struct /* solver_options */ {
-          // Source: drake/solvers/mathematical_program.h:2387
+          // Source: drake/solvers/mathematical_program.h:2385
           const char* doc =
 R"""(Returns the solver options stored inside MathematicalProgram.)""";
         } solver_options;
         // Symbol: drake::solvers::MathematicalProgram::visualization_callbacks
         struct /* visualization_callbacks */ {
-          // Source: drake/solvers/mathematical_program.h:2407
+          // Source: drake/solvers/mathematical_program.h:2405
           const char* doc = R"""(Getter for all callbacks.)""";
         } visualization_callbacks;
       } MathematicalProgram;
