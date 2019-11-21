@@ -117,6 +117,7 @@ void def_geometry_render(py::module m) {
     render_label
         .def(py::init<int>(), py::arg("value"), doc.RenderLabel.ctor.doc_1args)
         .def("is_reserved", &RenderLabel::is_reserved)
+        .def("__int__", [](const RenderLabel& self) -> int { return self; })
         // EQ(==).
         .def(py::self == py::self)
         .def(py::self == int{})
@@ -124,8 +125,7 @@ void def_geometry_render(py::module m) {
         // NE(!=).
         .def(py::self != py::self)
         .def(py::self != int{})
-        .def(int{} != py::self)
-        .def("__int__", [](const RenderLabel& self) -> int { return self; });
+        .def(int{} != py::self);
     render_label.attr("kEmpty") = RenderLabel::kEmpty;
     render_label.attr("kDoNotRender") = RenderLabel::kDoNotRender;
     render_label.attr("kDontCare") = RenderLabel::kDontCare;
