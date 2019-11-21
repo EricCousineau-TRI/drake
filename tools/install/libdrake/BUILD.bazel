@@ -12,6 +12,7 @@ load(
     "@drake//tools/skylark:drake_cc.bzl",
     "drake_cc_googletest",
     "drake_cc_test",
+    "drake_cc_library",
     "drake_transitive_installed_hdrs_filegroup",
 )
 load("//tools/lint:lint.bzl", "add_lint_tests")
@@ -96,6 +97,14 @@ drake_transitive_installed_hdrs_filegroup(
     name = "libdrake_headers_only_attic",
     only_startswith = "attic/",
     deps = LIBDRAKE_COMPONENTS,
+)
+
+cc_library(
+    name = "libdrake_headers_attic_lib",
+    hdrs = [":libdrake_headers_only_attic"],
+    include_prefix = "drake",
+    strip_include_prefix = "/",
+    visibility = ["//bindings/pydrake:__pkg__"],
 )
 
 # Install headers that are stored in the attic by stripping off the "attic/"

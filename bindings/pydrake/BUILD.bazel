@@ -60,14 +60,15 @@ drake_py_library(
 generate_pybind_documentation_header(
     name = "generate_pybind_documentation_header",
     out = "documentation_pybind.h",
+    targets_exclude = [
+        "//tools/install/libdrake:libdrake_headers_attic_lib",
+    ],
     exclude_hdr_patterns = [
         "drake/common/text_logging_gflags.h",
         # Exclude LCM-generated classes to reduce size of generated
         # docstrings.
         "drake/lcmtypes/**",
     ],
-    headers_without_attic =
-        "//tools/install/libdrake:libdrake_headers_no_attic",
     out_xml = "documentation_pybind.xml",
     root_name = "pydrake_doc",
     targets = [
