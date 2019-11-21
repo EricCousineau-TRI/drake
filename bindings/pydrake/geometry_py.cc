@@ -240,6 +240,26 @@ void DoScalarDependentDefinitions(py::module m, T) {
             cls_doc.HasRenderer.doc)
         .def("RendererCount", &Class::RendererCount, cls_doc.RendererCount.doc)
         // - Begin: AssignRole Overloads.
+        // - - Proximity.
+        .def("AssignRole",
+            [](Class& self, SourceId source_id, GeometryId geometry_id,
+                ProximityProperties properties, RoleAssign assign) {
+              self.AssignRole(source_id, geometry_id, properties, assign);
+            },
+            py::arg("source_id"), py::arg("geometry_id"), py::arg("properties"),
+            py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_proximity_direct)
+        .def("AssignRole",
+            [](Class& self, Context<T>* context, SourceId source_id,
+                GeometryId geometry_id, ProximityProperties properties,
+                RoleAssign assign) {
+              self.AssignRole(
+                  context, source_id, geometry_id, properties, assign);
+            },
+            py::arg("context"), py::arg("source_id"), py::arg("geometry_id"),
+            py::arg("properties"), py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_proximity_context)
+        // - - Perception.
         .def("AssignRole",
             [](Class& self, SourceId source_id, GeometryId geometry_id,
                 PerceptionProperties properties, RoleAssign assign) {
@@ -258,6 +278,25 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::arg("context"), py::arg("source_id"), py::arg("geometry_id"),
             py::arg("properties"), py::arg("assign") = RoleAssign::kNew,
             cls_doc.AssignRole.doc_perception_context)
+        // - - Illustration.
+        .def("AssignRole",
+            [](Class& self, SourceId source_id, GeometryId geometry_id,
+                IllustrationProperties properties, RoleAssign assign) {
+              self.AssignRole(source_id, geometry_id, properties, assign);
+            },
+            py::arg("source_id"), py::arg("geometry_id"), py::arg("properties"),
+            py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_illustration_direct)
+        .def("AssignRole",
+            [](Class& self, Context<T>* context, SourceId source_id,
+                GeometryId geometry_id, IllustrationProperties properties,
+                RoleAssign assign) {
+              self.AssignRole(
+                  context, source_id, geometry_id, properties, assign);
+            },
+            py::arg("context"), py::arg("source_id"), py::arg("geometry_id"),
+            py::arg("properties"), py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_illustration_context)
         // - End: AssignRole Overloads.
         .def_static("world_frame_id", &Class::world_frame_id,
             cls_doc.world_frame_id.doc);

@@ -67,12 +67,36 @@ class TestGeometry(unittest.TestCase):
         scene_graph.AddRenderer("test_renderer",
                                 mut.render.MakeRenderEngineVtk(
                                     mut.render.RenderEngineVtkParams()))
+        self.assertTrue(scene_graph.HasRenderer("test_renderer"))
+        self.assertEqual(scene_graph.RendererCount(), 1)
 
         # Test SceneGraphInspector API
         inspector = scene_graph.model_inspector()
         self.assertEqual(inspector.num_frames(), 3)
         self.assertEqual(inspector.num_sources(), 2)
         self.assertEqual(inspector.num_geometries(), 3)
+
+        # Check AssignRole bits.
+        proximity = mut.ProximityProperties()
+        perception = mut.PerceptionProperties()
+        perception.AddProperty("label", "id", mut.render.RenderLabel(0))
+        illustration = mut.IllustrationProperties()
+        props = [
+            proximity,
+            perception,
+            illustration,
+        ]
+        context = scene_graph.CreateDefaultContext()
+        for prop in props:
+            # Check SceneGraph mutating variant.
+            scene_graph.AssignRole(
+                source_id=global_source, geometry_id=global_geometry,
+                properties=prop, assign=mut.RoleAssign.kNew)
+            # Check Context mutating variant.
+            scene_graph.AssignRole(
+                context=context, source_id=global_source,
+                geometry_id=global_geometry, properties=prop,
+                assign=mut.RoleAssign.kNew)
 
     def test_connect_drake_visualizer(self):
         # Test visualization API.
