@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "pybind11/eigen.h"
 #include "pybind11/eval.h"
 #include "pybind11/operators.h"
@@ -29,6 +31,7 @@
 namespace drake {
 namespace pydrake {
 namespace {
+using systems::Context;
 using systems::LeafSystem;
 
 template <typename Class>
@@ -129,6 +132,8 @@ void def_geometry_render(py::module m) {
     render_label.attr("kUnspecified") = RenderLabel::kUnspecified;
     render_label.attr("kMaxUnreserved") = RenderLabel::kMaxUnreserved;
   }
+
+  AddValueInstantiation<RenderLabel>(m);
 }
 
 template <typename T>
@@ -192,12 +197,11 @@ void DoScalarDependentDefinitions(py::module m, T) {
             [](Class* self) -> const systems::OutputPort<T>& {
               return self->get_pose_bundle_output_port();
             },
-            py_reference_internal,
-            cls_doc.get_pose_bundle_output_port.doc)
+            py_reference_internal, cls_doc.get_pose_bundle_output_port.doc)
         .def("get_query_output_port", &Class::get_query_output_port,
             py_reference_internal, cls_doc.get_query_output_port.doc)
-        .def("model_inspector", &Class::model_inspector,
-            py_reference_internal, cls_doc.model_inspector.doc)
+        .def("model_inspector", &Class::model_inspector, py_reference_internal,
+            cls_doc.model_inspector.doc)
         .def("RegisterSource",
             py::overload_cast<const std::string&>(  // BR
                 &Class::RegisterSource),
@@ -214,38 +218,31 @@ void DoScalarDependentDefinitions(py::module m, T) {
             cls_doc.RegisterFrame.doc_3args)
         .def("RegisterGeometry",
             py::overload_cast<SourceId, FrameId,
-                std::unique_ptr<GeometryInstance>>(
-                &Class::RegisterGeometry),
+                std::unique_ptr<GeometryInstance>>(&Class::RegisterGeometry),
             py::arg("source_id"), py::arg("frame_id"), py::arg("geometry"),
-            cls_doc.RegisterGeometry
-                .doc_3args_source_id_frame_id_geometry)
+            cls_doc.RegisterGeometry.doc_3args_source_id_frame_id_geometry)
         .def("RegisterGeometry",
             py::overload_cast<SourceId, GeometryId,
-                std::unique_ptr<GeometryInstance>>(
-                &Class::RegisterGeometry),
+                std::unique_ptr<GeometryInstance>>(&Class::RegisterGeometry),
             py::arg("source_id"), py::arg("geometry_id"), py::arg("geometry"),
-            cls_doc.RegisterGeometry
-                .doc_3args_source_id_geometry_id_geometry)
+            cls_doc.RegisterGeometry.doc_3args_source_id_geometry_id_geometry)
         .def("RegisterAnchoredGeometry",
             py::overload_cast<SourceId, std::unique_ptr<GeometryInstance>>(
                 &Class::RegisterAnchoredGeometry),
             py::arg("source_id"), py::arg("geometry"),
             cls_doc.RegisterAnchoredGeometry.doc)
-        .def("AddRenderer",
-            &Class::AddRenderer,
-            py::arg("name"), py::arg("renderer"),
-            cls_doc.AddRenderer.doc)
-        .def("AddRenderer",
-            WrapDeprecated("Deprecated", &Class::AddRenderer),
+        .def("AddRenderer", &Class::AddRenderer, py::arg("name"),
+            py::arg("renderer"), cls_doc.AddRenderer.doc)
+        .def("AddRenderer", WrapDeprecated("Deprecated", &Class::AddRenderer),
             py::arg("renderer_name"), py::arg("renderer"),
             cls_doc.AddRenderer.doc)
-        .def("HasRenderer", &Class::HasRenderer,
-            py::arg("name"), cls_doc.HasRenderer.doc)
+        .def("HasRenderer", &Class::HasRenderer, py::arg("name"),
+            cls_doc.HasRenderer.doc)
         .def("RendererCount", &Class::RendererCount, cls_doc.RendererCount.doc)
         // - Begin: AssignRole Overloads.
         .def("AssignRole",
             [](Class& self, SourceId source_id, GeometryId geometry_id,
-               PerceptionProperties properties, RoleAssign assign) {
+                PerceptionProperties properties, RoleAssign assign) {
               self.AssignRole(source_id, geometry_id, properties, assign);
             },
             py::arg("source_id"), py::arg("geometry_id"), py::arg("properties"),
@@ -253,9 +250,10 @@ void DoScalarDependentDefinitions(py::module m, T) {
             cls_doc.AssignRole.doc_perception_direct)
         .def("AssignRole",
             [](Class& self, Context<T>* context, SourceId source_id,
-               GeometryId geometry_id, PerceptionProperties properties,
-               RoleAssign assign) {
-              self.AssignRole(source_id, geometry_id, properties, assign);
+                GeometryId geometry_id, PerceptionProperties properties,
+                RoleAssign assign) {
+              self.AssignRole(
+                  context, source_id, geometry_id, properties, assign);
             },
             py::arg("context"), py::arg("source_id"), py::arg("geometry_id"),
             py::arg("properties"), py::arg("assign") = RoleAssign::kNew,
@@ -453,25 +451,6 @@ void DoScalarIndependentDefinitions(py::module m) {
   BindIdentifier<FrameId>(m, "FrameId", doc.FrameId.doc);
   BindIdentifier<GeometryId>(m, "GeometryId", doc.GeometryId.doc);
 
-  py::handle value_cls = py::module::import(
-      "pydrake.systems.framework").attr("Value");
-
-  {
-    using Class = GeometryProperties;
-    constexpr auto& cls_doc = doc.GeometryProperties;
-    py::class_<Class>(m, "GeometryProperties")
-        .def("HasGroup", &Class::HasGroup, py::arg("group_name"),
-            cls_doc.HasGroup.doc)
-        .def("num_groups", &Class::num_groups, cls_doc.num_groups.doc)
-        .def("AddProperty",
-            [value_cls](const std::string& group_name, const std::string& name,
-               py::object value) {
-              py::object abstract = value_cls.attr("Make")(value);
-              self.AddPropertyAbstract(
-                  group_name, name, abstract.cast<const AbstractValue&>());
-            }
-  }
-
   {
     constexpr auto& cls_doc = doc.Role;
     py::enum_<Role>(m, "Role", py::arithmetic(), cls_doc.doc)
@@ -480,6 +459,15 @@ void DoScalarIndependentDefinitions(py::module m) {
         .value("kIllustration", Role::kIllustration, cls_doc.kIllustration.doc)
         .value("kPerception", Role::kPerception, cls_doc.kPerception.doc);
   }
+
+  {
+    constexpr auto& cls_doc = doc.RoleAssign;
+    using Class = RoleAssign;
+    py::enum_<Class>(m, "RoleAssign", cls_doc.doc)
+        .value("kNew", Class::kNew, cls_doc.kNew.doc)
+        .value("kReplace", Class::kReplace, cls_doc.kReplace.doc);
+  }
+
   m.def("ConnectDrakeVisualizer",
       py::overload_cast<systems::DiagramBuilder<double>*,
           const SceneGraph<double>&, lcm::DrakeLcmInterface*, geometry::Role>(
@@ -605,48 +593,84 @@ void DoScalarIndependentDefinitions(py::module m) {
             py_reference_internal, cls_doc.perception_properties.doc);
   }
 
-  // Geometry Properties
   {
-    py::class_<GeometryProperties>(
-        m, "GeometryProperties", doc.GeometryProperties.doc)
-        .def("HasGroup", &GeometryProperties::HasGroup, py::arg("group_name"),
-            doc.GeometryProperties.HasGroup.doc)
-        .def("num_groups", &GeometryProperties::num_groups,
-            doc.GeometryProperties.num_groups.doc)
-        .def("GetPropertiesInGroup", &GeometryProperties::GetPropertiesInGroup,
-            py::arg("group_name"),
-            doc.GeometryProperties.GetPropertiesInGroup.doc)
-        .def("GetGroupNames", &GeometryProperties::GetGroupNames,
-            doc.GeometryProperties.GetGroupNames.doc)
-        // .def("AddProperty", &GeometryProperties::AddProperty,
-        //     py::arg("group_name"), py::arg("name"), py::arg("value"),
-        //     doc.GeometryProperties.AddProperty.doc)
-        .def("HasProperty", &GeometryProperties::HasProperty,
-            py::arg("group_name"), py::arg("name"),
-            doc.GeometryProperties.HasProperty.doc)
-        // .def("GetProperty", &GeometryProperties::GetProperty,
-        //     py::arg("group_name"), py::arg("name"),
-        //     doc.GeometryProperties.GetProperty.doc)
-        // .def("GetPropertyOrDefault",
-        //     &GeometryProperties::GetPropertyOrDefault,
-        //     py::arg("group_name"), py::arg("name"), py::arg("default_value"),
-        //     doc.GeometryProperties.GetPropertyOrDefault.doc)
-        .def_static("default_group_name",
-            &GeometryProperties::default_group_name,
-            doc.GeometryProperties.default_group_name.doc);
-    py::class_<ProximityProperties, GeometryProperties>(
-        m, "ProximityProperties", doc.ProximityProperties.doc)
-        .def(py::init<>(), doc.ProximityProperties.ctor.doc);
-    py::class_<IllustrationProperties, GeometryProperties>(
-        m, "IllustrationProperties", doc.IllustrationProperties.doc)
-        .def(py::init<>(), doc.IllustrationProperties.ctor.doc);
-    py::class_<PerceptionProperties, GeometryProperties>(
-        m, "PerceptionProperties", doc.PerceptionProperties.doc)
-        .def(py::init<>(), doc.PerceptionProperties.ctor.doc);
-    m.def("MakePhongIllustrationProperties", &MakePhongIllustrationProperties,
-        py_reference_internal, py::arg("diffuse"),
-        doc.MakePhongIllustrationProperties.doc);
+    using Class = GeometryProperties;
+    constexpr auto& cls_doc = doc.GeometryProperties;
+    py::handle abstract_value_cls =
+        py::module::import("pydrake.systems.framework").attr("AbstractValue");
+    py::class_<Class>(m, "GeometryProperties", cls_doc.doc)
+        .def("HasGroup", &Class::HasGroup, py::arg("group_name"),
+            cls_doc.HasGroup.doc)
+        .def("num_groups", &Class::num_groups, cls_doc.num_groups.doc)
+        .def("GetPropertiesInGroup",
+            [](const Class& self, const std::string& group_name) {
+              py::dict out;
+              py::object py_self = py::cast(&self, py_reference);
+              for (auto& [name, abstract] :
+                  self.GetPropertiesInGroup(group_name)) {
+                out[name.c_str()] =
+                    py::cast(abstract.get(), py_reference_internal, py_self);
+              }
+              return out;
+            },
+            py::arg("group_name"), cls_doc.GetPropertiesInGroup.doc)
+        .def("GetGroupNames", &Class::GetGroupNames, cls_doc.GetGroupNames.doc)
+        .def("AddProperty",
+            [abstract_value_cls](Class& self, const std::string& group_name,
+                const std::string& name, py::object value) {
+              py::object abstract = abstract_value_cls.attr("Make")(value);
+              self.AddPropertyAbstract(
+                  group_name, name, abstract.cast<const AbstractValue&>());
+            },
+            py::arg("group_name"), py::arg("name"), py::arg("value"),
+            cls_doc.AddProperty.doc)
+        .def("HasProperty", &Class::HasProperty, py::arg("group_name"),
+            py::arg("name"), cls_doc.HasProperty.doc)
+        .def("GetProperty",
+            [](const Class& self, const std::string& group_name,
+                const std::string& name) {
+              py::object abstract = py::cast(
+                  self.GetPropertyAbstract(group_name, name), py_reference);
+              return abstract.attr("get_value")();
+            },
+            py::arg("group_name"), py::arg("name"), cls_doc.GetProperty.doc)
+        .def("GetPropertyOrDefault",
+            [](const Class& self, const std::string& group_name,
+                const std::string& name, py::object default_value) {
+              // For now, ignore typing. This is less efficient, but eh, it's
+              // Python.
+              if (self.HasProperty(group_name, name)) {
+                py::object py_self = py::cast(&self, py_reference);
+                return py_self.attr("GetProperty")(group_name, name);
+              } else {
+                return default_value;
+              }
+            },
+            py::arg("group_name"), py::arg("name"), py::arg("default_value"),
+            cls_doc.GetPropertyOrDefault.doc)
+        .def_static("default_group_name", &Class::default_group_name,
+            cls_doc.default_group_name.doc)
+        .def("__str__",
+            [](const Class& self) {
+              std::stringstream ss;
+              ss << self;
+              return ss.str();
+            },
+            "Returns formatted string.");
   }
+
+  py::class_<ProximityProperties, GeometryProperties>(
+      m, "ProximityProperties", doc.ProximityProperties.doc)
+      .def(py::init(), doc.ProximityProperties.ctor.doc);
+  py::class_<IllustrationProperties, GeometryProperties>(
+      m, "IllustrationProperties", doc.IllustrationProperties.doc)
+      .def(py::init(), doc.IllustrationProperties.ctor.doc);
+  py::class_<PerceptionProperties, GeometryProperties>(
+      m, "PerceptionProperties", doc.PerceptionProperties.doc)
+      .def(py::init(), doc.PerceptionProperties.ctor.doc);
+  m.def("MakePhongIllustrationProperties", &MakePhongIllustrationProperties,
+      py_reference_internal, py::arg("diffuse"),
+      doc.MakePhongIllustrationProperties.doc);
 
   m.def("ReadObjToSurfaceMesh",
       py::overload_cast<const std::string&, double>(
@@ -671,7 +695,9 @@ void def_geometry_all(py::module m) {
 
 PYBIND11_MODULE(geometry, m) {
   PYDRAKE_PREVENT_PYTHON3_MODULE_REIMPORT(m);
+  py::module::import("pydrake.systems.framework");
   py::module::import("pydrake.systems.lcm");
+
   def_geometry(m);
   def_geometry_render(m.def_submodule("render"));
   def_geometry_all(m.def_submodule("all"));

@@ -13,7 +13,12 @@ from pydrake.common.test_utilities.deprecation import catch_drake_warnings
 from pydrake.lcm import DrakeMockLcm
 from pydrake.math import RigidTransform_
 from pydrake.symbolic import Expression
-from pydrake.systems.framework import DiagramBuilder_, InputPort_, OutputPort_
+from pydrake.systems.framework import (
+    AbstractValue,
+    DiagramBuilder_,
+    InputPort_,
+    OutputPort_,
+)
 from pydrake.systems.sensors import (
     ImageRgba8U,
     ImageDepth32F,
@@ -233,21 +238,24 @@ class TestGeometry(unittest.TestCase):
             mut.MakePhongIllustrationProperties([0, 0, 1, 1]),
             mut.IllustrationProperties)
         prop = mut.ProximityProperties()
+        self.assertEqual(str(prop), "[__default__]")
         default_group = prop.default_group_name()
         self.assertTrue(prop.HasGroup(group_name=default_group))
         self.assertEqual(prop.num_groups(), 1)
         self.assertTrue(default_group in prop.GetGroupNames())
-        # prop.AddProperty(group_name=default_group, name="test", value=3)
-        # self.assertTrue(prop.HasProperty(group_name=default_group,
-        #                                  name="test"))
-        # self.assertEqual(
-        #     prop.GetProperty(group_name=default_group, name="test"), 3)
-        # self.assertEqual(
-        #     prop.GetPropertyOrDefault(group_name=default_group, name="empty",
-        #         default_value=5),
-        #     5)
-        # print(prop.GetPropertiesInGroup(group_name=default_group))
-        # self.assertTrue(False)
+        prop.AddProperty(group_name=default_group, name="test", value=3)
+        self.assertTrue(prop.HasProperty(group_name=default_group,
+                                         name="test"))
+        self.assertEqual(
+            prop.GetProperty(group_name=default_group, name="test"), 3)
+        self.assertEqual(
+            prop.GetPropertyOrDefault(
+                group_name=default_group, name="empty", default_value=5),
+            5)
+        group_values = prop.GetPropertiesInGroup(group_name=default_group)
+        for name, value in group_values.items():
+            self.assertIsInstance(name, str)
+            self.assertIsInstance(value, AbstractValue)
 
     def test_render_engine_vtk_params(self):
         # Confirm default construction of params.

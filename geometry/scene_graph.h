@@ -610,6 +610,7 @@ class SceneGraph final : public systems::LeafSystem<T> {
                   RoleAssign assign = RoleAssign::kNew) const;
 
   /** Assigns the perception role to the geometry indicated by `geometry_id`.
+   @pydrake_mkdoc_identifier{perception_direct}
    */
   void AssignRole(SourceId source_id, GeometryId geometry_id,
                   PerceptionProperties properties,
@@ -619,7 +620,7 @@ class SceneGraph final : public systems::LeafSystem<T> {
    @ref AssignRole(SourceId,GeometryId,PerceptionProperties) "AssignRole()" for
    perception properties. Rather than modifying %SceneGraph's model, it modifies
    the copy of the model stored in the provided context.
-   @pydrake_mkdoc_identifier{perception_direct}
+   @pydrake_mkdoc_identifier{perception_context}
    */
   void AssignRole(systems::Context<T>* context, SourceId source_id,
                   GeometryId geometry_id, PerceptionProperties properties,
