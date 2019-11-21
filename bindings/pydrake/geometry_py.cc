@@ -119,7 +119,8 @@ void def_geometry_render(py::module m) {
         // NE(!=).
         .def(py::self != py::self)
         .def(py::self != int{})
-        .def(int{} != py::self);
+        .def(int{} != py::self)
+        .def("__int__", [](const RenderLabel& self) -> int { return self; });
     render_label.attr("kEmpty") = RenderLabel::kEmpty;
     render_label.attr("kDoNotRender") = RenderLabel::kDoNotRender;
     render_label.attr("kDontCare") = RenderLabel::kDontCare;
@@ -177,60 +178,89 @@ void DoScalarDependentDefinitions(py::module m, T) {
 
   //  SceneGraph
   {
-    auto cls = DefineTemplateClassWithDefault<SceneGraph<T>, LeafSystem<T>>(
-        m, "SceneGraph", param, doc.SceneGraph.doc);
+    using Class = SceneGraph<T>;
+    constexpr auto& cls_doc = doc.SceneGraph;
+    auto cls = DefineTemplateClassWithDefault<Class, LeafSystem<T>>(
+        m, "SceneGraph", param, cls_doc.doc);
     cls  // BR
-        .def(py::init<>(), doc.SceneGraph.ctor.doc)
-        .def("get_source_pose_port", &SceneGraph<T>::get_source_pose_port,
-            py_reference_internal, doc.SceneGraph.get_source_pose_port.doc)
+        .def(py::init<>(), cls_doc.ctor.doc)
+        .def("get_source_pose_port", &Class::get_source_pose_port,
+            py_reference_internal, cls_doc.get_source_pose_port.doc)
         .def("get_pose_bundle_output_port",
-            [](SceneGraph<T>* self) -> const systems::OutputPort<T>& {
+            [](Class* self) -> const systems::OutputPort<T>& {
               return self->get_pose_bundle_output_port();
             },
             py_reference_internal,
-            doc.SceneGraph.get_pose_bundle_output_port.doc)
-        .def("get_query_output_port", &SceneGraph<T>::get_query_output_port,
-            py_reference_internal, doc.SceneGraph.get_query_output_port.doc)
-        .def("model_inspector", &SceneGraph<T>::model_inspector,
-            py_reference_internal, doc.SceneGraph.model_inspector.doc)
+            cls_doc.get_pose_bundle_output_port.doc)
+        .def("get_query_output_port", &Class::get_query_output_port,
+            py_reference_internal, cls_doc.get_query_output_port.doc)
+        .def("model_inspector", &Class::model_inspector,
+            py_reference_internal, cls_doc.model_inspector.doc)
         .def("RegisterSource",
             py::overload_cast<const std::string&>(  // BR
-                &SceneGraph<T>::RegisterSource),
-            py::arg("name") = "", doc.SceneGraph.RegisterSource.doc)
+                &Class::RegisterSource),
+            py::arg("name") = "", cls_doc.RegisterSource.doc)
         .def("RegisterFrame",
             py::overload_cast<SourceId, const GeometryFrame&>(
-                &SceneGraph<T>::RegisterFrame),
+                &Class::RegisterFrame),
             py::arg("source_id"), py::arg("frame"),
-            doc.SceneGraph.RegisterFrame.doc_2args)
+            cls_doc.RegisterFrame.doc_2args)
         .def("RegisterFrame",
             py::overload_cast<SourceId, FrameId, const GeometryFrame&>(
-                &SceneGraph<T>::RegisterFrame),
+                &Class::RegisterFrame),
             py::arg("source_id"), py::arg("parent_id"), py::arg("frame"),
-            doc.SceneGraph.RegisterFrame.doc_3args)
+            cls_doc.RegisterFrame.doc_3args)
         .def("RegisterGeometry",
             py::overload_cast<SourceId, FrameId,
                 std::unique_ptr<GeometryInstance>>(
-                &SceneGraph<T>::RegisterGeometry),
+                &Class::RegisterGeometry),
             py::arg("source_id"), py::arg("frame_id"), py::arg("geometry"),
-            doc.SceneGraph.RegisterGeometry
+            cls_doc.RegisterGeometry
                 .doc_3args_source_id_frame_id_geometry)
         .def("RegisterGeometry",
             py::overload_cast<SourceId, GeometryId,
                 std::unique_ptr<GeometryInstance>>(
-                &SceneGraph<T>::RegisterGeometry),
+                &Class::RegisterGeometry),
             py::arg("source_id"), py::arg("geometry_id"), py::arg("geometry"),
-            doc.SceneGraph.RegisterGeometry
+            cls_doc.RegisterGeometry
                 .doc_3args_source_id_geometry_id_geometry)
         .def("RegisterAnchoredGeometry",
             py::overload_cast<SourceId, std::unique_ptr<GeometryInstance>>(
-                &SceneGraph<T>::RegisterAnchoredGeometry),
+                &Class::RegisterAnchoredGeometry),
             py::arg("source_id"), py::arg("geometry"),
-            doc.SceneGraph.RegisterAnchoredGeometry.doc)
-        .def("AddRenderer", &SceneGraph<T>::AddRenderer,
+            cls_doc.RegisterAnchoredGeometry.doc)
+        .def("AddRenderer",
+            &Class::AddRenderer,
+            py::arg("name"), py::arg("renderer"),
+            cls_doc.AddRenderer.doc)
+        .def("AddRenderer",
+            WrapDeprecated("Deprecated", &Class::AddRenderer),
             py::arg("renderer_name"), py::arg("renderer"),
-            doc.SceneGraph.AddRenderer.doc)
-        .def_static("world_frame_id", &SceneGraph<T>::world_frame_id,
-            doc.SceneGraph.world_frame_id.doc);
+            cls_doc.AddRenderer.doc)
+        .def("HasRenderer", &Class::HasRenderer,
+            py::arg("name"), cls_doc.HasRenderer.doc)
+        .def("RendererCount", &Class::RendererCount, cls_doc.RendererCount.doc)
+        // - Begin: AssignRole Overloads.
+        .def("AssignRole",
+            [](Class& self, SourceId source_id, GeometryId geometry_id,
+               PerceptionProperties properties, RoleAssign assign) {
+              self.AssignRole(source_id, geometry_id, properties, assign);
+            },
+            py::arg("source_id"), py::arg("geometry_id"), py::arg("properties"),
+            py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_perception_direct)
+        .def("AssignRole",
+            [](Class& self, Context<T>* context, SourceId source_id,
+               GeometryId geometry_id, PerceptionProperties properties,
+               RoleAssign assign) {
+              self.AssignRole(source_id, geometry_id, properties, assign);
+            },
+            py::arg("context"), py::arg("source_id"), py::arg("geometry_id"),
+            py::arg("properties"), py::arg("assign") = RoleAssign::kNew,
+            cls_doc.AssignRole.doc_perception_context)
+        // - End: AssignRole Overloads.
+        .def_static("world_frame_id", &Class::world_frame_id,
+            cls_doc.world_frame_id.doc);
   }
 
   //  FramePoseVector
@@ -420,6 +450,25 @@ void DoScalarIndependentDefinitions(py::module m) {
   BindIdentifier<SourceId>(m, "SourceId", doc.SourceId.doc);
   BindIdentifier<FrameId>(m, "FrameId", doc.FrameId.doc);
   BindIdentifier<GeometryId>(m, "GeometryId", doc.GeometryId.doc);
+
+  py::handle value_cls = py::module::import(
+      "pydrake.systems.framework").attr("Value");
+
+  {
+    using Class = GeometryProperties;
+    constexpr auto& cls_doc = doc.GeometryProperties;
+    py::class_<Class>(m, "GeometryProperties")
+        .def("HasGroup", &Class::HasGroup, py::arg("group_name"),
+            cls_doc.HasGroup.doc)
+        .def("num_groups", &Class::num_groups, cls_doc.num_groups.doc)
+        .def("AddProperty",
+            [value_cls](const std::string& group_name, const std::string& name,
+               py::object value) {
+              py::object abstract = value_cls.attr("Make")(value);
+              self.AddPropertyAbstract(
+                  group_name, name, abstract.cast<const AbstractValue&>());
+            }
+  }
 
   {
     constexpr auto& cls_doc = doc.Role;
