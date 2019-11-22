@@ -1076,7 +1076,6 @@ def main():
     std = '-std=c++11'
     root_name = 'mkdoc_doc'
     ignore_patterns = []
-    ignore_filenames = []
     output_filename = None
     output_filename_xml = None
 
@@ -1094,8 +1093,6 @@ def main():
             root_name = item[len('-root-name='):]
         elif item.startswith('-exclude-hdr-patterns='):
             ignore_patterns.append(item[len('-exclude-hdr-patterns='):])
-        elif item.startswith("-exclude_hdrs="):
-            ignore_filenames = item[len('-exclude_hdrs='):].split(",")
         elif item.startswith('-'):
             parameters.append(item)
         else:
@@ -1142,25 +1139,16 @@ def main():
     include_files = []
     # Create mapping from filename to include file.
     include_file_map = FileDict()
-
-    def strip_prefix(filename):
+    for filename in filenames:
         for include_path in include_paths:
             prefix = include_path + "/"
             if filename.startswith(prefix):
-                return filename[len(prefix):]
-        raise RuntimeError(
-            "Filename not incorporated into -I includes: {}".format(
-                filename))
-
-    ignore_headers = []
-    for ignore_filename in ignore_filenames:
-        ignore_headers.append(strip_prefix(ignore_filename))
-    print("\n".join(sorted(ignore_headers)))
-
-    for filename in filenames:
-        include_file = strip_prefix(filename)
-        if include_file in ignore_headers:
-            continue
+                include_file = filename[len(prefix):]
+                break
+        else:
+            raise RuntimeError(
+                "Filename not incorporated into -I includes: {}".format(
+                    filename))
         for p in ignore_patterns:
             if fnmatch(include_file, p):
                 break
@@ -1168,8 +1156,6 @@ def main():
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
-    # print("\n".join(sorted(include_files)))
-    # exit(1)
     # Generate the glue include file, which will include all relevant include
     # files, and parse. Use a tempdir that is relative to the output file for
     # usage with Bazel.
