@@ -206,8 +206,9 @@ cc_library(
     ],
 )
 
-# Combine attic-only headers into a library with necessary dependencies, but not
-# object code. (For use with pybind documentation generation.)
+# Combine attic-only headers into a library, *without* necessary dependencies
+# (for use with pybind documentation generation.) We exclude the dependency on
+# `drake_headers_no_attic` for simplicity. See note in `pybind.bzl`.
 # Include headers that are stored in the attic by stripping off the "attic/"
 # component of the pathname.
 cc_library(
@@ -215,8 +216,6 @@ cc_library(
     hdrs = [":libdrake_headers_only_attic"],
     include_prefix = "drake",
     strip_include_prefix = "/attic",
-    # N.B. This still depends on `drake_headers_no_attic`, but we exclude it
-    # for now to simplify logic for pybind documentation generation.
     visibility = ["//bindings/pydrake/attic:__pkg__"],
 )
 
