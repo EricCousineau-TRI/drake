@@ -73,6 +73,14 @@ drake_transitive_installed_hdrs_filegroup(
     deps = LIBDRAKE_COMPONENTS,
 )
 
+cc_library(
+    name = "libdrake_headers_attic_lib",
+    hdrs = [":libdrake_headers_only_attic"],
+    include_prefix = "drake",
+    strip_include_prefix = "/",
+    visibility = ["//bindings/pydrake:__pkg__"],
+)
+
 # Install libdrake.so along with all transitive headers in the same workspace
 # (i.e. in Drake itself; not externals).
 install(
@@ -97,14 +105,6 @@ drake_transitive_installed_hdrs_filegroup(
     name = "libdrake_headers_only_attic",
     only_startswith = "attic/",
     deps = LIBDRAKE_COMPONENTS,
-)
-
-cc_library(
-    name = "libdrake_headers_attic_lib",
-    hdrs = [":libdrake_headers_only_attic"],
-    include_prefix = "drake",
-    strip_include_prefix = "/",
-    visibility = ["//bindings/pydrake:__pkg__"],
 )
 
 # Install headers that are stored in the attic by stripping off the "attic/"
@@ -275,6 +275,30 @@ drake_cc_googletest(
     deps = [
         "//:drake_shared_library",
     ],
+)
+
+# Only for coverage.
+# TODO: SIMPLIFY
+cc_library(
+    name = "drake_headers_no_attic_for_coverage",
+    hdrs = [":libdrake_headers_no_attic"],
+    deps = [
+        ":libdrake_header_only_deps",
+        ":libdrake_runtime_so_deps",
+    ],
+    include_prefix = "drake",
+    strip_include_prefix = "/",
+    visibility = ["//bindings/pydrake:__subpackages__"],
+)
+
+cc_library(
+    name = "drake_headers_attic_only_for_coverage",
+    deps = [
+        ":libdrake_headers_only_attic_cc_library",
+        ":libdrake_header_only_deps",
+        ":libdrake_runtime_so_deps",
+    ],
+    visibility = ["//bindings/pydrake/attic:__pkg__"],
 )
 
 add_lint_tests(

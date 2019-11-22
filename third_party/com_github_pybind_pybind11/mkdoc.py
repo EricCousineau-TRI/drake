@@ -134,9 +134,8 @@ ignore_directories = (
 )
 
 
-def ignore_files(file_name, headers_without_attic):
-    return (file_name not in headers_without_attic) or \
-        (file_name.startswith(ignore_directories))
+def ignore_files(file_name):
+    return file_name.startswith(ignore_directories)
 
 
 def is_accepted_cursor(cursor, name_chain):
@@ -1071,7 +1070,6 @@ def prettify(elem):
 def main():
     parameters = ['-x', 'c++', '-D__MKDOC_PY__']
     filenames = []
-    headers_without_attic = []
     cindex_utils.add_library_paths(parameters)
 
     quiet = False
@@ -1111,7 +1109,9 @@ def main():
         sys.exit(1)
 
     f = open(output_filename, 'w', encoding='utf-8')
-    f_xml = open(output_filename_xml, 'w')
+    f_xml = None
+    if output_filename_xml is not None:
+        f_xml = open(output_filename_xml, 'w')
 
     # N.B. We substitute the `GENERATED FILE...` bits in this fashion because
     # otherwise Reviewable gets confused.
@@ -1168,8 +1168,8 @@ def main():
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
-    print("\n".join(sorted(include_files)))
-    exit(1)
+    # print("\n".join(sorted(include_files)))
+    # exit(1)
     # Generate the glue include file, which will include all relevant include
     # files, and parse. Use a tempdir that is relative to the output file for
     # usage with Bazel.
@@ -1216,7 +1216,8 @@ If you are on Ubuntu, please ensure you have en_US.UTF-8 locales generated:
 #pragma GCC diagnostic pop
 #endif
 ''')
-    f_xml.write(prettify(tree_parser_xpath[0]))
+    if f_xml is not None:
+        f_xml.write(prettify(tree_parser_xpath[0]))
 
 
 if __name__ == '__main__':

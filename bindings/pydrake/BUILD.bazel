@@ -60,9 +60,9 @@ drake_py_library(
 generate_pybind_documentation_header(
     name = "generate_pybind_documentation_header",
     out = "documentation_pybind.h",
-    targets_exclude = [
-        "//tools/install/libdrake:libdrake_headers_attic_lib",
-    ],
+    # targets_exclude = [
+    #     "//tools/install/libdrake:libdrake_headers_attic_lib",
+    # ],
     exclude_hdr_patterns = [
         "drake/common/text_logging_gflags.h",
         # Exclude LCM-generated classes to reduce size of generated
@@ -72,7 +72,8 @@ generate_pybind_documentation_header(
     out_xml = "documentation_pybind.xml",
     root_name = "pydrake_doc",
     targets = [
-        "//:drake_shared_library",
+        # "//:drake_shared_library",
+        "//tools/install/libdrake:drake_headers_no_attic_for_coverage",
         "//examples/compass_gait:compass_gait",
         "//examples/manipulation_station:manipulation_station",
         "//examples/manipulation_station:manipulation_station_hardware_interface",  # noqa

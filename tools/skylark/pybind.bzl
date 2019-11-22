@@ -299,7 +299,7 @@ def drake_pybind_cc_googletest(
         allow_import_unittest = True,
     )
 
-def _extract_header_library_info(targets):
+def _collect_cc_header_info(targets):
     compile_flags = []
     transitive_headers_depsets = []
     package_headers_depsets = []
@@ -339,39 +339,32 @@ def _extract_header_library_info(targets):
     )
 
 def _generate_pybind_documentation_header_impl(ctx):
-    # TODO(eric.cousineau): Remove this hack once `attic` is fully separate
-    # from `drake_shared_library`.
-    include = _extract_header_library_info(ctx.attr.targets)
-    exclude = _extract_header_library_info(ctx.attr.targets_exclude)
-    # Check that exclude is a subset.
-    include_headers = exclude.package_headers.tolist()
-    exclude_headers = include.package_headers.tolist()
-    for hdr in include_headers:
-        if hdr not in exclude_headers:
-            fail("`targets_exclude` must only be transitive dependencies " +
-                 "of `targets`")
-    # Filter headers.
-    filtered_headers = []
-    for hdr in include.package_headers:
-        if hdr in exclude.package_headers:
-            filtered_headers.append(hdr)
+    targets = _collect_cc_header_info(ctx.attr.targets)
+    target_deps = _collect_cc_header_info(ctx.attr.target_deps)
+
     args = ctx.actions.args()
-    args.add_all(include.compile_flags, uniquify = True)
+    args.add_all(
+        targets.compile_flags + target_deps.compile_flags, uniquify = True)
+    outputs = [ctx.outputs.out]
     args.add("-output=" + ctx.outputs.out.path)
-    args.add("-output_xml=" + ctx.outputs.out_xml.path)
+    out_xml = getattr(ctx.outputs, "out_xml", None)
+    if out_xml != None:
+        outputs.append(out_xml)
+        args.add("-output_xml=" + out_xml.path)
     args.add("-quiet")
     args.add("-root-name=" + ctx.attr.root_name)
     for p in ctx.attr.exclude_hdr_patterns:
         args.add("-exclude-hdr-patterns=" + p)
     args.add_all(ctx.fragments.cpp.cxxopts, uniquify = True)
     args.add("-w")
-    args.add_all(filtered_headers)
+    args.add_all(targets.package_headers)
 
     ctx.actions.run(
-        outputs = [ctx.outputs.out, ctx.outputs.out_xml],
-        inputs = depset(
-            transitive = [include.transitive_headers, exclude.transitive_headers],
-        ),
+        outputs = outputs,
+        inputs = depset(transitive = [
+            targets.transitive_headers,
+            target_deps.transitive_headers,
+        ]),
         arguments = [args],
         executable = ctx.executable._mkdoc,
     )
@@ -381,6 +374,8 @@ def _generate_pybind_documentation_header_impl(ctx):
 # transitive headers of the given targets.
 # @param targets Targets with header files that should have documentation
 # strings generated.
+# @param target_deps Dependencies for `targets` (necessary for compilation /
+# parsing), but should not have documentation generated.
 # @param root_name Name of the root struct in generated file.
 # @param exclude_hdr_patterns Headers whose symbols should be ignored. Can be
 # glob patterns.
@@ -389,7 +384,7 @@ generate_pybind_documentation_header = rule(
         "targets": attr.label_list(
             mandatory = True,
         ),
-        "targets_exclude": attr.label_list(),
+        "target_deps": attr.label_list(default = []),
         "_mkdoc": attr.label(
             default = Label("//tools/workspace/pybind11:mkdoc"),
             allow_files = True,
@@ -397,7 +392,7 @@ generate_pybind_documentation_header = rule(
             executable = True,
         ),
         "out": attr.output(mandatory = True),
-        "out_xml": attr.output(mandatory = True),
+        "out_xml": attr.output(mandatory = False),
         "root_name": attr.string(default = "pydrake_doc"),
         "exclude_hdr_patterns": attr.string_list(),
     },
