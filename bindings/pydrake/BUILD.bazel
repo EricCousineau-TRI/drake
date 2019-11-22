@@ -527,9 +527,7 @@ generate_pybind_coverage(
     name = "generate_pybind_coverage",
     class_coverage = ":class_coverage.csv",
     file_coverage = ":file_coverage.csv",
-    script = "//tools/pybind11_coverage:get_pybind_coverage",
-    xml_docstrings = ":documentation_pybind.xml",
-    deps = [
+    pybind_coverage_data = [
         ":pybind_coverage_data",
         "//bindings/pydrake/common:pybind_coverage_data",
         "//bindings/pydrake/examples:pybind_coverage_data",
@@ -538,6 +536,7 @@ generate_pybind_coverage(
         "//bindings/pydrake/solvers:pybind_coverage_data",
         "//bindings/pydrake/systems:pybind_coverage_data",
     ],
+    xml_docstrings = ":documentation_pybind.xml",
 )
 
 add_pybind_coverage_data()

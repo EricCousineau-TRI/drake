@@ -457,7 +457,8 @@ generate_pybind_coverage = rule(
         "pybind_coverage_data": attr.label_list(allow_files = True),
         "_script": attr.label(
             default = Label(
-                "//tools/workspace/pybind11:generate_pybind_coverage"),
+                "//tools/workspace/pybind11:generate_pybind_coverage",
+            ),
             allow_files = True,
             executable = True,
             cfg = "host",

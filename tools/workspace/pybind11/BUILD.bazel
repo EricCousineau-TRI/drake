@@ -3,8 +3,8 @@
 load("//tools/lint:lint.bzl", "add_lint_tests")
 load(
     "@drake//tools/skylark:pybind.bzl",
-    "generate_pybind_documentation_header",
     "generate_pybind_coverage",
+    "generate_pybind_documentation_header",
 )
 load("@drake//tools/skylark:drake_py.bzl", "drake_py_unittest")
 load(
@@ -83,8 +83,8 @@ py_library(
 py_binary(
     name = "generate_pybind_coverage",
     srcs = ["generate_pybind_coverage.py"],
-    deps = [":pybind_coverage_py"],
     visibility = ["//visibility:public"],
+    deps = [":pybind_coverage_py"],
 )
 
 drake_cc_library(
@@ -119,8 +119,8 @@ filegroup(
     name = "pybind_coverage_test_expected_data",
     testonly = 1,
     data = [
-        "test/documentation_pybind.xml",
         "test/class_coverage.csv",
+        "test/documentation_pybind.xml",
         "test/file_coverage.csv",
     ],
 )
@@ -139,8 +139,8 @@ drake_py_unittest(
     name = "generate_pybind_coverage_test",
     data = [
         "test/test_py.cc",
-        ":pybind_coverage_test_expected_data",
         ":pybind_coverage_test_actual_data",
+        ":pybind_coverage_test_expected_data",
     ],
 )
 
