@@ -1,7 +1,9 @@
-import unittest
 import filecmp
-from tools.pybind11_coverage import libclang_parser
-print(__import__('glob').glob("**/*", recursive=True))
+import unittest
+
+from drake.tools.workspace.pybind11.pybind_coverage_libclang_parser import (
+    get_docstrings_from_bindings,
+)
 
 
 class TestLibclangParser(unittest.TestCase):
@@ -25,8 +27,7 @@ class TestLibclangParser(unittest.TestCase):
 
     def test_parser(self):
         filenames = ["tools/pybind11_coverage/test/test_py.cc"]
-        pybind_docstrings = \
-            libclang_parser.get_docstring_for_bindings(filenames)
+        pybind_docstrings = get_docstrings_from_bindings(filenames)
         self.assertEqual(len(pybind_docstrings), len(self.docstrings))
         self.assertEqual(set(pybind_docstrings), set(self.docstrings))
 

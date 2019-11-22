@@ -16,9 +16,11 @@
 from clang import cindex
 import re
 import logging
+
 import third_party.com_github_pybind_pybind11.cindex_utils as cindex_utils
 
 cindex_utils.add_library_paths()
+
 
 replace_variables = ["doc", "cls_doc", "var_doc", "enum_doc"]
 
@@ -183,19 +185,19 @@ def replace_tokens_in_file(filename):
     return token_spellings, pydoc_strings
 
 
-def get_docstring_for_bindings(filenames):
-    """Given a list of pybind filenames, get thes docstrings used in them
+def get_docstrings_from_bindings(filenames):
+    """Given a list of pybind filenames, get the docstrings used in them
 
     Args:
         filenames: Names of the files
 
     Returns:
-        list: List of the docstrings used
+        List of the docstrings used
     """
-
-    array_for_all_files = []
+    # TODO(eric.cousineau): Hoist side effects to main file?
     logging.basicConfig(level=logging.INFO)
 
+    array_for_all_files = []
     for f in filenames:
         logging.debug("On file: {}".format(f))
         _, final_array = replace_tokens_in_file(f)
