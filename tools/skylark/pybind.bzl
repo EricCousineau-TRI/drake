@@ -299,23 +299,11 @@ def drake_pybind_cc_googletest(
         allow_import_unittest = True,
     )
 
-def _get_depset_for_package_files_only(target, depset_in):
-    # Find all files provided by the target, i.e., the set of
-    # transitively-available files that exist in the same Bazel package as the
-    # target.
-    return depset(direct = [
-        file
-        for file in depset_in.to_list()
-        if (target.label.package == file.owner.package and
-            target.label.workspace_root == file.owner.workspace_root)  # noqa
-    ])
-
-
-def _generate_pybind_documentation_header_impl(ctx):
+def _extract_header_library_info(targets):
     compile_flags = []
     transitive_headers_depsets = []
     package_headers_depsets = []
-    for target in ctx.attr.targets:
+    for target in targets:
         if CcInfo in target:
             compilation_context = target[CcInfo].compilation_context
 
@@ -333,39 +321,57 @@ def _generate_pybind_documentation_header_impl(ctx):
 
             transitive_headers_depset = compilation_context.headers
             transitive_headers_depsets.append(transitive_headers_depset)
-            package_headers_depsets.append(
-                _get_depset_for_package_files_only(
-                    target, transitive_headers_depset))
 
-    transitive_exclude_headers_depsets = []
-    for target in ctx.attr.targets_exclude:
-        if CcInfo in target:
-            compilation_context = target[CcInfo].compilation_context
-            package_header_depset = _get_depset_for_package_files_only(
-                target, compilation_context.headers)
-            transitive_exclude_headers_depsets.append(
-                package_header_depset)
+            # Find all headers provided by the drake_cc_package_library,
+            # i.e., the set of transitively-available headers that exist in
+            # the same Bazel package as the target.
+            package_headers_depsets.append(depset(direct = [
+                transitive_header
+                for transitive_header in transitive_headers_depset.to_list()
+                if (target.label.package == transitive_header.owner.package and
+                    target.label.workspace_root == transitive_header.owner.workspace_root)  # noqa
+            ]))
 
-    transitive_headers = depset(transitive = transitive_headers_depsets)
-    package_headers = depset(transitive = package_headers_depsets)
-    exclude_headers = depset(transitive = transitive_exclude_headers_depsets)
+    return struct(
+        compile_flags = compile_flags,
+        transitive_headers = depset(transitive = transitive_headers_depsets),
+        package_headers = depset(transitive = package_headers_depsets),
+    )
 
+def _generate_pybind_documentation_header_impl(ctx):
+    # TODO(eric.cousineau): Remove this hack once `attic` is fully separate
+    # from `drake_shared_library`.
+    include = _extract_header_library_info(ctx.attr.targets)
+    exclude = _extract_header_library_info(ctx.attr.targets_exclude)
+    # Check that exclude is a subset.
+    include_headers = exclude.package_headers.tolist()
+    exclude_headers = include.package_headers.tolist()
+    for hdr in include_headers:
+        if hdr not in exclude_headers:
+            fail("`targets_exclude` must only be transitive dependencies " +
+                 "of `targets`")
+    # Filter headers.
+    filtered_headers = []
+    for hdr in include.package_headers:
+        if hdr in exclude.package_headers:
+            filtered_headers.append(hdr)
     args = ctx.actions.args()
-    args.add_all(compile_flags, uniquify = True)
+    args.add_all(include.compile_flags, uniquify = True)
     args.add("-output=" + ctx.outputs.out.path)
     args.add("-output_xml=" + ctx.outputs.out_xml.path)
     args.add("-quiet")
     args.add("-root-name=" + ctx.attr.root_name)
-    # args.add_joined("-exclude-hdrs", exclude_headers, join_with=",")
     for p in ctx.attr.exclude_hdr_patterns:
         args.add("-exclude-hdr-patterns=" + p)
     args.add_all(ctx.fragments.cpp.cxxopts, uniquify = True)
     args.add("-w")
-    args.add_all(package_headers)
+    args.add_all(filtered_headers)
 
     ctx.actions.run(
         outputs = [ctx.outputs.out, ctx.outputs.out_xml],
-        inputs = transitive_headers,
+        inputs = depset(
+            transitive = [include.transitive_headers, exclude.transitive_headers],
+        ),
         arguments = [args],
         executable = ctx.executable._mkdoc,
     )
