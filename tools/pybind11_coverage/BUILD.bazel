@@ -17,8 +17,7 @@ load(
 )
 load(
     "@drake//tools/pybind11_coverage:transitive_rule.bzl",
-    "add_for_pybind_coverage",
-    "files_globber",
+    "add_pybind_coverage_data",
     "generate_pybind_coverage",
 )
 
@@ -49,19 +48,18 @@ generate_pybind_documentation_header(
     targets = [":pybind_coverage_test"],
 )
 
-files_globber(
-    name = "cc_glob",
-    files = glob(["test/*.cc"]),
+filegroup(
+    name = "pybind_coverage_data",
+    srcs = glob(["test/*.cc"]),
 )
 
 generate_pybind_coverage(
     name = "generate_pybind_coverage",
     class_coverage = ":class_coverage_test.csv",
     file_coverage = ":file_coverage_test.csv",
-    script = "//tools/pybind11_coverage:get_pybind_coverage",
     xml_docstrings = ":documentation_pybind_test.xml",
-    deps = [
-        ":cc_glob",
+    pybind_coverage_data = [
+        ":pybind_coverage_data",
     ],
 )
 

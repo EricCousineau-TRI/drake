@@ -24,7 +24,7 @@ load(
 load("//bindings/pydrake:pydrake.bzl", "add_lint_tests_pydrake")
 load(
     "@drake//tools/pybind11_coverage:transitive_rule.bzl",
-    "add_for_pybind_coverage",
+    "add_pybind_coverage_data",
     "generate_pybind_coverage",
 )
 
@@ -530,14 +530,14 @@ generate_pybind_coverage(
     script = "//tools/pybind11_coverage:get_pybind_coverage",
     xml_docstrings = ":documentation_pybind.xml",
     deps = [
-        ":cc_glob",
-        "//bindings/pydrake/common:cc_glob",
-        "//bindings/pydrake/examples:cc_glob",
-        "//bindings/pydrake/manipulation:cc_glob",
-        "//bindings/pydrake/multibody:cc_glob",
-        "//bindings/pydrake/solvers:cc_glob",
-        "//bindings/pydrake/systems:cc_glob",
+        ":pybind_coverage_data",
+        "//bindings/pydrake/common:pybind_coverage_data",
+        "//bindings/pydrake/examples:pybind_coverage_data",
+        "//bindings/pydrake/manipulation:pybind_coverage_data",
+        "//bindings/pydrake/multibody:pybind_coverage_data",
+        "//bindings/pydrake/solvers:pybind_coverage_data",
+        "//bindings/pydrake/systems:pybind_coverage_data",
     ],
 )
 
-add_for_pybind_coverage()
+add_pybind_coverage_data()

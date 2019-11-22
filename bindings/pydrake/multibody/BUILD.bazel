@@ -24,7 +24,7 @@ package(default_visibility = [
 
 load(
     "@drake//tools/pybind11_coverage:transitive_rule.bzl",
-    "add_for_pybind_coverage",
+    "add_pybind_coverage_data",
 )
 
 # This determines how `PYTHONPATH` is configured, and how to install the
@@ -233,6 +233,6 @@ drake_py_unittest(
     ],
 )
 
-add_for_pybind_coverage()
+add_pybind_coverage_data()
 
 add_lint_tests_pydrake()
