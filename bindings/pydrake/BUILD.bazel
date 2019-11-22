@@ -15,18 +15,15 @@ load(
 )
 load(
     "@drake//tools/skylark:pybind.bzl",
+    "add_pybind_coverage_data",
     "drake_pybind_cc_googletest",
     "drake_pybind_library",
+    "generate_pybind_coverage",
     "generate_pybind_documentation_header",
     "get_drake_py_installs",
     "get_pybind_package_info",
 )
 load("//bindings/pydrake:pydrake.bzl", "add_lint_tests_pydrake")
-load(
-    "@drake//tools/skylark:pybind.bzl",
-    "add_pybind_coverage_data",
-    "generate_pybind_coverage",
-)
 
 package(default_visibility = [
     "//bindings:__subpackages__",
