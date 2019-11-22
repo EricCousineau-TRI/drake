@@ -142,9 +142,6 @@ drake_py_unittest(
         ":pybind_coverage_test_expected_data",
         ":pybind_coverage_test_actual_data",
     ],
-    deps = [
-        ":pybind_coverage_py",
-    ],
 )
 
 add_lint_tests()

@@ -17,7 +17,7 @@ from clang import cindex
 import re
 import logging
 
-import third_party.com_github_pybind_pybind11.cindex_utils as cindex_utils
+from third_party.com_github_pybind_pybind11 import cindex_utils
 
 cindex_utils.add_library_paths()
 
