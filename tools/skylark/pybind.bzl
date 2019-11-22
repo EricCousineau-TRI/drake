@@ -340,6 +340,7 @@ def _collect_cc_header_info(targets):
 
 def _generate_pybind_documentation_header_impl(ctx):
     targets = _collect_cc_header_info(ctx.attr.targets)
+
     # N.B. We take this approach, rather than `target_exclude`, because it's
     # easier to add depsets together rather than subtract them.
     target_deps = _collect_cc_header_info(ctx.attr.target_deps)
