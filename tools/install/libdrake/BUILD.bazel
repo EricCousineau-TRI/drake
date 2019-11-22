@@ -11,8 +11,8 @@ load(
 load(
     "@drake//tools/skylark:drake_cc.bzl",
     "drake_cc_googletest",
-    "drake_cc_test",
     "drake_cc_library",
+    "drake_cc_test",
     "drake_transitive_installed_hdrs_filegroup",
 )
 load("//tools/lint:lint.bzl", "add_lint_tests")
@@ -194,15 +194,15 @@ cc_library(
 cc_library(
     name = "drake_headers_no_attic",
     hdrs = [":libdrake_headers_no_attic"],
-    deps = [
-        ":libdrake_header_only_deps",
-        ":libdrake_runtime_so_deps",
-    ],
     include_prefix = "drake",
     strip_include_prefix = "/",
     visibility = [
         "//bindings/pydrake:__pkg__",
         "//bindings/pydrake/attic:__pkg__",
+    ],
+    deps = [
+        ":libdrake_header_only_deps",
+        ":libdrake_runtime_so_deps",
     ],
 )
 
@@ -232,8 +232,8 @@ cc_library(
     data = [":libdrake.so"],
     visibility = ["//:__pkg__"],
     deps = [
-        ":drake_headers_no_attic",
         ":drake_headers_attic_only",
+        ":drake_headers_no_attic",
     ],
 )
 

@@ -344,7 +344,9 @@ def _generate_pybind_documentation_header_impl(ctx):
 
     args = ctx.actions.args()
     args.add_all(
-        targets.compile_flags + target_deps.compile_flags, uniquify = True)
+        targets.compile_flags + target_deps.compile_flags,
+        uniquify = True,
+    )
     outputs = [ctx.outputs.out]
     args.add("-output=" + ctx.outputs.out.path)
     out_xml = getattr(ctx.outputs, "out_xml", None)
@@ -357,6 +359,7 @@ def _generate_pybind_documentation_header_impl(ctx):
         args.add("-exclude-hdr-patterns=" + p)
     args.add_all(ctx.fragments.cpp.cxxopts, uniquify = True)
     args.add("-w")
+
     # N.B. This is for `targets` only.
     args.add_all(targets.package_headers)
 

@@ -12,7 +12,6 @@ load(
     "drake_py_unittest",
 )
 load("//bindings/pydrake:pydrake.bzl", "add_lint_tests_pydrake")
-
 load(
     "@drake//tools/skylark:drake_cc.bzl",
     "drake_cc_library",
@@ -36,11 +35,11 @@ generate_pybind_documentation_header(
         "drake/lcmtypes/**",
     ],
     root_name = "pydrake_doc",
-    targets = [
-        "//tools/install/libdrake:drake_headers_attic_only",
-    ],
     target_deps = [
         "//tools/install/libdrake:drake_headers_no_attic",
+    ],
+    targets = [
+        "//tools/install/libdrake:drake_headers_attic_only",
     ],
 )
 
