@@ -57,10 +57,8 @@ generate_pybind_coverage(
     name = "generate_pybind_coverage",
     class_coverage = ":class_coverage_test.csv",
     file_coverage = ":file_coverage_test.csv",
+    pybind_coverage_data = [":pybind_coverage_data"],
     xml_docstrings = ":documentation_pybind_test.xml",
-    pybind_coverage_data = [
-        ":pybind_coverage_data",
-    ],
 )
 
 filegroup(

@@ -231,7 +231,7 @@ def extract_comment(cursor, deprecations):
 
     # Append the deprecation text.
     result += (
-        " (Deprecated.) \deprecated {} " +
+        r" (Deprecated.) \deprecated {} " +
         "This will be removed from Drake on or after {}.").format(
             message, removal_date)
 
