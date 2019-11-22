@@ -189,6 +189,37 @@ cc_library(
     ],
 )
 
+# Combine non-attic headers into a library with necessary dependencies, but not
+# object code. (For use with pybind documentation generation.)
+cc_library(
+    name = "drake_headers_no_attic",
+    hdrs = [":libdrake_headers_no_attic"],
+    deps = [
+        ":libdrake_header_only_deps",
+        ":libdrake_runtime_so_deps",
+    ],
+    include_prefix = "drake",
+    strip_include_prefix = "/",
+    visibility = [
+        "//bindings/pydrake:__pkg__",
+        "//bindings/pydrake/attic:__pkg__",
+    ],
+)
+
+# Combine attic-only headers into a library with necessary dependencies, but not
+# object code. (For use with pybind documentation generation.)
+# Include headers that are stored in the attic by stripping off the "attic/"
+# component of the pathname.
+cc_library(
+    name = "drake_headers_attic_only",
+    hdrs = [":libdrake_headers_only_attic"],
+    include_prefix = "drake",
+    strip_include_prefix = "/attic",
+    # N.B. This still depends on `drake_headers_no_attic`, but we exclude it
+    # for now to simplify logic for pybind documentation generation.
+    visibility = ["//bindings/pydrake/attic:__pkg__"],
+)
+
 # Provide a cc_library target that provides libdrake.so, its headers, its
 # header-only dependencies, and its required *.so's.  This is aliased by
 # `//:drake_shared_library`, which is what downstream users will consume if
@@ -196,17 +227,13 @@ cc_library(
 cc_library(
     name = "drake_shared_library",
     srcs = [":libdrake.so"],
-    hdrs = [":libdrake_headers_no_attic"],
     # N.B. To pull in transitive `data` dependencies, we must list
     # `libdrake.so` as a data target.
     data = [":libdrake.so"],
-    include_prefix = "drake",
-    strip_include_prefix = "/",
     visibility = ["//:__pkg__"],
     deps = [
-        ":libdrake_header_only_deps",
-        ":libdrake_headers_only_attic_cc_library",
-        ":libdrake_runtime_so_deps",
+        ":drake_headers_no_attic",
+        ":drake_headers_attic_only",
     ],
 )
 
@@ -253,15 +280,6 @@ cc_library(
     ],
 )
 
-# Include headers that are stored in the attic by stripping off the "attic/"
-# component of the pathname.
-cc_library(
-    name = "libdrake_headers_only_attic_cc_library",
-    hdrs = [":libdrake_headers_only_attic"],
-    include_prefix = "drake",
-    strip_include_prefix = "/attic",
-)
-
 drake_cc_test(
     name = "drake_shared_library_test",
     # Using `drake_shared_library` can cause timeouts in debug mode.
@@ -275,30 +293,6 @@ drake_cc_googletest(
     deps = [
         "//:drake_shared_library",
     ],
-)
-
-# Only for coverage.
-# TODO: SIMPLIFY
-cc_library(
-    name = "drake_headers_no_attic_for_coverage",
-    hdrs = [":libdrake_headers_no_attic"],
-    deps = [
-        ":libdrake_header_only_deps",
-        ":libdrake_runtime_so_deps",
-    ],
-    include_prefix = "drake",
-    strip_include_prefix = "/",
-    visibility = ["//bindings/pydrake:__subpackages__"],
-)
-
-cc_library(
-    name = "drake_headers_attic_only_for_coverage",
-    deps = [
-        ":libdrake_headers_only_attic_cc_library",
-        ":libdrake_header_only_deps",
-        ":libdrake_runtime_so_deps",
-    ],
-    visibility = ["//bindings/pydrake/attic:__pkg__"],
 )
 
 add_lint_tests(

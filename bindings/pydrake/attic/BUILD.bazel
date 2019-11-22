@@ -37,10 +37,10 @@ generate_pybind_documentation_header(
     ],
     root_name = "pydrake_doc",
     targets = [
-        "//tools/install/libdrake:drake_headers_attic_only_for_coverage",
+        "//tools/install/libdrake:drake_headers_attic_only",
     ],
     target_deps = [
-        "//tools/install/libdrake:drake_headers_no_attic_for_coverage",
+        "//tools/install/libdrake:drake_headers_no_attic",
     ],
 )
 
