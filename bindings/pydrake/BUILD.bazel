@@ -57,9 +57,6 @@ drake_py_library(
 generate_pybind_documentation_header(
     name = "generate_pybind_documentation_header",
     out = "documentation_pybind.h",
-    # targets_exclude = [
-    #     "//tools/install/libdrake:libdrake_headers_attic_lib",
-    # ],
     exclude_hdr_patterns = [
         "drake/common/text_logging_gflags.h",
         # Exclude LCM-generated classes to reduce size of generated
@@ -279,6 +276,19 @@ PY_LIBRARIES_WITH_INSTALL = [
     "//bindings/pydrake/systems",
     "//bindings/pydrake/third_party",
     "//bindings/pydrake/visualization",
+]
+
+# TODO(mmanu): Make this parallel the packages shown above (so that it's in one
+# place?).
+PYBIND_SUBPACKAGES_FOR_COVERAGE = [
+    "//bindings/pydrake/common",
+    "//bindings/pydrake/examples",
+    "//bindings/pydrake/manipulation",
+    "//bindings/pydrake/multibody",
+    "//bindings/pydrake/solvers",
+    "//bindings/pydrake/systems",
+    # "//bindings/pydrake/third_party",
+    # "//bindings/pydrake/visualization",
 ]
 
 PY_LIBRARIES = [
@@ -513,27 +523,21 @@ drake_py_unittest(
     tags = ["lint"],
 )
 
+generate_pybind_coverage(
+    name = "generate_pybind_coverage",
+    class_coverage = ":class_coverage.csv",
+    file_coverage = ":file_coverage.csv",
+    pybind_coverage_data = [":pybind_coverage_data"],
+    xml_docstrings = ":documentation_pybind.xml",
+)
+
+add_pybind_coverage_data(
+    subpackages = PYBIND_SUBPACKAGES_FOR_COVERAGE,
+)
+
 add_lint_tests_pydrake(
     python_lint_extra_srcs = [
         ":test/all_install_test.py",
         ":test/common_install_test.py",
     ],
 )
-
-generate_pybind_coverage(
-    name = "generate_pybind_coverage",
-    class_coverage = ":class_coverage.csv",
-    file_coverage = ":file_coverage.csv",
-    pybind_coverage_data = [
-        ":pybind_coverage_data",
-        "//bindings/pydrake/common:pybind_coverage_data",
-        "//bindings/pydrake/examples:pybind_coverage_data",
-        "//bindings/pydrake/manipulation:pybind_coverage_data",
-        "//bindings/pydrake/multibody:pybind_coverage_data",
-        "//bindings/pydrake/solvers:pybind_coverage_data",
-        "//bindings/pydrake/systems:pybind_coverage_data",
-    ],
-    xml_docstrings = ":documentation_pybind.xml",
-)
-
-add_pybind_coverage_data()

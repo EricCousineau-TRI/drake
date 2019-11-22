@@ -410,13 +410,17 @@ generate_pybind_documentation_header = rule(
 
 def add_pybind_coverage_data(
         name = "pybind_coverage_data",
-        patterns = ["*.cc"]):
+        subpackages = []):
     """Gathers necessary source files so that we can have access to them for
     coverage analysis (Bazel does not like inter-package globs). This should be
     added to each package where coverage is desired."""
     native.filegroup(
         name = name,
-        srcs = native.glob(patterns),
+        srcs = native.glob(["*_py*.cc"]),
+        data = [
+            subpackage + ":pybind_coverage_data"
+            for subpackage in subpackages
+        ],
         visibility = ["//bindings/pydrake:__pkg__"],
     )
 
