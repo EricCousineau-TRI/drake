@@ -130,7 +130,6 @@ def is_accepted_cursor(cursor, name_chain):
     name chain.
     """
     name = utf8(cursor.spelling)
-    assert name == name_chain[-1]
     is_bad = False
     for piece in name_chain:
         if piece in SKIP_RECURSE_NAMES:
