@@ -51,6 +51,8 @@ PRINT_LIST = CLASS_KINDS + FUNCTION_KINDS + [
     CursorKind.TYPEDEF_DECL
 ]
 
+ACCEPT_LIST = CLASS_KINDS + FUNCTION_KINDS + RECURSE_LIST
+
 CPP_OPERATORS = {
     '<=': 'le', '>=': 'ge', '==': 'eq', '!=': 'ne', '[]': 'array',
     '+=': 'iadd', '-=': 'isub', '*=': 'imul', '/=': 'idiv', '%=':
@@ -126,12 +128,18 @@ def eprint(*args):
 
 def is_accepted_cursor(cursor, name_chain):
     """
-    Determines if a symbol should be visited or not.
+    Determines if a symbol should be visited or not, given the cursor and the
+    name chain.
     """
     name = utf8(cursor.spelling)
-    if name in SKIP_RECURSE_NAMES:
-        if tuple(name_chain) not in SKIP_RECURSE_EXCEPTIONS:
-            return False
+    assert name == name_chain[-1]
+    is_bad = False
+    for piece in name_chain:
+        if piece in SKIP_RECURSE_NAMES:
+            is_bad = True
+            break
+    if is_bad and tuple(name_chain) not in SKIP_RECURSE_EXCEPTIONS:
+        return False
     for bad in SKIP_PARTIAL_NAMES:
         if bad in name:
             return False
@@ -143,6 +151,7 @@ def is_accepted_cursor(cursor, name_chain):
         # Don't process forward declarations.  If we did, we'd define the class
         # overview documentation twice; both cursors have a .raw_comment value.
         return False
+    assert "internal" not in name_chain, name_chain
     return True
 
 
@@ -650,7 +659,8 @@ def get_name_chain(cursor):
     """
     Extracts the pieces for a namespace-qualified name for a symbol.
     """
-    name_chain = [utf8(cursor.spelling)]
+    name = utf8(cursor.spelling)
+    name_chain = [name]
     p = cursor.semantic_parent
     while p and p.kind != CursorKind.TRANSLATION_UNIT:
         piece = utf8(p.spelling)
@@ -659,6 +669,10 @@ def get_name_chain(cursor):
     # Do not try to specify names for anonymous structs.
     while '' in name_chain:
         name_chain.remove('')
+    assert len(name_chain) > 0
+    assert name_chain[-1] == name, (name, name_chain, cursor.kind)
+    # else:
+    #     print(f"no chain: {name}, {cursor.kind}")
     return tuple(name_chain)
 
 
@@ -713,6 +727,10 @@ def extract(include_file_map, cursor, symbol_tree, deprecations=None):
                     deprecations.append(i)
                 continue
             extract(include_file_map, i, symbol_tree, deprecations)
+        return
+    if cursor.kind not in ACCEPT_LIST:
+        return
+    if len(cursor.spelling) == 0:
         return
     assert cursor.location.file is not None, cursor.kind
     filename = utf8(cursor.location.file.name)
