@@ -1124,10 +1124,10 @@ def main():
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
-    include_files = [x for x in include_files if "drake/multibody/tree" in x]
-    print("---")
-    print("\n".join(sorted(include_files)))
-    print("---")
+    # include_files = [x for x in include_files if "drake/multibody/tree" in x]
+    # print("---")
+    # print("\n".join(sorted(include_files)))
+    # print("---")
     # Generate the glue include file, which will include all relevant include
     # files, and parse. Use a tempdir that is relative to the output file for
     # usage with Bazel.
