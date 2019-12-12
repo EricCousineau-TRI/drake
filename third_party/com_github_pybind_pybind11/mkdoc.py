@@ -669,10 +669,6 @@ def get_name_chain(cursor):
     # Do not try to specify names for anonymous structs.
     while '' in name_chain:
         name_chain.remove('')
-    assert len(name_chain) > 0
-    assert name_chain[-1] == name, (name, name_chain, cursor.kind)
-    # else:
-    #     print(f"no chain: {name}, {cursor.kind}")
     return tuple(name_chain)
 
 
@@ -729,8 +725,6 @@ def extract(include_file_map, cursor, symbol_tree, deprecations=None):
             extract(include_file_map, i, symbol_tree, deprecations)
         return
     if cursor.kind not in ACCEPT_LIST:
-        return
-    if len(cursor.spelling) == 0:
         return
     assert cursor.location.file is not None, cursor.kind
     filename = utf8(cursor.location.file.name)
@@ -1124,10 +1118,6 @@ def main():
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
-    # include_files = [x for x in include_files if "drake/multibody/tree" in x]
-    # print("---")
-    # print("\n".join(sorted(include_files)))
-    # print("---")
     # Generate the glue include file, which will include all relevant include
     # files, and parse. Use a tempdir that is relative to the output file for
     # usage with Bazel.
