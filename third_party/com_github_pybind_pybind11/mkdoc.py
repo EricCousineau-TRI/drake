@@ -51,8 +51,6 @@ PRINT_LIST = CLASS_KINDS + FUNCTION_KINDS + [
     CursorKind.TYPEDEF_DECL
 ]
 
-ACCEPT_LIST = CLASS_KINDS + FUNCTION_KINDS + RECURSE_LIST
-
 CPP_OPERATORS = {
     '<=': 'le', '>=': 'ge', '==': 'eq', '!=': 'ne', '[]': 'array',
     '+=': 'iadd', '-=': 'isub', '*=': 'imul', '/=': 'idiv', '%=':
@@ -723,8 +721,6 @@ def extract(include_file_map, cursor, symbol_tree, deprecations=None):
                     deprecations.append(i)
                 continue
             extract(include_file_map, i, symbol_tree, deprecations)
-        return
-    if cursor.kind not in ACCEPT_LIST:
         return
     assert cursor.location.file is not None, cursor.kind
     filename = utf8(cursor.location.file.name)
