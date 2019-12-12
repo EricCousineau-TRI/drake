@@ -80,7 +80,7 @@ SKIP_RECURSE_NAMES = [
 SKIP_RECURSE_EXCEPTIONS = [
     # TODO(eric.cousineau): Remove this once we figure out why not having
     # it breaks the doc generation process.
-    ('drake', 'multibody', 'internal'),
+    # ('drake', 'multibody', 'internal'),
 ]
 
 # Filter based on partial names.
@@ -695,6 +695,7 @@ class SymbolTree(object):
             self.children_map = defaultdict(SymbolTree.Node)
 
         def get_child(self, piece):
+            assert piece != "internal", piece
             return self.children_map[piece]
 
 
@@ -934,7 +935,7 @@ def print_symbols(f, name, node, level=0):
 
     name_var = name
     if not node.first_symbol:
-        assert level == 0
+        assert level == 0, name_var
         full_name = name
     else:
         name_chain = node.first_symbol.name_chain
@@ -1105,6 +1106,10 @@ def main():
             include_files.append(include_file)
             include_file_map[filename] = include_file
     assert len(include_files) > 0
+    include_files = [x for x in include_files if "drake/multibody/tree" in x]
+    print("---")
+    print("\n".join(sorted(include_files)))
+    print("---")
     # Generate the glue include file, which will include all relevant include
     # files, and parse. Use a tempdir that is relative to the output file for
     # usage with Bazel.
