@@ -141,13 +141,21 @@ Vector3d ExtractJointAxis(const sdf::Model& model_spec,
   // TODO(amcastro-tri): Verify JointAxis::UseParentModelFrame is actually
   // supported by sdformat.
   Vector3d axis_J = ToVector3(axis->Xyz());
-  if (axis->UseParentModelFrame()) {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  const bool use_parent_model_frame = axis->UseParentModelFrame();
+#pragma GCC diagnostic pop
+
+  if (use_parent_model_frame) {
     // RotationMatrix of the joint frame J in the frame of the child link C.
     ThrowIfPoseFrameSpecified(joint_spec.Element());
-    const RotationMatrixd R_CJ = ToRigidTransform(joint_spec.Pose()).rotation();
+    const RotationMatrixd R_CJ =
+        ToRigidTransform(joint_spec.RawPose()).rotation();
     // Get the RotationMatrix of the child link C in the model frame M.
     const RotationMatrixd R_MC = ToRigidTransform(
-        model_spec.LinkByName(joint_spec.ChildLinkName())->Pose()).rotation();
+        model_spec.LinkByName(
+            joint_spec.ChildLinkName())->RawPose()).rotation();
     const RotationMatrixd R_MJ = R_MC * R_CJ;
     // axis_J actually contains axis_M, expressed in the model frame M.
     axis_J = R_MJ.transpose() * axis_J;
@@ -268,7 +276,7 @@ void AddJointFromSpecification(
     ModelInstanceIndex model_instance, MultibodyPlant<double>* plant,
     std::set<sdf::JointType>* joint_types) {
   // Pose of the model frame M in the world frame W.
-  const RigidTransformd X_WM = ToRigidTransform(model_spec.Pose());
+  const RigidTransformd X_WM = ToRigidTransform(model_spec.RawPose());
 
   const Body<double>& parent_body = GetBodyByLinkSpecificationName(
       model_spec, joint_spec.ParentLinkName(), model_instance, *plant);
@@ -280,13 +288,13 @@ void AddJointFromSpecification(
   // TODO(eric.cousineau): Verify sdformat supports frame specifications
   // correctly.
   ThrowIfPoseFrameSpecified(joint_spec.Element());
-  const RigidTransformd X_CJ = ToRigidTransform(joint_spec.Pose());
+  const RigidTransformd X_CJ = ToRigidTransform(joint_spec.RawPose());
 
   // Get the pose of the child link C in the model frame M.
   // TODO(eric.cousineau): Figure out how to use link poses when they are NOT
   // connected to a joint.
   const RigidTransformd X_MC = ToRigidTransform(
-      model_spec.LinkByName(joint_spec.ChildLinkName())->Pose());
+      model_spec.LinkByName(joint_spec.ChildLinkName())->RawPose());
 
   // Pose of the joint frame J in the model frame M.
   const RigidTransformd X_MJ = X_MC * X_CJ;
@@ -301,7 +309,7 @@ void AddJointFromSpecification(
   } else {
     // Get the pose of the parent link P in the model frame M.
     const RigidTransformd X_MP = ToRigidTransform(
-        model_spec.LinkByName(joint_spec.ParentLinkName())->Pose());
+        model_spec.LinkByName(joint_spec.ParentLinkName())->RawPose());
     X_PJ = X_MP.inverse() * X_MJ;
   }
 
@@ -492,7 +500,7 @@ std::vector<LinkInfo> AddLinksFromSpecification(
         plant->AddRigidBody(link.Name(), model_instance, M_BBo_B);
 
     // Register information.
-    const RigidTransformd X_ML = ToRigidTransform(link.Pose());
+    const RigidTransformd X_ML = ToRigidTransform(link.RawPose());
     const RigidTransformd X_WL = X_WM * X_ML;
     link_infos.push_back(LinkInfo{&body, X_WL});
 
@@ -616,7 +624,7 @@ ModelInstanceIndex AddModelFromSpecification(
   // frame is not the world. At present, we assume the parent frame is the
   // world.
   ThrowIfPoseFrameSpecified(model.Element());
-  const RigidTransformd X_WM = ToRigidTransform(model.Pose());
+  const RigidTransformd X_WM = ToRigidTransform(model.RawPose());
   // Add the SDF "model frame" given the model name so that way any frames added
   // to the plant are associated with this current model instance.
   // N.B. We mangle this name to dis-incentivize users from wanting to use

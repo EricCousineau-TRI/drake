@@ -194,7 +194,7 @@ std::unique_ptr<GeometryInstance> MakeGeometryInstanceFromSdfVisual(
 
   // Retrieve the pose of the visual frame G in the parent link L in which
   // geometry gets defined.
-  const RigidTransformd X_LG = ToRigidTransform(sdf_visual.Pose());
+  const RigidTransformd X_LG = ToRigidTransform(sdf_visual.RawPose());
 
   // GeometryInstance defines its shapes in a "canonical frame" C. For instance:
   // - A half-space's normal is directed along the Cz axis,
@@ -291,7 +291,7 @@ RigidTransformd MakeGeometryPoseFromSdfCollision(
     const sdf::Collision& sdf_collision) {
   // Retrieve the pose of the collision frame G in the parent link L in which
   // geometry gets defined.
-  const RigidTransformd X_LG = ToRigidTransform(sdf_collision.Pose());
+  const RigidTransformd X_LG = ToRigidTransform(sdf_collision.RawPose());
 
   // GeometryInstance defines its shapes in a "canonical frame" C. The canonical
   // frame C is the frame in which the geometry is defined and it generally
