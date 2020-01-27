@@ -60,7 +60,22 @@ def compare_value(test, a, b):
         test.assertEqual(a.get_value(), b.get_value())
 
 
-class TestGeneral(unittest.TestCase):
+def make_issue(nx, ny, nu):
+    print(f"make_issue(nx={nx}, ny={ny}, nu={nu})")
+    A = np.zeros((nx, nx))
+    B = np.zeros((nx, nu))
+    C = np.zeros((ny, nx))
+    D = np.zeros((ny, nu))
+    return LinearSystem(A, B, C, D)
+
+
+class TestQuick(unittest.TestCase):
+    def test_rar(self):
+        make_issue(nx=0, ny=1, nu=1)
+        make_issue(nx=0, nu=2, ny=2)
+
+
+class _TestGeneral(unittest.TestCase):
     def _check_instantiations(self, template, supports_symbolic=True):
         default_cls = template[None]
         self.assertTrue(template[float] is default_cls)
