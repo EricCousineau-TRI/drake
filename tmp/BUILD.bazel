@@ -1,0 +1,19 @@
+load(
+    "@drake//tools/skylark:pybind.bzl",
+    "pybind_py_library",
+)
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_unittest",
+)
+
+pybind_py_library(
+    name = "convert_py",
+    cc_srcs = ["convert_py.cc"],
+    py_imports = ["."],
+)
+
+drake_py_unittest(
+    name = "convert_test",
+    deps = [":convert_py"],
+)
