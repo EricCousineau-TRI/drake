@@ -444,6 +444,7 @@ ExternalProject_Add(drake_cxx_python
     "${Bazel_EXECUTABLE}"
     ${BAZEL_STARTUP_ARGS}
     build
+    -j 20
     ${BAZEL_ARGS}
     ${BAZEL_TARGETS}
   BUILD_IN_SOURCE ON
