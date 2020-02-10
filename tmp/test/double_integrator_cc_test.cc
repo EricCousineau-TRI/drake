@@ -33,6 +33,7 @@ int DoMain() {
   auto diagram = builder.Build();
 
   Simulator<double> simulator(*diagram);
+  simulator.Initialize();
   MatrixXd x0(2, 1);
   x0 << 0, 0;
   simulator.get_mutable_context().SetContinuousState(x0);
