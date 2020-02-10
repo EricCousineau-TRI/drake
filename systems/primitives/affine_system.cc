@@ -239,6 +239,7 @@ AffineSystem<T>::AffineSystem(SystemScalarConverter converter,
   DRAKE_DEMAND(this->num_inputs() == D.cols());
   DRAKE_DEMAND(this->num_outputs() == C.rows());
   DRAKE_DEMAND(this->num_outputs() == D.rows());
+  nonzero_D_ = true;
   if constexpr (!std::is_same<T, symbolic::Expression>::value) {
     if ((D_.array() == 0).all()) {
       nonzero_D_ = false;
