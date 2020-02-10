@@ -1,8 +1,6 @@
-// #include "drake/systems/primitives/vector_system.h"
 #include "drake/systems/primitives/linear_system.h"
 #include "drake/systems/controllers/linear_quadratic_regulator.h"
 #include "drake/systems/framework/diagram_builder.h"
-#include "drake/systems/analysis/simulator.h"
 
 namespace drake {
 namespace systems {
@@ -32,12 +30,11 @@ int DoMain() {
   builder.Connect(plant->get_output_port(), controller->get_input_port());
   auto diagram = builder.Build();
 
-  Simulator<double> simulator(*diagram);
-  simulator.Initialize();
+  auto context = diagram->CreateDefaultContext();
   MatrixXd x0(2, 1);
   x0 << 0, 0;
-  simulator.get_mutable_context().SetContinuousState(x0);
-  simulator.AdvanceTo(1.);
+  context->SetContinuousState(x0);
+  plant->get_output_port().Eval(plant->GetMyContextFromRoot(*context));
 
   std::cout << "Done\n";
   return 0;
