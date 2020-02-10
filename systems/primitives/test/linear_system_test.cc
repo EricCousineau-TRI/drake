@@ -841,30 +841,35 @@ GTEST_TEST(LinearizeTest, TestInputOutputPorts) {
 
 GTEST_TEST(LinearSystemIssueTest, Issue12706) {
   // Ensure we do not segfault when connecting a double-integrator with a
-  // "controller".
+  // "controller", both implemented using LinearSystem (#12706).
+  DiagramBuilder<double> builder;
+
+  // Create a simple double-integrator plant.
   MatrixXd Ap(2, 2);
   Ap << 0, 1, 0, 0;
   MatrixXd Bp(2, 1);
   Bp << 0, 1;
   MatrixXd Cp = MatrixXd::Identity(2, 2);
   MatrixXd Dp = MatrixXd::Zero(2, 1);
-
-  DiagramBuilder<double> builder;
   auto* plant = builder.AddSystem(
       std::make_unique<LinearSystem<double>>(Ap, Bp, Cp, Dp));
 
+  // Create a simple PD-controller.
   MatrixXd Ac(0, 0);
   MatrixXd Bc(0, 2);
   MatrixXd Cc(1, 0);
   MatrixXd Dc(1, 2);
-  Dc << -1, -1.7;  // These gains are 
+  Dc << -1, -1;
   auto* controller = builder.AddSystem(
       std::make_unique<LinearSystem<double>>(Ac, Bc, Cc, Dc));
 
+  // Connect, build, and allocate a context.
   builder.Connect(controller->get_output_port(), plant->get_input_port());
   builder.Connect(plant->get_output_port(), controller->get_input_port());
   auto diagram = builder.Build();
   auto context = diagram->CreateDefaultContext();
+
+  // Compute the output; we simply ensure that we do not segfault.
   plant->get_output_port().Eval(plant->GetMyContextFromRoot(*context));
 }
 
