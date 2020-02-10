@@ -2,11 +2,22 @@ load(
     "@drake//tools/skylark:drake_py.bzl",
     "drake_py_test"
 )
+load(
+    "@drake//tools/skylark:drake_cc.bzl",
+    "drake_cc_test"
+)
 
 drake_py_test(
-    name = "double_integrator_test",
+    name = "double_integrator_py_test",
     deps = [
         "//bindings/pydrake",
     ],
     allow_import_unittest = True,
+)
+
+drake_cc_test(
+    name = "double_integrator_cc_test",
+    deps = [
+        "//:drake_shared_library",
+    ],
 )
