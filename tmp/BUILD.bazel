@@ -18,6 +18,9 @@ drake_py_test(
 drake_cc_test(
     name = "double_integrator_cc_test",
     deps = [
-        "//:drake_shared_library",
+        "//systems/analysis",
+        "//systems/controllers",
+        "//systems/framework",
+        "//systems/primitives",
     ],
 )
