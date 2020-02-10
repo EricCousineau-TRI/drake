@@ -239,6 +239,9 @@ AffineSystem<T>::AffineSystem(SystemScalarConverter converter,
   DRAKE_DEMAND(this->num_inputs() == D.cols());
   DRAKE_DEMAND(this->num_outputs() == C.rows());
   DRAKE_DEMAND(this->num_outputs() == D.rows());
+  // This check permits a workaround for #12706 (inadvertent algebraic loops)
+  // for non-symbolic types. Symbolic versions of a system may still run into
+  // an effective algebraic loop.
   nonzero_D_ = true;
   if constexpr (!std::is_same<T, symbolic::Expression>::value) {
     if ((D_.array() == 0).all()) {

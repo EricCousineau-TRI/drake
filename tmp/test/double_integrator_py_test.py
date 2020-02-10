@@ -31,6 +31,11 @@ def main():
     builder.Connect(plant.get_output_port(0), controller.get_input_port(0))
     diagram = builder.Build()
 
+    print(controller.A())
+    print(controller.B())
+    print(controller.C())
+    print(controller.D())
+
     simulator = Simulator(diagram)
     simulator.get_mutable_context().SetContinuousState([0., 0.])
     simulator.AdvanceTo(1.)
