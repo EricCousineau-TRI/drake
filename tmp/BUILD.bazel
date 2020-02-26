@@ -1,0 +1,7 @@
+load("//tools/jupyter:jupyter_py.bzl", "drake_jupyter_py_binary")
+
+drake_jupyter_py_binary(
+    name = "model_check",
+    deps = ["//bindings/pydrake"],
+    add_test_rule = False,
+)
