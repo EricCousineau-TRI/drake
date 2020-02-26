@@ -64,9 +64,6 @@ def make_drawer(name, parent_frame, joint_type):
       <child>{name}</child>
       <axis>
         <xyz>0 0 1</xyz>
-        <dynamics>
-          <spring_stiffness>1</spring_stiffness>
-        </dynamics>
         <limit>
           <lower>-0.001</lower>
           <upper>0.001</upper>
@@ -97,9 +94,11 @@ def make_model(joint_type):
   """.lstrip()
 
 
-def show_and_sim_model(model_file):
+def show_and_sim_model(model_file, q0=None):
     builder = DiagramBuilder()
-    plant, scene_graph = AddMultibodyPlantSceneGraph(builder, 0.1)
+    # time_step = 0.001  # good
+    time_step = 0.1  # bad
+    plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step)
     model = Parser(plant).AddModelFromFile(model_file)
     ConnectDrakeVisualizer(builder, scene_graph)
     plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("base"))
@@ -118,28 +117,33 @@ def show_and_sim_model(model_file):
         joint = plant.get_joint(JointIndex(i))
         print(f"{i}: {joint.name()}, {joint.position_start()}")
 
-    q = [
-        # px: drawer 1 and 2
-        0., 0.,
-        # pz_spring: drawer 1 and 2
-        0., 0.,
-    ]
-    if joint_type == "prismatic":
+    if q0 is not None:
       print("Set IC")
-      plant.SetPositions(context, model, q)
+      plant.SetPositions(context, model, q0)
     print("Show kinematic")
     diagram.Publish(diagram_context)
     time.sleep(1)
     print("Show sim")
-    simulator.AdvanceTo(0.1)
+    simulator.set_target_realtime_rate(0.1)
+    simulator.AdvanceTo(1.)
 
 
-assert __name__ == "__main__"
-
-for joint_type in ["prismatic", "fixed"]:
+def show_joint_type(joint_type, q0=None):
     model_file = f"/tmp/model_check_{joint_type}.sdf"
     with open(model_file, "w") as f:
         f.write(make_model(joint_type))
     print(f"\n\n\nJoint Type: {joint_type}\n")
-    show_and_sim_model(model_file)
+    show_and_sim_model(model_file, q0)
+    print(" - Done")
     time.sleep(1)
+
+
+assert __name__ == "__main__"
+
+show_joint_type("prismatic", q0 = [
+        # px: drawer 1 and 2
+        0., 0.,
+        # pz_spring: drawer 1 and 2
+        0., 0.,
+    ])
+show_joint_type("fixed")
