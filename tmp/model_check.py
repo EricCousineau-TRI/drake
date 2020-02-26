@@ -1,22 +1,18 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
 from textwrap import indent
+
+import numpy as np
+
 from pydrake.all import (
     DiagramBuilder, AddMultibodyPlantSceneGraph, Parser, Simulator, ConnectDrakeVisualizer,
     JointIndex,
 )
 
+assert __name__ == "__main__"
 
 # Model setup:
 # * Base link
 # * Drawer 1: 0.1m from bottom, prismatic x and z (w/ spring)
 # * Drawer 2: 0.1m from Drawer 1, prismatic x and z (w/ spring)
-
-# In[ ]:
 
 
 drawer_viz = f"""
@@ -69,8 +65,8 @@ def make_drawer(name, parent_frame):
           <spring_stiffness>1</spring_stiffness>
         </dynamics>
         <limit>
-          <lower>0</lower>
-          <upper>0</upper>
+          <lower>-0.001</lower>
+          <upper>0.001</upper>
         </limit>
       </axis>
     </joint>
@@ -96,15 +92,9 @@ model_text = f"""
 """.lstrip()
 
 
-# In[ ]:
-
-
 model_file = "/tmp/model_check.sdf"
 with open(model_file, "w") as f:
     f.write(model_text)
-
-
-# In[ ]:
 
 
 builder = DiagramBuilder()
@@ -115,9 +105,12 @@ plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("base"))
 plant.Finalize()
 diagram = builder.Build()
 
-Simulator(diagram).Initialize()
 diagram_context = diagram.CreateDefaultContext()
+simulator = Simulator(diagram, diagram_context)
+simulator.Initialize()
 context = plant.GetMyMutableContextFromRoot(diagram_context)
+num_v = plant.num_velocities()
+plant.get_actuation_input_port(model).FixValue(context, np.zeros(num_v))
 
 # This ordering is... so weird...
 for i in range(plant.num_joints()):
@@ -126,10 +119,10 @@ for i in range(plant.num_joints()):
 
 q = [
     # px: drawer 1 and 2
-    0., 0.,
+    1., 2.,
     # pz_spring: drawer 1 and 2
     0., 0.,
 ]
 plant.SetPositions(context, model, q)
-diagram.Publish(diagram_context)
-
+# diagram.Publish(diagram_context)
+simulator.AdvanceTo(1.)
