@@ -96,8 +96,9 @@ def make_model(joint_type):
 
 def show_and_sim_model(model_file, q0=None):
     builder = DiagramBuilder()
-    # time_step = 0.001  # good
-    time_step = 0.1  # bad
+    time_step = 0.001  # good
+    # time_step = 0.1  # bad
+    # time_step = 0.003
     plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step)
     model = Parser(plant).AddModelFromFile(model_file)
     ConnectDrakeVisualizer(builder, scene_graph)
