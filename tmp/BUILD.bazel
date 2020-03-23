@@ -2,21 +2,9 @@ load(
     "@drake//tools/skylark:drake_py.bzl",
     "drake_py_binary",
 )
-load(
-    "@drake//tools/skylark:pybind.bzl",
-    "pybind_py_library",
-)
-
-pybind_py_library(
-    name = "bleh_lib_py",
-    cc_so_name = "bleh_lib",
-    cc_srcs = ["bleh_lib_py.cc"],
-    cc_deps = ["@eigen"],
-    py_imports = ["."],
-)
 
 drake_py_binary(
     name = "bleh",
     srcs = ["bleh.py"],
-    deps = [":bleh_lib_py"],
+    deps = ["//bindings/pydrake"],
 )
