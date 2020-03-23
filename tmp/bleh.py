@@ -1,23 +1,29 @@
 # from https://drakedevelopers.slack.com/archives/C2CK4CWE7/p1584994164030500
 
-from pydrake.examples.pendulum import PendulumInput, PendulumPlant
 from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import DiagramBuilder
-from pydrake.systems.primitives import ConstantVectorSource
+from pydrake.systems.framework import DiagramBuilder, LeafSystem, BasicVector
+from pydrake.systems.primitives import ConstantVectorSource, Gain
+
+
+class Sink(LeafSystem):
+    def __init__(self):
+        LeafSystem.__init__(self)
+        self.input_port = self.DeclareVectorInputPort("u", BasicVector(1))
+
+    def DoPublish(self, context, events):
+        u = self.input_port.Eval(context)
+        print(f"Hey {u}")
 
 
 def main():
     builder = DiagramBuilder()
-    pendulum = builder.AddSystem(PendulumPlant())
-    source = builder.AddSystem(ConstantVectorSource([PendulumInput().set_tau(0.)]))
-    builder.Connect(source.get_output_port(0), pendulum.get_input_port())
+    source = builder.AddSystem(ConstantVectorSource([None]))
+    sink = builder.AddSystem(Sink())
+    builder.Connect(source.get_output_port(0), sink.input_port)
 
     diagram = builder.Build()
-    simulator = Simulator(diagram)
-    simulator.set_target_realtime_rate(1.0)
-
-    simulator.Initialize()
-    simulator.AdvanceTo(0.)
+    context = diagram.CreateDefaultContext()
+    diagram.Publish(context)
 
 
 # main()
