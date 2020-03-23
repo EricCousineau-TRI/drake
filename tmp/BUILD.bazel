@@ -1,0 +1,10 @@
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
+
+drake_py_binary(
+    name = "bleh",
+    srcs = ["bleh.py"],
+    deps = ["//bindings/pydrake"],
+)
