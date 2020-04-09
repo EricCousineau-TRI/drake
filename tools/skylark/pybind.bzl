@@ -13,6 +13,7 @@ load(
 load(
     "@drake//tools/skylark:drake_py.bzl",
     "drake_py_library",
+    "drake_py_binary",
     "drake_py_test",
 )
 
@@ -286,7 +287,7 @@ def drake_pybind_cc_googletest(
     # Use this Python test as the glue for Bazel to expose the appropriate
     # environment for the C++ binary.
     py_main = "@drake//tools/skylark:py_env_runner.py"
-    drake_py_test(
+    drake_py_binary(
         name = name,
         srcs = [py_main],
         main = py_main,
@@ -295,9 +296,10 @@ def drake_pybind_cc_googletest(
         deps = [py_name],
         tags = tags,
         visibility = visibility,
+        testonly = 1,
         # The C++ test isn't going to `import unittest`, but test dependencies
         # such as numpy(!!) do so unconditionally.  We should allow that.
-        allow_import_unittest = True,
+        # allow_import_unittest = True,
     )
 
 def _collect_cc_header_info(targets):

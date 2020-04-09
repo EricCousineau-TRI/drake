@@ -20,9 +20,11 @@
 using std::string;
 using std::vector;
 
-namespace drake {
-namespace pydrake {
-namespace {
+namespace py = pybind11;
+
+// namespace drake {
+// namespace pydrake {
+// namespace {
 
 // using test::SynchronizeGlobalsForPython3;
 
@@ -149,23 +151,36 @@ namespace {
 //   CheckValue("SimpleType().SimpleMethod[int, float]()", expected_2);
 // }
 
+// int main(int argc, char** argv) {
+//   // Reconstructing `scoped_interpreter` multiple times (e.g. via `SetUp()`)
+//   // while *also* importing `numpy` wreaks havoc.
+//   py::scoped_interpreter guard;
+//   ::testing::InitGoogleTest(&argc, argv);
+//   return RUN_ALL_TESTS();
+// }
+// }  // namespace drake
+
+/*
+This works just fine outside of bazel:
+
+bazel-bin/bindings/pydrake/common/py/cpp_template_pybind_test bazel-bin/bindings/pydrake/common/cpp_param_pybind_test_cc
+
+But inside, nope?
+
+bazel run //bindings/pydrake/common:py/cpp_template_pybind_test
+
+Works fine if this is turned into a `py_binary` target. So meh.
+
+*/
+
 int main(int argc, char** argv) {
-  // Reconstructing `scoped_interpreter` multiple times (e.g. via `SetUp()`)
-  // while *also* importing `numpy` wreaks havoc.
-  py::scoped_interpreter guard;
+  // return drake::pydrake::main(argc, argv);
+  py::scoped_interpreter guard{};
+  auto m = py::module::import("numpy");
+  py::print("Module", m);
   // This does not work???
-  py::exec("import ctypes");
+  // py::exec("import ctypes");
   // py::module::import("ctypes");
   // py::module::import("numpy");
-  // ::testing::InitGoogleTest(&argc, argv);
-  return 1;
-  // return RUN_ALL_TESTS();
-}
-
-}  // namespace
-}  // namespace pydrake
-}  // namespace drake
-
-int main(int argc, char** argv) {
-  return drake::pydrake::main(argc, argv);
+  return 0;
 }
