@@ -7,3 +7,6 @@ build:_helgrind --extra_toolchains=//tools/py_toolchain:linux_dbg_toolchain
 # Configure ${PATH} for actions.
 # N.B. Ensure this is consistent with `execute.bzl`.
 build --action_env=PATH=/usr/bin:/bin
+
+# HACK: Make it work?
+build --test_env=PATH=/home/eacousineau/.local/opt/cpython/3.8.2/bin:/usr/bin:/bin
