@@ -346,6 +346,7 @@ def patch_document_members(original, self, all_members=False):
         memberdocumenters.sort(key=custom_key)
     # Patch ends here.
 
+    # TODO(eric): This breaks due to StopIteration???
     for documenter, isattr in memberdocumenters:
         documenter.generate(
             all_members=True, real_modname=self.real_modname,
