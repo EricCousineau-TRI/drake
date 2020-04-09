@@ -9,7 +9,5 @@ try:
     from sphinx.cmd.build import main
     sys.exit(main(sys.argv[1:]))
 except ImportError:
-    pass
-
-from sphinx import main
-sys.exit(main(sys.argv))
+    from sphinx import main
+    sys.exit(main(sys.argv))
