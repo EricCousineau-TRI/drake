@@ -167,6 +167,10 @@ def _impl(repository_ctx):
         if not linkopts[i].startswith("-"):
             linkopts[i - 1] += " " + linkopts.pop(i)
 
+    # HACK: Build from source doesn't put the right flags in?
+    linkopts += ["-L/home/eacousineau/.local/opt/cpython/3.8.2/lib", "-lpython3.8"]
+    print(linkopts)
+
     linkopts_direct_link = list(linkopts)
 
     if py_info.os.is_macos:
@@ -206,7 +210,7 @@ licenses(["notice"])  # Python-2.0
 # may be nested within `/usr/include/python<version>`, such as `numpy` when
 # installed via `apt` on Ubuntu.
 headers = glob(
-    ["include/*/*"],
+    ["include/**/*.h"],
     exclude_directories = 1,
 )
 
