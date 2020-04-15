@@ -22,3 +22,9 @@ build:Release --compilation_mode=opt
 build:RelWithDebInfo --compilation_mode=opt @MAYBE_BAZEL_COPT_G@
 
 startup --output_base=@BAZEL_OUTPUT_BASE@
+
+# .bazelrc options. For more information, please see:
+# https://docs.bazel.build/versions/master/guide.html#bazelrc
+# https://docs.bazel.build/versions/master/user-manual.html
+# @Steven Yeung: Set this to a lower ratio, or a concrete number, like -j 2.
+build -j HOST_CPUS*0.8
