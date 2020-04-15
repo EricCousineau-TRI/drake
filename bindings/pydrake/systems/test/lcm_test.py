@@ -13,7 +13,7 @@ import numpy as np
 from robotlocomotion import header_t, quaternion_t
 
 from pydrake.common.test_utilities.deprecation import catch_drake_warnings
-from pydrake.lcm import DrakeLcm, Subscriber
+from pydrake.lcm import DrakeLcm, Subscriber, DrakeLcmInterface
 from pydrake.systems.analysis import Simulator
 from pydrake.systems.framework import (
     AbstractValue, BasicVector, DiagramBuilder, LeafSystem)
@@ -166,3 +166,38 @@ class TestSystemsLcm(unittest.TestCase):
                             channel="TEST_CHANNEL",
                             builder=builder,
                             lcm=DrakeLcm())
+
+    def test_lcm_interface_system_diagram(self):
+        builder = DiagramBuilder()
+        lcm = DrakeLcm("memq://")
+        lcm_system = builder.AddSystem(mut.LcmInterfaceSystem(lcm=lcm))
+        # N.B. In general, aim to use a nested DrakeLcmInterface if possible.
+        # If not, then you must use `.as_drake_lcm_interface()` as below.
+        # See warning in associated `*_py.cc` file!
+        self.assertIsInstance(
+            lcm_system.as_drake_lcm_interface(), DrakeLcmInterface)
+        self.assertIsNot(
+            lcm_system.as_drake_lcm_interface(), lcm_system)
+        # Create publisher.
+        publisher = builder.AddSystem(mut.LcmPublisherSystem.Make(
+            channel="TEST_CHANNEL", lcm_type=quaternion_t, lcm=lcm,
+            publish_period=0.1))
+        # Ensure we can fix an input port.
+        builder.ExportInput(publisher.get_input_port(0))
+        diagram = builder.Build()
+        simulator = Simulator(diagram)
+        context = simulator.get_mutable_context()
+        diagram.get_input_port(0).FixValue(context, self._model_message())
+        # Count number of messages received.
+        count = 0
+
+        def on_msg(_):
+            nonlocal count
+            count += 1
+
+        lcm.Subscribe("TEST_CHANNEL", on_msg)
+
+        # Simulate to dispatch publication.
+        simulator.AdvanceTo(0.)
+        # Check count.
+        self.assertEqual(count, 1)

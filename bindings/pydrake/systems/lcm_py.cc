@@ -10,6 +10,7 @@
 #include "drake/lcm/drake_lcm.h"
 #include "drake/lcm/drake_lcm_interface.h"
 #include "drake/systems/lcm/connect_lcm_scope.h"
+#include "drake/systems/lcm/lcm_interface_system.h"
 #include "drake/systems/lcm/lcm_publisher_system.h"
 #include "drake/systems/lcm/lcm_subscriber_system.h"
 #include "drake/systems/lcm/serializer.h"
@@ -65,6 +66,20 @@ class PySerializerInterface : public py::wrapper<SerializerInterface> {
   }
 };
 
+// By default, pybind11 uses RTTI, so we cannot try to upcast by using any form
+// of static pointer types (e.g. just `dynamic_cast<Base*>(child_ptr)`).
+// Instead, I (Eric) hack it to use static type info.
+template <typename Base, typename Child>
+py::handle py_force_upcast(Child* child_ptr,
+    py::return_value_policy policy =
+        py::return_value_policy::automatic_reference,
+    py::handle parent = {}) {
+  auto base_type_info = py::detail::get_type_info(typeid(Base));
+  Base* base_ptr = dynamic_cast<Base*>(child_ptr);
+  return py::detail::type_caster_generic::cast(
+      base_ptr, policy, parent, base_type_info, nullptr, nullptr, {});
+}
+
 }  // namespace
 
 PYBIND11_MODULE(lcm, m) {
@@ -77,6 +92,24 @@ PYBIND11_MODULE(lcm, m) {
 
   py::module::import("pydrake.lcm");
   py::module::import("pydrake.systems.framework");
+
+  {
+    using Class = LcmInterfaceSystem;
+    constexpr auto& cls_doc = doc.LcmInterfaceSystem;
+    py::class_<Class, LeafSystem<double>>(m, "LcmInterfaceSystem")
+        .def(py::init<std::string>(), py::arg("lcm_url") = "",
+            cls_doc.ctor.doc_1args_lcm_url)
+        .def(py::init<DrakeLcmInterface*>(),
+            // Keep alive, reference: `lcm` keeps `self` alive.
+            py::keep_alive<2, 1>(), py::arg("lcm"), cls_doc.ctor.doc_1args_lcm)
+        .def("as_drake_lcm_interface",
+            // N.B. Manually up-cast because mutliple inheritance makes our
+            // fork of pybind11 crash.
+            [](Class* self) {
+              return py_force_upcast<DrakeLcmInterface>(self);
+            },
+            "Use this to get a DrakeLcmInterface version of this object.");
+  }
 
   {
     using Class = SerializerInterface;
