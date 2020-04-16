@@ -1,0 +1,10 @@
+load(
+    "//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
+
+drake_py_binary(
+    name = "meshcat_bug",
+    srcs = ["meshcat_bug.py"],
+    deps = ["//bindings/pydrake"],
+)
