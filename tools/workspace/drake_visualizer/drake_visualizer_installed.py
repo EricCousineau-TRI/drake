@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Runs Drake Visualizer with builtin scripts under an install tree."""
 
 from os.path import isdir, isfile, join, dirname, realpath
@@ -18,7 +20,7 @@ from drake.tools.workspace.drake_visualizer import (
 def main():
     # Execute wrapper.
     _exec_drake_visualizer_with_plugins.main(
-        join(SCRIPT_DIR, "drake-visualizer-real"))
+        join(PREFIX_DIR, "bin/drake-visualizer-real"))
 
 
 assert __name__ == "__main__"

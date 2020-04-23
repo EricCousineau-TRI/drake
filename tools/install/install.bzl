@@ -925,27 +925,4 @@ def install_test(
         **kwargs
     )
 
-#------------------------------------------------------------------------------
-def install_file_copies(name, src, dest_list, **kwargs):
-    rules = []
-    for i, dest in enumerate(dest_list):
-        rule = "{}_{}".format(name, i)
-        dest_dir = dirname(dest)
-        dest_file = basename(dest)
-        install_files(
-            name = rule,
-            files = [src],
-            dest = dest_dir,
-            rename = {
-                join_paths(dest_dir, src): dest_file,
-            },
-            **kwargs
-        )
-        rules.append(rule)
-    install(
-        name = name,
-        deps = rules,
-        **kwargs
-    )
-
 #END macros

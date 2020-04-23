@@ -2,7 +2,7 @@
 
 load("//tools/skylark:py.bzl", "py_library")
 load("//tools/lint:lint.bzl", "add_lint_tests")
-load("@drake//tools/install:install.bzl", "install")
+load("@drake//tools/install:install.bzl", "install", "install_files")
 
 exports_files(
     # To be consumed by `//tools:drake_visualizer_py`.
@@ -19,8 +19,9 @@ py_library(
 
 py_library(
     name = "exec_drake_visualizer_with_plugins_py",
-    srcs = "_exec_drake_visualizer_with_plugins.py",
+    srcs = ["_exec_drake_visualizer_with_plugins.py"],
     deps = [
+        ":module_py",
         "//tools/workspace/drake_visualizer/plugin",
     ],
     visibility = ["//tools:__pkg__"],
@@ -39,14 +40,28 @@ py_library(
     visibility = ["//tools:__pkg__"],
 )
 
-# N.B. This should be removed if upstream packages are installed.
-install_file_copies(
-    name = "install_blank_py_modules",
-    src = "_blank_init.py",
-    dest_list = [
-        "@PYTHON_SITE_PACKAGES@/drake/tools/__init__.py",
-        "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/__init__.py",
+install_files(
+    name = "install_wrapper_script",
+    files = ["drake_visualizer_installed.py"],
+    dest = "bin",
+    rename = {
+        "bin/drake_visualizer_installed.py": "drake-visualizer",
+    },
+)
+
+install(
+    name = "install",
+    targets = [
+        ":module_py",
+        ":exec_drake_visualizer_with_plugins_py",
     ],
+    deps = [
+        ":install_wrapper_script",
+        "//tools/workspace/drake_visualizer/plugin:install",
+        "@drake_visualizer//:install",
+    ],
+    py_dest = "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/drake_visualizer",
+    visibility = ["//tools/workspace:__pkg__"],
 )
 
 add_lint_tests(

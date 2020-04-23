@@ -27,8 +27,6 @@ py_library(
     ],
 )
 
-# TODO(eric.cousineau): Consider moving this that makes more sense for the
-# install tree.
 install(
     name = "install",
     targets = [
@@ -36,7 +34,7 @@ install(
         ":plugin",
     ],
     py_dest = "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/drake_visualizer/plugin",  # noqa
-    visibility = ["//:__pkg__"],
+    visibility = ["//tools/workspace/drake_visualizer:__pkg__"],
 )
 
 add_lint_tests()
