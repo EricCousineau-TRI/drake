@@ -138,7 +138,7 @@ def check_call(args, *extra_args, **kwargs):
     return subprocess.check_call(args, cwd='/', env=env, *extra_args, **kwargs)
 
 
-def check_output(*args, **kwargs):
+def check_output(*args, encoding='utf8', **kwargs):
     """Helper function for `subprocess.check_output()`.
 
     Install tests should use this function instead of
@@ -155,7 +155,7 @@ def check_output(*args, **kwargs):
     if sys.platform == 'darwin':
         env['PATH'] = '/usr/local/opt/python@3.8/bin:' + env['PATH']
     return subprocess.check_output(
-        cwd='/', env=env, *args, **kwargs).decode('utf8')
+        cwd='/', env=env, *args, encoding=encoding, **kwargs)
 
 
 def get_python_site_packages_dir(install_dir):

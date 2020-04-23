@@ -17,6 +17,7 @@ py_library(
     deps = ["//:module_py"],
 )
 
+# TODO(eric.cousineau): Move this to //tools/workspace:drake_visualizer.
 # TODO(eric.cousineau): Consider using a `./run`-like script for this, rather
 # than `drake_runfiles_binary`. Then this can be renamed to `drake_visualizer`.
 py_binary(

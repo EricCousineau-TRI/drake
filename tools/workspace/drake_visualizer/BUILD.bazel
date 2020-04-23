@@ -1,5 +1,6 @@
 # -*- python -*-
 
+load("//tools/skylark:drake_py.bzl", "drake_py_unittest")
 load("//tools/skylark:py.bzl", "py_library")
 load("//tools/lint:lint.bzl", "add_lint_tests")
 load("@drake//tools/install:install.bzl", "install", "install_files")
@@ -62,6 +63,13 @@ install(
     ],
     py_dest = "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/drake_visualizer",
     visibility = ["//tools/workspace:__pkg__"],
+)
+
+drake_py_unittest(
+    name = "drake_visualizer_bazel_help_test",
+    data = [
+        "//tools:drake_visualizer",
+    ],
 )
 
 add_lint_tests(
