@@ -76,7 +76,11 @@ def main():
     # Execute wrapper.
     drake_visualizer_real = resolve_path(
         "external/drake_visualizer/bin/drake-visualizer")
-    _exec_drake_visualizer_with_plugins.main(drake_visualizer_real)
+    _exec_drake_visualizer_with_plugins.main(
+        drake_visualizer_real=drake_visualizer_real,
+        # Ensure the wrapped binary shows 'drake-visualizer' in its usage.
+        arg0=drake_visualizer_real,
+    )
 
 
 assert __name__ == "__main__"

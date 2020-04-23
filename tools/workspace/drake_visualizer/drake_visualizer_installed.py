@@ -20,7 +20,10 @@ from drake.tools.workspace.drake_visualizer import (
 def main():
     # Execute wrapper.
     _exec_drake_visualizer_with_plugins.main(
-        join(PREFIX_DIR, "bin/drake-visualizer-real"))
+        drake_visualizer_real=join(PREFIX_DIR, "bin/drake-visualizer-real"),
+        # Ensure the wrapped binary shows 'drake-visualizer' in its usage.
+        arg0=__file__,
+    )
 
 
 assert __name__ == "__main__"

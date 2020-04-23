@@ -9,7 +9,9 @@ from drake.tools.workspace.drake_visualizer.plugin import (
 )
 
 
-def main(drake_visualizer_real):
+def main(drake_visualizer_real, arg0):
+    """Executes `drake_visualizer_real`, intercepting arguments, and passing
+    `arg0` to help simplify the usage line from --help."""
     assert os.path.isfile(drake_visualizer_real), (
         f"Must exist: {drake_visualizer_real}")
 
@@ -35,9 +37,7 @@ def main(drake_visualizer_real):
         parser.print_help()
         print()
 
-    exec_args = (
-        [drake_visualizer_real] + argv +
-        ["--script", use_builtin_scripts_file])
+    exec_args = [arg0] + argv + ["--script", use_builtin_scripts_file]
     # Due to our usage of `os.exec*`, we need to flush stdout for things like
     # testing with `subprocess.run`. Otherwise, this wrapper's output is lost,
     # and only the real binary's output is captured.
