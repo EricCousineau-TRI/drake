@@ -5,7 +5,6 @@ load("@drake//tools/skylark:drake_java.bzl", "MainClassInfo")
 load("@drake//tools/skylark:drake_py.bzl", "drake_py_test")
 load(
     "@drake//tools/skylark:pathutils.bzl",
-    "basename",
     "dirname",
     "join_paths",
     "output_path",
