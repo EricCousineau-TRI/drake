@@ -5,6 +5,7 @@ load("@drake//tools/skylark:drake_java.bzl", "MainClassInfo")
 load("@drake//tools/skylark:drake_py.bzl", "drake_py_test")
 load(
     "@drake//tools/skylark:pathutils.bzl",
+    "basename",
     "dirname",
     "join_paths",
     "output_path",
@@ -35,8 +36,12 @@ def _workspace(ctx):
     # If workspace_root is empty, assume we are the root workspace
     return ctx.workspace_name
 
-def _rename(file_dest, rename):
+def _rename(ctx, file_dest, rename):
     """Compute file name if file renamed."""
+    rename = {
+        _substitute_variables(ctx, key): value
+        for key, value in rename.items()
+    }
     if file_dest in rename:
         renamed = rename[file_dest]
         return join_paths(dirname(file_dest), renamed)
@@ -46,6 +51,16 @@ def _depset_to_list(l):
     """Helper function to convert depset to list."""
     iter_list = l.to_list() if type(l) == "depset" else l
     return iter_list
+
+def _substitute_variables(ctx, dest):
+    dest_replacements = (
+        ("@WORKSPACE@", _workspace(ctx)),
+        ("@PYTHON_SITE_PACKAGES@", PYTHON_SITE_PACKAGES_RELPATH),
+    )
+    for old, new in dest_replacements:
+        if old in dest:
+            dest = dest.replace(old, new)
+    return dest
 
 #------------------------------------------------------------------------------
 def _output_path(ctx, input_file, strip_prefix = [], warn_foreign = True):
@@ -121,13 +136,7 @@ def _install_action(
     else:
         dest = dests
 
-    dest_replacements = (
-        ("@WORKSPACE@", _workspace(ctx)),
-        ("@PYTHON_SITE_PACKAGES@", PYTHON_SITE_PACKAGES_RELPATH),
-    )
-    for old, new in dest_replacements:
-        if old in dest:
-            dest = dest.replace(old, new)
+    dest = _substitute_variables(ctx, dest)
 
     if type(strip_prefixes) == "dict":
         strip_prefix = strip_prefixes.get(
@@ -141,7 +150,7 @@ def _install_action(
         dest,
         _output_path(ctx, artifact, strip_prefix, warn_foreign),
     )
-    file_dest = _rename(file_dest, rename)
+    file_dest = _rename(ctx, file_dest, rename)
 
     if "/attic/" in file_dest and not file_dest.startswith("lib/python"):
         fail("Do not expose attic paths to the install tree ({})".format(
@@ -354,7 +363,7 @@ def _install_java_launcher_actions(
     # Compute destination file name.
     filename = target[MainClassInfo].filename
     file_dest = join_paths(dest, filename)
-    file_dest = _rename(file_dest, rename)
+    file_dest = _rename(ctx, file_dest, rename)
     jvm_flags = target[MainClassInfo].jvm_flags
 
     actions.append(struct(
@@ -913,6 +922,29 @@ def install_test(
         # the "list of commands" python programs must have a __main__ clause
         # (i.e., they must all be binaries, not libraries).
         allow_import_unittest = True,
+        **kwargs
+    )
+
+#------------------------------------------------------------------------------
+def install_file_copies(name, src, dest_list, **kwargs):
+    rules = []
+    for i, dest in enumerate(dest_list):
+        rule = "{}_{}".format(name, i)
+        dest_dir = dirname(dest)
+        dest_file = basename(dest)
+        install_files(
+            name = rule,
+            files = [src],
+            dest = dest_dir,
+            rename = {
+                join_paths(dest_dir, src): dest_file,
+            },
+            **kwargs
+        )
+        rules.append(rule)
+    install(
+        name = name,
+        deps = rules,
         **kwargs
     )
 

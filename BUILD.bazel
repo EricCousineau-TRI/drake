@@ -53,6 +53,7 @@ install(
         # "//tools/install/cmake:install",
         # "//tools/install/libdrake:install",
         "//tools/workspace:install_external_packages",
+        "//tools/workspace/drake_visualizer/plugin:install",
     ],
 )
 

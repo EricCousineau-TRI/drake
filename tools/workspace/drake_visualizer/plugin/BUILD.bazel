@@ -2,6 +2,7 @@
 
 load("//tools/skylark:py.bzl", "py_library")
 load("//tools/lint:lint.bzl", "add_lint_tests")
+load("@drake//tools/install:install.bzl", "install", "install_file_copies",)
 
 py_library(
     name = "module_py",
@@ -24,6 +25,30 @@ py_library(
     deps = [
         ":module_py",
     ],
+)
+
+# N.B. This should be removed if upstream packages are installed.
+install_file_copies(
+    name = "install_blank_py_modules",
+    src = "_blank_init.py",
+    dest_list = [
+        "@PYTHON_SITE_PACKAGES@/drake/tools/__init__.py",
+        "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/__init__.py",
+        "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/drake_visualizer/__init__.py",  # noqa
+    ],
+)
+
+# TODO(eric.cousineau): Consider moving this that makes more sense for the
+# install tree.
+install(
+    name = "install",
+    targets = [
+        ":module_py",
+        ":plugin",
+    ],
+    deps = [":install_blank_py_modules"],
+    py_dest = "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/drake_visualizer/plugin",  # noqa
+    visibility = ["//:__pkg__"],
 )
 
 add_lint_tests()
