@@ -2,9 +2,11 @@
 
 load("//tools/skylark:py.bzl", "py_library")
 load("//tools/lint:lint.bzl", "add_lint_tests")
+load("@drake//tools/install:install.bzl", "install")
 
 exports_files(
-    ["drake_visualizer.py"],
+    # To be consumed by `//tools:drake_visualizer_py`.
+    ["drake_visualizer_bazel.py"],
     visibility = ["//tools:__pkg__"],
 )
 
@@ -13,6 +15,15 @@ py_library(
     srcs = ["__init__.py"],
     visibility = [":__subpackages__"],
     deps = ["//tools/workspace:module_py"],
+)
+
+py_library(
+    name = "exec_drake_visualizer_with_plugins_py",
+    srcs = "_exec_drake_visualizer_with_plugins.py",
+    deps = [
+        "//tools/workspace/drake_visualizer/plugin",
+    ],
+    visibility = ["//tools:__pkg__"],
 )
 
 # When developing within Drake, we don't want //tools:drake_visualizer to
@@ -28,4 +39,18 @@ py_library(
     visibility = ["//tools:__pkg__"],
 )
 
-add_lint_tests()
+# N.B. This should be removed if upstream packages are installed.
+install_file_copies(
+    name = "install_blank_py_modules",
+    src = "_blank_init.py",
+    dest_list = [
+        "@PYTHON_SITE_PACKAGES@/drake/tools/__init__.py",
+        "@PYTHON_SITE_PACKAGES@/drake/tools/workspace/__init__.py",
+    ],
+)
+
+add_lint_tests(
+    python_lint_extra_srcs = [
+        "drake_visualizer_installed.py",
+    ],
+)
