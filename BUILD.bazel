@@ -43,15 +43,15 @@ install(
     docs = ["LICENSE.TXT"],
     visibility = ["//tools/install/bazel:__pkg__"],
     deps = [
-        "//bindings/pydrake:install",
-        "//common:install",
-        "//examples:install",
+        # "//bindings/pydrake:install",
+        # "//common:install",
+        # "//examples:install",
         "//lcmtypes:install",
-        "//manipulation/models:install_data",
-        "//setup:install",
-        "//third_party/com_github_finetjul_bender:install",
-        "//tools/install/cmake:install",
-        "//tools/install/libdrake:install",
+        # "//manipulation/models:install_data",
+        # "//setup:install",
+        # "//third_party/com_github_finetjul_bender:install",
+        # "//tools/install/cmake:install",
+        # "//tools/install/libdrake:install",
         "//tools/workspace:install_external_packages",
     ],
 )
@@ -63,7 +63,7 @@ install(
     install_tests_script = _INSTALL_TEST_COMMANDS,
     deps = [
         ":all_install_targets_except_bazel",
-        "//tools/install/bazel:install",
+        # "//tools/install/bazel:install",
     ],
 )
 

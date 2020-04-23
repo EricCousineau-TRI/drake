@@ -46,54 +46,55 @@ drake_py_binary(
 )
 
 _DRAKE_EXTERNAL_PACKAGE_INSTALLS = ["@%s//:install" % p for p in [
-    "bullet",
-    "ccd",
+    # "bullet",
+    # "ccd",
     "drake_visualizer",
-    "fcl",
-    "fmt",
-    "ghc_filesystem",
-    "ignition_math",
-    "json",
+    # "fcl",
+    # "fmt",
+    # "ghc_filesystem",
+    # "ignition_math",
+    # "json",
     "lcm",
     "lcmtypes_bot2_core",
     "lcmtypes_robotlocomotion",
-    "meshcat",
-    "meshcat_python",
-    "octomap",
-    "pybind11",
-    "sdformat",
-    "spdlog",
-    "tinydir",
-    "tinyobjloader",
+    # "meshcat",
+    # "meshcat_python",
+    # "octomap",
+    # "pybind11",
+    # "sdformat",
+    # "spdlog",
+    # "tinydir",
+    # "tinyobjloader",
     "vtk",
-]] + ["//tools/workspace/%s:install" % p for p in [
-    "cds",
-    "dreal",
-    "net_sf_jchart2d",
-    "optitrack_driver",
-    "picosat",
-]] + select({
-    "//conditions:default": ["@csdp//:install"],
-    "//tools:no_csdp": [],
-}) + select({
-    "//conditions:default": ["//tools/workspace/ibex:install"],
-    "//tools:no_dreal": [],
-}) + select({
-    "//tools:with_gurobi": ["@gurobi//:install"],
-    "//conditions:default": [],
-}) + select({
-    "//tools:with_mosek": ["@mosek//:install"],
-    "//conditions:default": [],
-}) + select({
-    "//conditions:default": [
-        "@osqp//:install",
-        "@qdldl//:install",
-    ],
-    "//tools:no_osqp": [],
-}) + select({
-    "//conditions:default": ["@scs//:install"],
-    "//tools:no_scs": [],
-})
+# ]] + ["//tools/workspace/%s:install" % p for p in [
+#     "cds",
+#     "dreal",
+#     "net_sf_jchart2d",
+#     "optitrack_driver",
+#     "picosat",
+# ]] + select({
+#     "//conditions:default": ["@csdp//:install"],
+#     "//tools:no_csdp": [],
+# }) + select({
+#     "//conditions:default": ["//tools/workspace/ibex:install"],
+#     "//tools:no_dreal": [],
+# }) + select({
+#     "//tools:with_gurobi": ["@gurobi//:install"],
+#     "//conditions:default": [],
+# }) + select({
+#     "//tools:with_mosek": ["@mosek//:install"],
+#     "//conditions:default": [],
+# }) + select({
+#     "//conditions:default": [
+#         "@osqp//:install",
+#         "@qdldl//:install",
+#     ],
+#     "//tools:no_osqp": [],
+# }) + select({
+#     "//conditions:default": ["@scs//:install"],
+#     "//tools:no_scs": [],
+# })
+]]
 
 install(
     name = "install_external_packages",
