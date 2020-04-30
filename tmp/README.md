@@ -7,28 +7,28 @@ pycost
 
 <class 'float'>
 bad input
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionCost: Input must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 1 and .size = 2 instead.
 bad output
-  no error
+  ERROR: PyFunctionCost: Output must be of .ndim = 0 (scalar) and .size = 1. Got .ndim = 1 and .size = 1 instead.
 
 <class 'pydrake.autodiffutils.AutoDiffXd'>
 bad input
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionCost: Input must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 1 and .size = 2 instead.
 bad output
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionCost: Output must be of .ndim = 0 (scalar) and .size = 1. Got .ndim = 1 and .size = 1 instead.
 .
 
 pyconstraint
 
 <class 'float'>
 bad input
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionConstraint: Input must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 1 and .size = 2 instead.
 bad output
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionConstraint: Output must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 0 and .size = 1 instead.
 
 <class 'pydrake.autodiffutils.AutoDiffXd'>
 bad input
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionConstraint: Input must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 1 and .size = 2 instead.
 bad output
-  ERROR: Unable to cast Python instance to C++ type (compile in debug mode for details)
+  ERROR: PyFunctionConstraint: Output must be of .ndim = 1 or 2 (vector) and .size = 1. Got .ndim = 0 and .size = 1 instead.
 ```
