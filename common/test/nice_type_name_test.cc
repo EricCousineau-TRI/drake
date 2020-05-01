@@ -29,7 +29,54 @@ class Base {
   virtual ~Base() = default;
 };
 class Derived : public Base {};
+
+// Use a complicated forwarding scheme to reflect usage as seen in Systems,
+// i.e. a derived base class that may call NiceTypeName::Get on itself.
+class CustomBase;
+
 }  // namespace nice_type_name_test
+
+namespace internal {
+
+inline std::string
+GetNiceTypeName(const nice_type_name_test::CustomBase& thing);
+
+template <typename T>
+struct nice_type_name<T, std::enable_if_t<
+              std::is_base_of_v<nice_type_name_test::CustomBase, T>>> {
+  static std::string Get(const nice_type_name_test::CustomBase& thing) {
+    return GetNiceTypeName(thing);
+  }
+};
+
+}  // namespace internal
+
+namespace nice_type_name_test {
+
+class CustomBase {
+ public:
+  virtual ~CustomBase() = default;
+ private:
+  virtual std::string get_nice_type_name() const {
+    return NiceTypeName::Get(typeid(*this));
+  }
+  friend std::string internal::GetNiceTypeName(const CustomBase&);
+};
+
+class CustomDerived : public CustomBase {
+ private:
+  std::string get_nice_type_name() const { return "__custom__"; }
+};
+}  // namespace nice_type_name_test
+
+namespace internal {
+
+inline std::string
+GetNiceTypeName(const nice_type_name_test::CustomBase& thing) {
+  return thing.get_nice_type_name();
+}
+
+}
 
 namespace {
 // Can't test much of NiceTypeName::Demangle because its behavior is compiler-
@@ -208,6 +255,26 @@ GTEST_TEST(NiceTypeNameTest, RemoveNamespaces) {
   EXPECT_EQ(NiceTypeName::RemoveNamespaces("::"), "::");
   // No final type segment -- should leave unprocessed.
   EXPECT_EQ(NiceTypeName::RemoveNamespaces("blah::blah2::"), "blah::blah2::");
+}
+
+GTEST_TEST(NiceTypeNameTest, Custom) {
+  using nice_type_name_test::CustomBase;
+  using nice_type_name_test::CustomDerived;
+
+  EXPECT_EQ(
+      NiceTypeName::Get<CustomBase>(),
+      "drake::nice_type_name_test::CustomBase");
+  EXPECT_EQ(
+      NiceTypeName::Get<CustomDerived>(),
+      "drake::nice_type_name_test::CustomDerived");
+
+  const CustomBase base;
+  EXPECT_EQ(NiceTypeName::Get(base), "drake::nice_type_name_test::CustomBase");
+
+  const CustomDerived derived;
+  const CustomBase& base_ref = derived;
+  EXPECT_EQ(NiceTypeName::Get(base_ref), "__custom__");
+  EXPECT_EQ(NiceTypeName::Get(derived), "__custom__");
 }
 
 }  // namespace
