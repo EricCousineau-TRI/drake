@@ -64,6 +64,11 @@ class TestScalarConversion(unittest.TestCase):
         param_list = [(T,) for T in SystemScalarConverter.SupportedScalars]
         self.assertListEqual(Example_.param_list, param_list)
 
+        for T in SystemScalarConverter.SupportedScalars:
+            system_T = Example_[T](0)
+            self.assertEqual(
+                system_T.GetSystemType(), f"__main__.Example_[{T.__name__}]")
+
         # Test private properties (do NOT use these in your code!).
         self.assertTupleEqual(
             tuple(Example_._T_list), SystemScalarConverter.SupportedScalars)

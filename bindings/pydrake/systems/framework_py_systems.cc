@@ -43,6 +43,12 @@ using systems::SystemScalarConverter;
 using systems::VectorSystem;
 using systems::WitnessFunction;
 
+std::string GetPyClassName(const SystemBase* self) {
+  py::handle type = py::import::module("builtins").attr("type");
+  py::handle cls = type(self);
+  return cls.attr("__module__") + "." + cls.attr("__qualname__");
+}
+
 // Provides a templated 'namespace'.
 template <typename T>
 struct Impl {
@@ -157,6 +163,11 @@ struct Impl {
       };
       *witnesses = wrapped();
     }
+
+   private:
+    std::string DoGetSystemType() const override {
+      return GetPyClassName(this);
+    }
   };
 
   using PyLeafSystem = PyLeafSystemBase<>;
@@ -176,6 +187,11 @@ struct Impl {
    public:
     using Base = py::wrapper<DiagramBase>;
     using Base::Base;
+
+   private:
+    std::string DoGetSystemType() const override {
+      return GetPyClassName(this);
+    }
   };
 
   using PyDiagram = PyDiagramBase<>;
@@ -258,6 +274,11 @@ struct Impl {
       Base::DoCalcVectorDiscreteVariableUpdates(
           context, input, state, next_state);
     }
+
+   private:
+    std::string DoGetSystemType() const override {
+      return GetPyClassName(this);
+    }
   };
 
   static void DoScalarDependentDefinitions(py::module m) {
@@ -275,6 +296,8 @@ struct Impl {
     auto system_cls = DefineTemplateClassWithDefault<System<T>, PySystem>(
         m, "System", GetPyParam<T>(), doc.SystemBase.doc);
     system_cls  // BR
+        .def("GetSystemType", &System<T>::GetSystemType,
+            doc.SystemBase.GetSystemType.doc);
         .def("get_name", &System<T>::get_name, doc.SystemBase.get_name.doc)
         .def("set_name", &System<T>::set_name, doc.SystemBase.set_name.doc)
         // Topology.

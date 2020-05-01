@@ -95,6 +95,8 @@ class TestGeneral(unittest.TestCase):
         self.assertEqual(system.num_input_ports(), 3)
         self.assertEqual(system.num_output_ports(), 1)
         u1 = system.GetInputPort("u1")
+        self.assertEqual(
+            u1.GetSystemType(), "drake::systems::primitives::Adder<double>")
         self.assertEqual(u1.get_name(), "u1")
         self.assertIn("u1", u1.GetFullDescription())
         self.assertEqual(u1.get_index(), 1)
