@@ -56,3 +56,9 @@ class TestCommon(unittest.TestCase):
 
     def test_assert_is_armed(self):
         self.assertIsInstance(mut.kDrakeAssertIsArmed, bool)
+
+    def test_nice_type_name(self):
+        obj = mut._testing.CustomType()
+        self.assertEqual(
+            mut._testing.get_nice_type_name("obj"),
+            "pydrake.common._testing.CustomType")

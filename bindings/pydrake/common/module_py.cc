@@ -17,14 +17,56 @@
 namespace drake {
 namespace pydrake {
 
+using drake::internal::type_erased_ptr;
+
 // This function is defined in drake/common/drake_assert_and_throw.cc.
 extern "C" void drake_set_assertion_failure_to_throw_exception();
 
 namespace {
+
 void trigger_an_assertion_failure() {
   DRAKE_DEMAND(false);
 }
+
+py::handle ResolvePyObject(const type_erased_ptr& ptr) {
+  // Taken from type_caster_generic::cast(const void*, ...).
+  auto tinfo = py::detail::get_type_info(ptr.info);
+  auto it_instances =
+      py::detail::get_internals().registered_instances.equal_range(ptr.raw);
+  for (auto it_i = it_instances.first; it_i != it_instances.second; ++it_i) {
+    auto instance_types = py::detail::all_type_info(Py_TYPE(it_i->second);
+      for (auto instance_type : instance_types)) {
+        if (instance_type
+              && py::detail::same_type(
+                    *instance_type->cpptype, *tinfo->cpptype)) {
+          return py::handle((PyObject*)it_i->second).inc_ref();
+        }
+    }
+  }
+  return py::handle();
+}
+
+std::optional<std::string> GetPyClassName(const type_erased_ptr& ptr) {
+  py::handle type = py::module::import("builtins").attr("type");
+  py::handle obj = ResolvePyObject(ptr);
+  if (!obj) {
+    return std::nullopt;
+  }
+  py::handle cls = type(obj);
+  return cls.attr("__module__") + "." + cls.attr("__qualname__");
+}
+
+class CustomType {};
+
 }  // namespace
+
+void def_testing(py::module m) {
+  py::class_<CustomType>(m, "CustomType")
+      .def(py::init());
+  m.def("get_nice_type_name", [](const CustomType& obj) {
+    return NiceTypeName::Get(obj);
+  });
+}
 
 PYBIND11_MODULE(_module_py, m) {
   PYDRAKE_PREVENT_PYTHON3_MODULE_REIMPORT(m);
@@ -111,6 +153,22 @@ PYBIND11_MODULE(_module_py, m) {
       "Trigger a Drake C++ assertion failure");
 
   m.attr("kDrakeAssertIsArmed") = kDrakeAssertIsArmed;
+
+  // Make nice_type_name use Python type info when available.
+  internal::SetNiceTypeNamePtrOverride(
+      [](const type_erased_ptr& ptr) -> std::string {
+        DRAKE_DEMAND(ptr.raw != nullptr);
+        const std::string cc_name = NiceTypeName::Get(ptr.info);
+        if (cc_name.find("pydrake::") != std::string::npos) {
+          if (auto py_name = GetPyClassName(ptr)) {
+            return *py_name;
+          }
+        }
+        return cc_name;
+      });
+
+  py::module m_testing = m.def_submodule("_testing");
+  def_testing(m_testing);
 }
 
 }  // namespace pydrake
