@@ -2,6 +2,8 @@
 Actual docstring will be overridden programmatically.
 """
 
+import sys
+
 
 def _import_cc_module_vars(cc_module, py_module_name):
     # Imports the cc_module's public symbols into the named py module

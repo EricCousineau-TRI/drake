@@ -2,6 +2,7 @@ import os
 import unittest
 
 import pydrake.common as mut
+import pydrake.common._module_py._testing as mut_testing
 
 
 class TestCommon(unittest.TestCase):
@@ -58,7 +59,13 @@ class TestCommon(unittest.TestCase):
         self.assertIsInstance(mut.kDrakeAssertIsArmed, bool)
 
     def test_nice_type_name(self):
-        obj = mut._testing.CustomType()
+        obj = mut_testing.CustomType()
         self.assertEqual(
-            mut._testing.get_nice_type_name("obj"),
-            "pydrake.common._testing.CustomType")
+            mut_testing.get_nice_type_name(obj),
+            "pydrake.common._module_py._testing.CustomType")
+        self.assertEqual(
+            mut_testing.get_nice_type_name_cc_only(),
+            "drake::pydrake::(anonymous)::CustomType")
+        self.assertEqual(
+            mut_testing.get_nice_type_name_raw(obj),
+            "drake::pydrake::(anonymous)::CustomType")

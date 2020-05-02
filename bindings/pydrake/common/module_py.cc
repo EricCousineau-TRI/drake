@@ -75,7 +75,19 @@ void def_testing(py::module m) {
   py::class_<CustomType>(m, "CustomType")
       .def(py::init());
   m.def("get_nice_type_name", [](const CustomType& obj) {
+    // Instance is registered with Python, so it should return the Python type
+    // name.
     return NiceTypeName::Get(obj);
+  });
+  m.def("get_nice_type_name_cc_only", []() {
+    // Instance is not registered with Python, so it should return the C++ type
+    // name.
+    CustomType cc_only;
+    return NiceTypeName::Get(cc_only);
+  });
+  m.def("get_nice_type_name_raw", [](const CustomType& obj) {
+    // Use raw typeid, so it should return C++ type name.
+    return NiceTypeName::Get(typeid(obj));
   });
 }
 
