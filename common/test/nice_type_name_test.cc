@@ -29,30 +29,10 @@ class Base {
   virtual ~Base() = default;
 };
 class Derived : public Base {};
+
+class OverrideName {};
+
 }  // namespace nice_type_name_test
-
-
-class CustomBase {
- public:
-  virtual ~CustomBase() = default;
- private:
-  virtual std::string get_nice_type_name() const {
-    return NiceTypeName::Get(typeid(*this));
-  }
-  friend std::string internal::GetNiceTypeName(const CustomBase&);
-};
-
-class CustomDerived : public CustomBase {
- private:
-  std::string get_nice_type_name() const { return "__custom__"; }
-};
-}  // namespace nice_type_name_test
-inline std::string
-GetNiceTypeName(const nice_type_name_test::CustomBase& thing) {
-  return thing.get_nice_type_name();
-}
-
-}
 
 namespace {
 // Can't test much of NiceTypeName::Demangle because its behavior is compiler-
@@ -233,24 +213,25 @@ GTEST_TEST(NiceTypeNameTest, RemoveNamespaces) {
   EXPECT_EQ(NiceTypeName::RemoveNamespaces("blah::blah2::"), "blah::blah2::");
 }
 
-GTEST_TEST(NiceTypeNameTest, Custom) {
-  using nice_type_name_test::CustomBase;
-  using nice_type_name_test::CustomDerived;
+// This test must be last.
+GTEST_TEST(NiceTypeNameTest, Override) {
+  using nice_type_name_test::OverrideName;
+
+  internal::SetNiceTypeNamePtrOverride(
+      [](const internal::type_erased_ptr& ptr) -> std::string {
+        EXPECT_NE(ptr.raw, nullptr);
+        if (ptr.info == typeid(OverrideName)) {
+          return "example_override";
+        } else {
+          return NiceTypeName::Get(ptr.info);
+        }
+      });
 
   EXPECT_EQ(
-      NiceTypeName::Get<CustomBase>(),
-      "drake::nice_type_name_test::CustomBase");
-  EXPECT_EQ(
-      NiceTypeName::Get<CustomDerived>(),
-      "drake::nice_type_name_test::CustomDerived");
-
-  const CustomBase base;
-  EXPECT_EQ(NiceTypeName::Get(base), "drake::nice_type_name_test::CustomBase");
-
-  const CustomDerived derived;
-  const CustomBase& base_ref = derived;
-  EXPECT_EQ(NiceTypeName::Get(base_ref), "__custom__");
-  EXPECT_EQ(NiceTypeName::Get(derived), "__custom__");
+      NiceTypeName::Get<OverrideName>(),
+      "drake::nice_type_name_test::OverrideName");
+  const OverrideName obj;
+  EXPECT_EQ(NiceTypeName::Get(obj), "example_override");
 }
 
 }  // namespace
