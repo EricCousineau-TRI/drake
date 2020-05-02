@@ -27,6 +27,7 @@ void trigger_an_assertion_failure() {
 }  // namespace
 
 PYBIND11_MODULE(_module_py, m) {
+  PYDRAKE_PREVENT_PYTHON3_MODULE_REIMPORT(m);
   m.doc() = "Bindings for //common:common";
 
   constexpr auto& doc = pydrake_doc.drake;
@@ -109,13 +110,7 @@ PYBIND11_MODULE(_module_py, m) {
   m.def("trigger_an_assertion_failure", &trigger_an_assertion_failure,
       "Trigger a Drake C++ assertion failure");
 
-  bool is_assert_armed{false};
-#ifdef DRAKE_ASSERT_IS_ARMED
-  is_assert_armed = true;
-#endif
-  // TODO(eric.cousineau): Consider making this public, as the C++ flavor is
-  // also public.
-  m.attr("_DRAKE_ASSERT_IS_ARMED") = is_assert_armed;
+  m.attr("kDrakeAssertIsArmed") = kDrakeAssertIsArmed;
 }
 
 }  // namespace pydrake
