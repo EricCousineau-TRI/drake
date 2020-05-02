@@ -33,7 +33,7 @@ class MyContextBase final : public ContextBase {
 };
 
 // A minimal concrete SystemBase object suitable for some simple tests.
-class MySystemBase : public SystemBase {
+class MySystemBase final : public SystemBase {
  public:
   MySystemBase() {}
 
@@ -79,24 +79,6 @@ GTEST_TEST(SystemBaseTest, NameAndMessageSupport) {
   DRAKE_EXPECT_THROWS_MESSAGE(system.ValidateContext(*other_context),
                               std::exception,
                               ".*Context.*was not created for.*");
-}
-
-// Ensure we can override custom type name (for Python).
-class MySystemBaseCustomTypeName final : public MySystemBase {
- public:
-  MySystemBaseCustomTypeName() {}
-
- private:
-  std::string DoGetSystemType() const override {
-    return "__custom__";
-  }
-};
-
-GTEST_TEST(SystemBaseTest, CustomType) {
-  MySystemBaseCustomTypeName system;
-
-  EXPECT_EQ(system.GetSystemType(), "__custom__");
-  EXPECT_EQ(NiceTypeName::Get(system), "__custom__");
 }
 
 }  // namespace system_base_test_internal

@@ -29,29 +29,8 @@ class Base {
   virtual ~Base() = default;
 };
 class Derived : public Base {};
-
-// Use a complicated forwarding scheme to reflect usage as seen in Systems,
-// i.e. a derived base class that may call NiceTypeName::Get on itself.
-class CustomBase;
-
 }  // namespace nice_type_name_test
 
-namespace internal {
-
-inline std::string
-GetNiceTypeName(const nice_type_name_test::CustomBase& thing);
-
-template <typename T>
-struct nice_type_name<T, std::enable_if_t<
-              std::is_base_of_v<nice_type_name_test::CustomBase, T>>> {
-  static std::string Get(const nice_type_name_test::CustomBase& thing) {
-    return GetNiceTypeName(thing);
-  }
-};
-
-}  // namespace internal
-
-namespace nice_type_name_test {
 
 class CustomBase {
  public:
@@ -68,9 +47,6 @@ class CustomDerived : public CustomBase {
   std::string get_nice_type_name() const { return "__custom__"; }
 };
 }  // namespace nice_type_name_test
-
-namespace internal {
-
 inline std::string
 GetNiceTypeName(const nice_type_name_test::CustomBase& thing) {
   return thing.get_nice_type_name();

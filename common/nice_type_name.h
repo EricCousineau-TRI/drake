@@ -10,14 +10,6 @@
 
 namespace drake {
 
-namespace internal {
-
-// Forward declare.
-template <typename T, typename SFINAE = void>
-struct nice_type_name;
-
-}  // namespace internal
-
 /** @brief Obtains canonicalized, platform-independent, human-readable names for
 arbitrarily-complicated C++ types.
 
@@ -72,7 +64,7 @@ class NiceTypeName {
   differ. */
   template <typename T>
   static std::string Get(const T& thing) {
-    return internal::nice_type_name<T>::Get(thing);
+    return Get(typeid(thing));
   }
 
   /** Returns the nicely demangled and canonicalized type name of `info`. This
@@ -110,18 +102,5 @@ class NiceTypeName {
   // No instances of this class should be created.
   NiceTypeName() = delete;
 };
-
-
-namespace internal {
-
-// Permits overriding.
-template <typename T, typename SFINAE>
-struct nice_type_name {
-  static std::string Get(const T& thing) {
-    return NiceTypeName::Get(typeid(thing));
-  }
-};
-
-}  // namespace internal
 
 }  // namespace drake
