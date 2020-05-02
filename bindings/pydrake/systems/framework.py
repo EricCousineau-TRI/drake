@@ -3,7 +3,7 @@ This module only exists to handle deprecation.
 
 Actual docstring will be overridden programmatically.
 """
-from pydrake import _import_cc_module_vars
+from pydrake.common import _import_cc_module_vars
 import pydrake.common.deprecation as _deprecation
 import pydrake.common.value as _value
 from pydrake.systems import _framework as _cc
