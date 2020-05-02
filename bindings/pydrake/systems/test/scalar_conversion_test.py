@@ -67,7 +67,8 @@ class TestScalarConversion(unittest.TestCase):
         for T in SystemScalarConverter.SupportedScalars:
             system_T = Example_[T](0)
             self.assertEqual(
-                system_T.GetSystemType(), f"__main__.Example_[{T.__name__}]")
+                system_T.GetSystemType(),
+                f"pydrake.systems.scalar_conversion.Example_[{T.__name__}]")
 
         # Test private properties (do NOT use these in your code!).
         self.assertTupleEqual(
