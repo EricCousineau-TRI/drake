@@ -19,18 +19,18 @@ struct type_erased_ptr {
   const std::type_info& info;
 
   template <typename T>
-  type_erased_ptr(const T* ptr)
+  explicit type_erased_ptr(const T* ptr)
       : raw(ptr), info(typeid(*ptr)) {
     DRAKE_DEMAND(ptr != nullptr);
   }
 };
 
 using NiceTypeNamePtrOverride =
-    std::function<std::string (const type_erased_ptr&)>;
+    std::function<std::string(const type_erased_ptr&)>;
 
 void SetNiceTypeNamePtrOverride(NiceTypeNamePtrOverride new_ptr_override);
 
-}
+}  // namespace internal
 
 /** @brief Obtains canonicalized, platform-independent, human-readable names for
 arbitrarily-complicated C++ types.

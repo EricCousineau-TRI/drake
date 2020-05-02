@@ -36,13 +36,11 @@ py::handle ResolvePyObject(const type_erased_ptr& ptr) {
       py::detail::get_internals().registered_instances.equal_range(ptr.raw);
   for (auto it_i = it_instances.first; it_i != it_instances.second; ++it_i) {
     auto instance_types = py::detail::all_type_info(Py_TYPE(it_i->second));
-      for (auto instance_type : instance_types) {
-        if (instance_type
-              && py::detail::same_type(
-                    *instance_type->cpptype, *tinfo->cpptype)) {
-          return py::handle(
-              reinterpret_cast<PyObject*>(it_i->second)).inc_ref();
-        }
+    for (auto instance_type : instance_types) {
+      if (instance_type &&
+          py::detail::same_type(*instance_type->cpptype, *tinfo->cpptype)) {
+        return py::handle(reinterpret_cast<PyObject*>(it_i->second)).inc_ref();
+      }
     }
   }
   return py::handle();
@@ -69,11 +67,8 @@ std::string PyNiceTypeNamePtrOverride(const type_erased_ptr& ptr) {
 
 class CustomType {};
 
-}  // namespace
-
 void def_testing(py::module m) {
-  py::class_<CustomType>(m, "CustomType")
-      .def(py::init());
+  py::class_<CustomType>(m, "CustomType").def(py::init());
   m.def("get_nice_type_name", [](const CustomType& obj) {
     // Instance is registered with Python, so it should return the Python type
     // name.
@@ -185,5 +180,6 @@ PYBIND11_MODULE(_module_py, m) {
   def_testing(m_testing);
 }
 
+}  // namespace
 }  // namespace pydrake
 }  // namespace drake
