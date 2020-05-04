@@ -33,9 +33,12 @@ Object& Object::operator=(Object&& other) {
   other.ptr_ = nullptr;
   return *this;
 }
-void Object::inc_ref() { py::handle(ptr_).inc_ref(); }
-void Object::dec_ref() { py::handle(ptr_).dec_ref(); }
-
+void Object::inc_ref() {
+  py::handle(ptr_).inc_ref();
+}
+void Object::dec_ref() {
+  py::handle(ptr_).dec_ref();
+}
 
 namespace internal {
 namespace {

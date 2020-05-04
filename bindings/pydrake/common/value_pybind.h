@@ -84,13 +84,16 @@ be destroyed when it is replaced, since it is stored using `unique_ptr<>`.
   } else {
     py_class  // BR
         .def("get_value", &Class::get_value)
-        .def("get_mutable_value", [py_T](const Class&) {
-          // For more info:
-          // https://pybind11.readthedocs.io/en/stable/advanced/cast/index.html
-          throw std::logic_error(fmt::format(
-              "Cannot get mutable value (or reference) for a type-conversion "
-              "type: {}", py::str(py_T).cast<std::string>()));
-        })
+        .def("get_mutable_value",
+            [py_T](const Class&) {
+              // For more info:
+              // https://pybind11.readthedocs.io/en/stable/advanced/cast/index.html
+              throw std::logic_error(
+                  fmt::format("Cannot get mutable value (or reference) for a "
+                              "type-conversion "
+                              "type: {}",
+                      py::str(py_T).cast<std::string>()));
+            })
         .def("set_value", &Class::set_value);
   }
   return py_class;

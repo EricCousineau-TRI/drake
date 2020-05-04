@@ -40,10 +40,15 @@ class Object {
   ::PyObject* ptr() const { return ptr_; }
 
   template <typename T>
-  T to_pyobject() const { return py::reinterpret_borrow<T>(ptr()); }
+  T to_pyobject() const {
+    return py::reinterpret_borrow<T>(ptr());
+  }
 
   template <typename T>
-  static Object from_pyobject(const T& h) { return Object(h.ptr()); }
+  static Object from_pyobject(const T& h) {
+    return Object(h.ptr());
+  }
+
  private:
   ::PyObject* ptr_{};
 };
@@ -76,8 +81,7 @@ py::object GetPyParamScalarImpl(const std::type_info& tinfo);
 // Gets Python type for a C++ type (base case).
 template <typename T>
 inline py::object GetPyParamScalarImpl(type_pack<T> = {}) {
-  static_assert(
-      !py::detail::is_pyobject<T>::value,
+  static_assert(!py::detail::is_pyobject<T>::value,
       "You cannot use `pybind11` types (e.g. `py::object`). Use a publicly "
       "visible replacement type instead, please.");
   return GetPyParamScalarImpl(typeid(T));
@@ -112,7 +116,7 @@ inline py::tuple GetPyParam(type_pack<Ts...> = {}) {
 
 namespace pybind11::detail {
 
-// N.B. Since this is used with 
+// N.B. Since this is used with
 template <>
 struct type_caster<drake::pydrake::Object>
     : public drake::pydrake::internal::type_caster_wrapped<
