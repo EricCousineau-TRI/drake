@@ -44,8 +44,8 @@ template <typename Signature>
 struct wrap_callback<std::function<Signature>>
     : public wrap_callback<const std::function<Signature>&> {};
 
-// Implements a `type_caster<>` specialization used to convert types using a
-// specific wrapping policy.
+// Implements a `py::detail::type_caster<>` specialization used to convert
+// types using a specific wrapping policy.
 // @tparam Wrapper
 //  Struct which must provide `Type`, `WrappedType`, `unwrap`, `wrap`,
 // `wrapped_name`, and `original_name`.
