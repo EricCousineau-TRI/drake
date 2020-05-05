@@ -6,3 +6,9 @@ drake_py_test(
     data = ["kneed_compass_gait.urdf"],
     allow_import_unittest = True,
 )
+drake_py_test(
+    name = "min_repro",
+    srcs = ["min_repro.py"],
+    deps = ["//bindings/pydrake"],
+    allow_import_unittest = True,
+)
