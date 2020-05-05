@@ -1,6 +1,8 @@
-py_binary(
+load("//tools/skylark:drake_py.bzl", "drake_py_test")
+drake_py_test(
     name = "kneed_compass_gait",
     srcs = ["kneed_compass_gait.py"],
     deps = ["//bindings/pydrake"],
     data = ["kneed_compass_gait.urdf"],
+    allow_import_unittest = True,
 )

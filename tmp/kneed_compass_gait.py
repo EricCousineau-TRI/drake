@@ -1,16 +1,15 @@
 # From: https://github.com/RobotLocomotion/drake/issues/13181#issuecomment-623607589
+import os
+
 import numpy as np
-import matplotlib.pyplot as plt
-from IPython.display import HTML
 
 # drake
-from pydrake.all import (MultibodyPlant, Parser, DiagramBuilder, Simulator,
-                         PlanarSceneGraphVisualizer, SceneGraph, TrajectorySource,
+from pydrake.all import (MultibodyPlant, Parser, DiagramBuilder,
                          SnoptSolver, MultibodyPositionToGeometryPose, PiecewisePolynomial,
-                         MathematicalProgram, JacobianWrtVariable, eq, GetInfeasibleConstraints)
+                         JacobianWrtVariable, eq)
+import pydrake.solvers.mathematicalprogram as mp
 from pydrake import symbolic
 from pydrake import math
-from underactuated import FindResource
 
 v = 1.5
 
@@ -26,7 +25,8 @@ foot_in_leg = {
 
 # parse urdf and create the MultibodyPlant
 kneed_compass_gait = MultibodyPlant(time_step=0)
-file_name = 'kneed_compass_gait.urdf'
+file_name = 'tmp/kneed_compass_gait.urdf'
+assert os.path.isfile(file_name), "use bazel run"
 Parser(kneed_compass_gait).AddModelFromFile(file_name)
 kneed_compass_gait.Finalize()
 
@@ -167,7 +167,7 @@ h_max = .05
 
 
 # initialize program
-prog = MathematicalProgram()
+prog = mp.MathematicalProgram()
 
 # vector of the time intervals
 # (distances between the T + 1 break points)
@@ -323,10 +323,11 @@ weight = mass * g
 prog.SetDecisionVariableValueInVector(f[:, 1], [weight] * T, initial_guess)
 
 # solve mathematical program with initial guess
-solver = SnoptSolver()
-result = solver.Solve(prog, initial_guess) ## The error occurs here if the cost function with np.abs() is added. math.abs() from pydrake threw an error related to the input type
+# solver = SnoptSolver()
+# result = solver.Solve(prog, initial_guess) ## The error occurs here if the cost function with np.abs() is added. math.abs() from pydrake threw an error related to the input type
+result = mp.Solve(prog, initial_guess)
 if not result.is_success():
-    infeasible = GetInfeasibleConstraints(prog, result) #ERROR OCCURS HERE
+    infeasible = mp.GetInfeasibleConstraints(prog, result) #ERROR OCCURS HERE
     print("Infeasible constraints:")
     for i in range(len(infeasible)):
         print(infeasible[i])
