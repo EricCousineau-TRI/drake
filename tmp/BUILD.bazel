@@ -1,0 +1,6 @@
+py_binary(
+    name = "kneed_compass_gait",
+    srcs = ["kneed_compass_gait.py"],
+    deps = ["//bindings/pydrake"],
+    data = ["kneed_compass_gait.urdf"],
+)
