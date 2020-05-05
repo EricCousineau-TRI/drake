@@ -142,10 +142,18 @@ def reset_velocity_heelstrike(vars):
     J = get_foot_jacobian(kneed_compass_gait, context, 'swing_leg')
     
     # return a vector that must vanish for the impulsive dynamics to hold
-    return np.concatenate((
+    out = np.concatenate((
         M.dot(qd_post - qd_pre) - J.T.dot(imp), # velocity jump due to the impulse
         J.dot(qd_post)                          # zero velocity restitution
     ))
+    vprint(out)
+    T = type(vars.flat[0])
+    U = type(out.flat[0])
+    vprint((T, U))
+    return out
+    # cast_T = np.vectorize(T)
+    # out = cast_T(np.zeros(nq + nf))
+    # return out
 
 # Function that given a leg, returns the Jacobian matrix for the related foot.
 def get_foot_jacobian(compass_gait, context, leg):
