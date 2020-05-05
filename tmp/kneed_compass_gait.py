@@ -209,20 +209,20 @@ prog.AddBoundingBoxConstraint([d_min], [d_max], d).evaluator().set_description('
 u = prog.NewContinuousVariables(rows=T, cols=na, name='u')
 u_min = -5.0
 u_max = 5.0
-#prog.AddBoundingBoxConstraint([[u_min] * na]*T, [[u_max] * na]*T, u)
-prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,0]).evaluator().set_description('tau1 bounding box')
-prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,1]).evaluator().set_description('tau2 bounding box')
-prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,2]).evaluator().set_description('tau3 bounding box')
+# #prog.AddBoundingBoxConstraint([[u_min] * na]*T, [[u_max] * na]*T, u)
+# prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,0]).evaluator().set_description('tau1 bounding box')
+# prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,1]).evaluator().set_description('tau2 bounding box')
+# prog.AddBoundingBoxConstraint([u_min] * T, [u_max] * T, u[:,2]).evaluator().set_description('tau3 bounding box')
 
-# lower and upper bound on the time steps for all t
-prog.AddBoundingBoxConstraint([h_min] * T, [h_max] * T, h).evaluator().set_description('h bounding box')
+# # lower and upper bound on the time steps for all t
+# prog.AddBoundingBoxConstraint([h_min] * T, [h_max] * T, h).evaluator().set_description('h bounding box')
 
-# link the configurations, velocities, and accelerations
-# uses implicit Euler method, https://en.wikipedia.org/wiki/Backward_Euler_method
-### Constraints for propagation of the system
-for t in range(T):
-    prog.AddConstraint(eq(q[t+1], q[t] + h[t] * qd[t+1])).evaluator().set_description('qd propagation ' + str(t))
-    prog.AddConstraint(eq(qd[t+1], qd[t] + h[t] * qdd[t])).evaluator().set_description('qdd propagation ' + str(t))
+# # link the configurations, velocities, and accelerations
+# # uses implicit Euler method, https://en.wikipedia.org/wiki/Backward_Euler_method
+# ### Constraints for propagation of the system
+# for t in range(T):
+#     prog.AddConstraint(eq(q[t+1], q[t] + h[t] * qd[t+1])).evaluator().set_description('qd propagation ' + str(t))
+#     prog.AddConstraint(eq(qd[t+1], qd[t] + h[t] * qdd[t])).evaluator().set_description('qdd propagation ' + str(t))
 
 # # manipulator equations for all t (implicit Euler)
 # ### Ensures that the system is calculated correctly
@@ -234,70 +234,70 @@ for t in range(T):
 # see http://underactuated.mit.edu/multibody.html#impulsive_collision
 vars = np.concatenate((q[-1], qd[-1], qd_post, imp))
 prog.AddConstraint(reset_velocity_heelstrike, lb=[0]*(nq+nf), ub=[0]*(nq+nf), vars=vars).evaluator().set_description('heel strike')
-    
-# mirror initial and final configuration
-# see "The Walking Cycle" section of this notebook
-prog.AddLinearConstraint(eq(q[0], - q[-1])).evaluator().set_description('initial mirror')
 
-# mirror constraint between initial and final velocity
-# see "The Walking Cycle" section of this notebook
-prog.AddLinearConstraint(qd[0, 0] == 0).evaluator().set_description('qd[0,0]')
-prog.AddLinearConstraint(qd[0, 1] == 0).evaluator().set_description('qd[0, 1]')
-prog.AddLinearConstraint(qd[0, 2] == qd_post[2] + qd_post[3]).evaluator().set_description('qd[0, 2]')
-prog.AddLinearConstraint(qd[0, 3] == - qd_post[3]).evaluator().set_description('qd[0, 3]')
+# # mirror initial and final configuration
+# # see "The Walking Cycle" section of this notebook
+# prog.AddLinearConstraint(eq(q[0], - q[-1])).evaluator().set_description('initial mirror')
 
-# Constraints for achieving a desired velocity
+# # mirror constraint between initial and final velocity
+# # see "The Walking Cycle" section of this notebook
+# prog.AddLinearConstraint(qd[0, 0] == 0).evaluator().set_description('qd[0,0]')
+# prog.AddLinearConstraint(qd[0, 1] == 0).evaluator().set_description('qd[0, 1]')
+# prog.AddLinearConstraint(qd[0, 2] == qd_post[2] + qd_post[3]).evaluator().set_description('qd[0, 2]')
+# prog.AddLinearConstraint(qd[0, 3] == - qd_post[3]).evaluator().set_description('qd[0, 3]')
 
-#Making sure the stride length, d, corresponds to the angles at the beginning/end
-prog.AddConstraint(eq(2*symbolic.sin(q[0, 2]), np.array([d/2]))).evaluator().set_description('Step length = initial stride')
+# # Constraints for achieving a desired velocity
 
-# The time used for one stride multiplied by the desired velocity equals the stride length
-prog.AddConstraint(eq(sum(h)*v, np.array([d]))).evaluator().set_description('T*V=d')
+# #Making sure the stride length, d, corresponds to the angles at the beginning/end
+# prog.AddConstraint(eq(2*symbolic.sin(q[0, 2]), np.array([d/2]))).evaluator().set_description('Step length = initial stride')
 
-z = np.array([0])
-zero = 0
+# # The time used for one stride multiplied by the desired velocity equals the stride length
+# prog.AddConstraint(eq(sum(h)*v, np.array([d]))).evaluator().set_description('T*V=d')
 
-# Making sure the stance foot is on the ground
-prog.AddLinearConstraint(eq(q[:,0], [zero]*(T+1))).evaluator().set_description('x = 0')
-prog.AddLinearConstraint(eq(q[:,1], [zero]*(T+1))).evaluator().set_description('y = 0')
+# z = np.array([0])
+# zero = 0
 
-# Making sure the swing foot starts on the ground (the legs are straight at t = 0 and t = T)
-prog.AddLinearConstraint(q[0, 2] == -q[0, 3]/2).evaluator().set_description('swing leg z(0) = 0')
+# # Making sure the stance foot is on the ground
+# prog.AddLinearConstraint(eq(q[:,0], [zero]*(T+1))).evaluator().set_description('x = 0')
+# prog.AddLinearConstraint(eq(q[:,1], [zero]*(T+1))).evaluator().set_description('y = 0')
 
-# The swing knee should be straight at t = 0
-prog.AddLinearConstraint(q[0, 4] == z).evaluator().set_description('initial swing knee straight')
+# # Making sure the swing foot starts on the ground (the legs are straight at t = 0 and t = T)
+# prog.AddLinearConstraint(q[0, 2] == -q[0, 3]/2).evaluator().set_description('swing leg z(0) = 0')
 
-
-
-# Attempt to ensure the swing knee leg doesn't bend forward. Should be replaced by constraint forces
-for t in range(T):
-  prog.AddLinearConstraint(q[t, 4] <= z).evaluator().set_description('theta3 < 0 at t '+ str(t))
+# # The swing knee should be straight at t = 0
+# prog.AddLinearConstraint(q[0, 4] == z).evaluator().set_description('initial swing knee straight')
 
 
 
+# # Attempt to ensure the swing knee leg doesn't bend forward. Should be replaced by constraint forces
+# for t in range(T):
+#   prog.AddLinearConstraint(q[t, 4] <= z).evaluator().set_description('theta3 < 0 at t '+ str(t))
 
 
-# Ensuring that the stance-foot contact force is in the friction cone for all times
-for t in range(T):
-  prog.AddLinearConstraint(f[t,1] >= z).evaluator().set_description('fz >= 0 at t = ' + str(t))
-  prog.AddConstraint(f[t,0]**2 <= (f[t,1]*friction)**2).evaluator().set_description('horizontal friction at t = ' + str(t))
-
-# Ensuring that the swing-foot impulse in the friction cone
-prog.AddLinearConstraint(imp[1] >= z).evaluator().set_description('positive z impulse')
-prog.AddConstraint(imp[0]**2 <= (imp[1]*friction)**2).evaluator().set_description('x impulse')
 
 
-def powerCost(vars):
-  #na qd_i, na u_i, h_i, d
-  assert vars.size == 2*na + 1 + 1
-  split_at = [na, 2*na, 2*na + 1]
-  qd, u, h, d = np.split(vars, split_at)
-  #return np.abs(qd.dot(u)*h/d)
-  return np.abs(np.array([qd.dot(u)*h/d]))
 
-for t in range(T):
-  vars = np.concatenate((qd[t, 2:], u[t], h[t], d))
-  #prog.AddCost(powerCost, vars=vars)
+# # Ensuring that the stance-foot contact force is in the friction cone for all times
+# for t in range(T):
+#   prog.AddLinearConstraint(f[t,1] >= z).evaluator().set_description('fz >= 0 at t = ' + str(t))
+#   prog.AddConstraint(f[t,0]**2 <= (f[t,1]*friction)**2).evaluator().set_description('horizontal friction at t = ' + str(t))
+
+# # Ensuring that the swing-foot impulse in the friction cone
+# prog.AddLinearConstraint(imp[1] >= z).evaluator().set_description('positive z impulse')
+# prog.AddConstraint(imp[0]**2 <= (imp[1]*friction)**2).evaluator().set_description('x impulse')
+
+
+# def powerCost(vars):
+#   #na qd_i, na u_i, h_i, d
+#   assert vars.size == 2*na + 1 + 1
+#   split_at = [na, 2*na, 2*na + 1]
+#   qd, u, h, d = np.split(vars, split_at)
+#   #return np.abs(qd.dot(u)*h/d)
+#   return np.abs(np.array([qd.dot(u)*h/d]))
+
+# for t in range(T):
+#   vars = np.concatenate((qd[t, 2:], u[t], h[t], d))
+#   #prog.AddCost(powerCost, vars=vars)
 
 
 # vector of the initial guess
