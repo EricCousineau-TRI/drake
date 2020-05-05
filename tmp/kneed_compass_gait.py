@@ -11,6 +11,12 @@ import pydrake.solvers.mathematicalprogram as mp
 from pydrake import symbolic
 from pydrake import math
 
+VERBOSE = False
+
+def vprint(arg):
+    if VERBOSE:
+        print(arg)
+
 v = 1.5
 
 # friction coefficient between feet and ground
@@ -55,6 +61,7 @@ def manipulator_equations(vars):
 
 
     assert vars.size == 3 * nq + nf + na 
+    vprint(repr(vars))
     # (number_of_derivatives + 1)*(x,y,q1,q2,q3) 
     # + number of forces on stance foot(Fx, Fy) + number of actuators (3)
 
@@ -80,7 +87,9 @@ def manipulator_equations(vars):
     ### The actuators should be added here somewhere
 
     # return violation of the manipulator equations
-    return M.dot(qdd) + Cv - tauG - J.T.dot(f) - U
+    violation = M.dot(qdd) + Cv - tauG - J.T.dot(f) - U
+    vprint(repr(violation))
+    return violation
 
 # Function that given the current configuration, returns
 # the distance of the swing foot from the ground (scalar).
@@ -215,11 +224,11 @@ for t in range(T):
     prog.AddConstraint(eq(q[t+1], q[t] + h[t] * qd[t+1])).evaluator().set_description('qd propagation ' + str(t))
     prog.AddConstraint(eq(qd[t+1], qd[t] + h[t] * qdd[t])).evaluator().set_description('qdd propagation ' + str(t))
 
-# manipulator equations for all t (implicit Euler)
-### Ensures that the system is calculated correctly
-for t in range(T):
-    vars = np.concatenate((q[t+1], qd[t+1], qdd[t], f[t], u[t]))
-    prog.AddConstraint(manipulator_equations, lb=[0]*nq, ub=[0]*nq, vars=vars).evaluator().set_description('implicit euler ' + str(t))
+# # manipulator equations for all t (implicit Euler)
+# ### Ensures that the system is calculated correctly
+# for t in range(T):
+#     vars = np.concatenate((q[t+1], qd[t+1], qdd[t], f[t], u[t]))
+#     prog.AddConstraint(manipulator_equations, lb=[0]*nq, ub=[0]*nq, vars=vars).evaluator().set_description('implicit euler ' + str(t))
     
 # velocity reset across heel strike
 # see http://underactuated.mit.edu/multibody.html#impulsive_collision
@@ -323,11 +332,20 @@ weight = mass * g
 prog.SetDecisionVariableValueInVector(f[:, 1], [weight] * T, initial_guess)
 
 # solve mathematical program with initial guess
-# solver = SnoptSolver()
-# result = solver.Solve(prog, initial_guess) ## The error occurs here if the cost function with np.abs() is added. math.abs() from pydrake threw an error related to the input type
-result = mp.Solve(prog, initial_guess)
-if not result.is_success():
-    infeasible = mp.GetInfeasibleConstraints(prog, result) #ERROR OCCURS HERE
+solver = SnoptSolver()
+print("Solve...")
+# The error occurs here if the cost function with np.abs() is added.
+# math.abs() from pydrake threw an error related to the input type
+result = solver.Solve(prog, initial_guess)
+if True: #not result.is_success():
+    print(result)
+
+    VERBOSE = True
+    import sys, trace
+    sys.stdout = sys.stderr
+    tracer = trace.Trace(trace=1, count=0, ignoredirs=["/usr", sys.prefix])
+
+    infeasible = tracer.runfunc(mp.GetInfeasibleConstraints, prog, result) #ERROR OCCURS HERE
     print("Infeasible constraints:")
     for i in range(len(infeasible)):
         print(infeasible[i])
