@@ -1,0 +1,31 @@
+load(
+    "//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+    "drake_py_library",
+)
+load(
+    "//tools/skylark:pybind.bzl",
+    "pybind_py_library",
+)
+
+drake_py_library(
+    name = "module_py",
+    srcs = ["__init__.py"],
+)
+
+pybind_py_library(
+    name = "cc_py",
+    cc_deps = ["//:drake_shared_library"],
+    cc_so_name = "cc",
+    cc_srcs = ["cc_py.cc"],
+    py_deps = [
+        ":module_py",
+        "@drake//bindings/pydrake",
+    ],
+)
+
+drake_py_binary(
+    name = "repro",
+    srcs = ["repro.py"],
+    deps = [":cc_py"],
+)
