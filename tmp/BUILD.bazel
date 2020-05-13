@@ -1,0 +1,20 @@
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
+load(
+    "@drake//tools/skylark:drake_cc.bzl",
+    "drake_cc_binary",
+)
+
+drake_py_binary(
+    name = "repro_py",
+    srcs = ["repro.py"],
+    deps = ["//bindings/pydrake"],
+)
+
+drake_cc_binary(
+    name = "repro_cc",
+    srcs = ["repro.cc"],
+    deps = ["//:drake_shared_library"],
+)
