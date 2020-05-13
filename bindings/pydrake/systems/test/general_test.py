@@ -413,6 +413,9 @@ class TestGeneral(unittest.TestCase):
         diagram = builder.Build()
         self.assertEqual(adder0.get_name(), "adder0")
         self.assertEqual(diagram.GetSubsystemByName("adder0"), adder0)
+        self.assertEqual(
+            diagram.GetSystems(),
+            [adder0, adder1, integrator])
         # TODO(eric.cousineau): Figure out unicode handling if needed.
         # See //systems/framework/test/diagram_test.cc:349 (sha: bc84e73)
         # for an example name.
