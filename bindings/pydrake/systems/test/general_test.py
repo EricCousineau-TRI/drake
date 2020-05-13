@@ -102,9 +102,11 @@ class TestGeneral(unittest.TestCase):
         self.assertEqual(u1.get_index(), 1)
         self.assertEqual(u1.size(), 10)
         self.assertIsNotNone(u1.ticket())
+        self.assertIs(u1.get_system(), system)
         y = system.GetOutputPort("sum")
         self.assertEqual(y.get_index(), 0)
         self.assertIsInstance(y.Allocate(), Value[BasicVector])
+        self.assertIs(y.get_system(), system)
         # TODO(eric.cousineau): Consolidate the main API tests for `System`
         # to this test point.
 
