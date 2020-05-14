@@ -1,3 +1,8 @@
+import sys
+sys.path.insert(0, '/home/eacousineau/proj/tri/repo/branches/drake/master/drake/tmp/venv/lib/python3.6/site-packages')
+import numpy as np
+assert np.__version__ == '1.18.4'
+
 import pydrake.autodiffutils as mut
 from pydrake.autodiffutils import (
     autoDiffToGradientMatrix,
@@ -12,6 +17,7 @@ import copy
 import unittest
 
 import numpy as np
+
 import pydrake.math as drake_math
 
 from pydrake.test.algebra_test_util import ScalarAlgebra, VectorizedAlgebra
