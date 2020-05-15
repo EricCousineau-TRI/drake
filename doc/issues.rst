@@ -86,9 +86,49 @@ Every issue must have at most one ``component`` label. The components are:
 
 - ``geometry externals``
 
-  VTK, FCL, drake_visualizer, etc.
+  VTK, FCL, drake_visualizer (core behavior), etc.
 
   typical team: kitware
+
+- ``geometry general``
+
+  Geometry infrastructure or topics that defy categorization into other geometry
+  components.
+
+  typical team: dynamics
+
+- ``geometry illustration``
+
+  What and how geometry gets communicated to external visualizers.
+
+  typical team: dynamics
+
+- ``geometry perception``
+
+  How geometry appears in color, depth, and label images (via the RenderEngine API).
+
+  typical team: dynamics
+
+- ``geometry proximity``
+
+  Contact, distance, signed distance queries and related properties.
+
+  typical team: dynamics
+
+- ``jupyter``
+
+  Jupyter notebook infrastructure, Binder integration, etc.
+
+  *Note*: This label does not imply content authoring for tutorials.
+
+  typical team: kitware
+
+- ``mathematical program``
+
+  Formulating and solving mathematical programs through numerical optimization,
+  usually in ``drake/solvers``.
+
+  typical team: manipulation
 
 - ``multibody plant``
 
@@ -96,6 +136,13 @@ Every issue must have at most one ``component`` label. The components are:
   usually in ``drake/multibody``.
 
   typical team: dynamics
+
+- ``pydrake``
+
+  Python API and documentation under ``//bindings/pydrake`` (and
+  its supporting Starlark macros), the ``RobotLocomotion/pybind11`` fork, etc.
+
+  typical team: kitware
 
 - ``simulator``
 
