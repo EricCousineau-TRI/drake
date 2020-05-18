@@ -253,8 +253,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
             cls_doc.set_velocity_limits.doc)
         .def("set_acceleration_limits", &Class::set_acceleration_limits,
             py::arg("lower_limits"), py::arg("upper_limits"),
-            cls_doc.set_accleration_limits.doc)
-        .def("set_default_positions", &class::set_default_positions,
+            cls_doc.set_acceleration_limits.doc)
+        .def("set_default_positions", &Class::set_default_positions,
             py::arg("default_positions"),
             cls_doc.set_default_positions.doc);
   }

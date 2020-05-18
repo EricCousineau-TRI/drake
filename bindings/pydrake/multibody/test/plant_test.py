@@ -338,6 +338,10 @@ class TestPlant(unittest.TestCase):
 
         nq = joint.num_positions()
 
+        q_default = joint.default_positions()
+        self.assertEqual(len(q_default), nq)
+        joint.set_default_positions(default_positions=q_default)
+
         q_lower = joint.position_lower_limits()
         self.assertEqual(len(q_lower), nq)
         q_upper = joint.position_upper_limits()
@@ -347,15 +351,15 @@ class TestPlant(unittest.TestCase):
         nv = joint.num_velocities()
 
         v_lower = joint.velocity_lower_limits()
-        self.assertEvual(len(v_lower), nv)
+        self.assertEqual(len(v_lower), nv)
         v_upper = joint.velocity_upper_limits()
-        self.assertEvual(len(v_upper), nv)
+        self.assertEqual(len(v_upper), nv)
         joint.set_velocity_limits(lower_limits=v_lower, upper_limits=v_upper)
 
         a_lower = joint.acceleration_lower_limits()
-        self.assertEaual(len(a_lower), nv)
+        self.assertEqual(len(a_lower), nv)
         a_upper = joint.acceleration_upper_limits()
-        self.assertEaual(len(a_upper), nv)
+        self.assertEqual(len(a_upper), nv)
         joint.set_acceleration_limits(lower_limits=a_lower, upper_limits=a_upper)
 
     def _test_joint_actuator_api(self, T, joint_actuator):
@@ -1159,7 +1163,8 @@ class TestPlant(unittest.TestCase):
                     len(joint.get_angular_rates(context=context)), 2)
             elif joint.name() == "weld":
                 numpy_compare.assert_float_equal(
-                    joint.X_PC(), RigidTransform_[float]())
+                    joint.X_PC().GetAsMatrix4(),
+                    RigidTransform_[float]().GetAsMatrix4())
             else:
                 raise TypeError(
                     "Joint type " + joint.name() + " not recognized.")
