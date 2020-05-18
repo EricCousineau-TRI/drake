@@ -1060,13 +1060,16 @@ class TestPlant(unittest.TestCase):
         Tests joint constructors, `AddJoint`, `AddJointActuator` and
         `HasJointActuatorNamed`.
         """
+        damping = 2.
+        x_axis = [1., 0., 0.]
+        X_PC = RigidTransform_[float](p=[1., 2., 3.])
 
         def make_ball_rpy_joint(plant, P, C):
             return BallRpyJoint_[T](
                 name="ball_rpy",
                 frame_on_parent=P,
                 frame_on_child=C,
-                damping=2.,
+                damping=damping,
             )
 
         def make_prismatic_joint(plant, P, C):
@@ -1074,8 +1077,8 @@ class TestPlant(unittest.TestCase):
                 name="prismatic",
                 frame_on_parent=P,
                 frame_on_child=C,
-                axis=[1., 0., 0.],
-                damping=2.,
+                axis=x_axis,
+                damping=damping,
             )
 
         def make_revolute_joint(plant, P, C):
@@ -1083,8 +1086,8 @@ class TestPlant(unittest.TestCase):
                 name="revolute",
                 frame_on_parent=P,
                 frame_on_child=C,
-                axis=[1., 0., 0.],
-                damping=2.,
+                axis=x_axis,
+                damping=damping,
             )
 
         def make_universal_joint(plant, P, C):
@@ -1092,7 +1095,7 @@ class TestPlant(unittest.TestCase):
                 name="universal",
                 frame_on_parent=P,
                 frame_on_child=C,
-                damping=2.,
+                damping=damping,
             )
 
         def make_weld_joint(plant, P, C):
@@ -1102,7 +1105,7 @@ class TestPlant(unittest.TestCase):
                 name="weld",
                 parent_frame_P=P,
                 child_frame_C=C,
-                X_PC=RigidTransform_[float](),
+                X_PC=X_PC,
             )
 
         make_joint_list = [
@@ -1142,6 +1145,8 @@ class TestPlant(unittest.TestCase):
                 self.assertEqual(
                     len(joint.get_angular_velocity(context=context)), 3)
             elif joint.name() == "prismatic":
+                self.assertEqual(joint.damping(), damping)
+                numpy_compare.assert_equal(joint.translation_axis(), x_axis)
                 set_point = 1.
                 joint.set_translation(context=context, translation=set_point)
                 self.assertIsInstance(
@@ -1151,10 +1156,13 @@ class TestPlant(unittest.TestCase):
                 self.assertIsInstance(
                     joint.get_translation_rate(context=context), T)
             elif joint.name() == "revolute":
+                numpy_compare.assert_equal(joint.revolute_axis(), x_axis)
+                self.assertEqual(joint.damping(), damping)
                 set_point = 1.
                 joint.set_angle(context=context, angle=set_point)
                 self.assertIsInstance(joint.get_angle(context=context), T)
             elif joint.name() == "universal":
+                self.assertEqual(joint.damping(), damping)
                 set_point = np.array([1., 2.])
                 joint.set_angles(context=context, angles=set_point)
                 self.assertEqual(len(joint.get_angles(context=context)), 2)
@@ -1164,7 +1172,7 @@ class TestPlant(unittest.TestCase):
             elif joint.name() == "weld":
                 numpy_compare.assert_float_equal(
                     joint.X_PC().GetAsMatrix4(),
-                    RigidTransform_[float]().GetAsMatrix4())
+                    X_PC.GetAsMatrix4())
             else:
                 raise TypeError(
                     "Joint type " + joint.name() + " not recognized.")

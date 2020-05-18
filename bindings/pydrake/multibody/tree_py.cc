@@ -300,6 +300,9 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::arg("pos_upper_limit") =
                 std::numeric_limits<double>::infinity(),
             py::arg("damping") = 0, cls_doc.ctor.doc)
+        .def("translation_axis", &Class::translation_axis,
+            cls_doc.translation_axis.doc)
+        .def("damping", &Class::damping, cls_doc.damping.doc)
         .def("get_translation", &Class::get_translation, py::arg("context"),
             cls_doc.get_translation.doc)
         .def("set_translation", &Class::set_translation, py::arg("context"),
@@ -326,6 +329,9 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::arg("name"), py::arg("frame_on_parent"),
             py::arg("frame_on_child"), py::arg("axis"), py::arg("damping") = 0,
             cls_doc.ctor.doc_5args)
+        .def("revolute_axis", &Class::revolute_axis,
+            cls_doc.revolute_axis.doc)
+        .def("damping", &Class::damping, cls_doc.damping.doc)
         .def("get_angle", &Class::get_angle, py::arg("context"),
             cls_doc.get_angle.doc)
         .def("set_angle", &Class::set_angle, py::arg("context"),
@@ -346,6 +352,7 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::init<const string&, const Frame<T>&, const Frame<T>&, double>(),
             py::arg("name"), py::arg("frame_on_parent"),
             py::arg("frame_on_child"), py::arg("damping") = 0, cls_doc.ctor.doc)
+        .def("damping", &Class::damping, cls_doc.damping.doc)
         .def("get_angles", &Class::get_angles, py::arg("context"),
             cls_doc.get_angles.doc)
         .def("set_angles", &Class::set_angles, py::arg("context"),
