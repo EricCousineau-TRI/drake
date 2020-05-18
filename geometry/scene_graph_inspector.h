@@ -1,11 +1,13 @@
 #pragma once
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "drake/geometry/geometry_instance.h"
 #include "drake/geometry/geometry_roles.h"
 #include "drake/geometry/geometry_state.h"
 #include "drake/geometry/shape_specification.h"
@@ -385,6 +387,13 @@ class SceneGraphInspector {
     DRAKE_DEMAND(state_ != nullptr);
     state_->GetShape(id).Reify(reifier);
   }
+
+  /** Obtains a GeometryInstance that represents the geometry indicated by the 
+   given `id`. Note that the GeometryInstance's id() will be completely unique,
+   and ready to be added as a new geometry.
+   @throws std::logic_error if the `id` does not refer to a valid geometry.  */
+  std::unique_ptr<GeometryInstance>
+  CloneGeometryInstance(GeometryId id) const;
 
   //@}
 
