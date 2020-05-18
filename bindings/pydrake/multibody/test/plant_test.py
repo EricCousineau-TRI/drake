@@ -353,6 +353,7 @@ class TestPlant(unittest.TestCase):
         self._test_multibody_tree_element_mixin(T, joint_actuator)
         self.assertIsInstance(joint_actuator.name(), str)
         self.assertIsInstance(joint_actuator.joint(), Joint)
+        self.assertIsInstance(joint_actuator.effort_limit(), float)
 
     def check_old_spelling_exists(self, value):
         # Just to make it obvious when this is being tested.

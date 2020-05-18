@@ -377,7 +377,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
     BindMultibodyElementMixin(&cls);
     cls  // BR
         .def("name", &Class::name, cls_doc.name.doc)
-        .def("joint", &Class::joint, py_reference_internal, cls_doc.joint.doc);
+        .def("joint", &Class::joint, py_reference_internal, cls_doc.joint.doc)
+        .def("effort_limit", &Class::effort_limit, cls_doc.effort_limit.doc);
   }
 
   // Force Elements.
