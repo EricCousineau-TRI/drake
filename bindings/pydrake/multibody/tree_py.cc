@@ -242,7 +242,21 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def("acceleration_lower_limits", &Class::acceleration_lower_limits,
             cls_doc.acceleration_lower_limits.doc)
         .def("acceleration_upper_limits", &Class::acceleration_upper_limits,
-            cls_doc.acceleration_upper_limits.doc);
+            cls_doc.acceleration_upper_limits.doc)
+        .def("default_positions", &Class::default_positions,
+            cls_doc.default_positions.doc)
+        .def("set_position_limits", &Class::set_position_limits,
+            py::arg("lower_limits"), py::arg("upper_limits"),
+            cls_doc.set_position_limits.doc)
+        .def("set_velocity_limits", &Class::set_velocity_limits,
+            py::arg("lower_limits"), py::arg("upper_limits"),
+            cls_doc.set_velocity_limits.doc)
+        .def("set_acceleration_limits", &Class::set_acceleration_limits,
+            py::arg("lower_limits"), py::arg("upper_limits"),
+            cls_doc.set_accleration_limits.doc)
+        .def("set_default_positions", &class::set_default_positions,
+            py::arg("default_positions"),
+            cls_doc.set_default_positions.doc);
   }
 
   // BallRpyJoint
@@ -365,7 +379,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
                   child_frame_C, RigidTransform<double>(X_PC));
             }),
             py::arg("name"), py::arg("parent_frame_P"),
-            py::arg("child_frame_C"), py::arg("X_PC"), doc_iso3_deprecation);
+            py::arg("child_frame_C"), py::arg("X_PC"), doc_iso3_deprecation)
+        .def("X_PC", &Class::X_PC, cls_doc.X_PC.doc);
   }
 
   // Actuators.
