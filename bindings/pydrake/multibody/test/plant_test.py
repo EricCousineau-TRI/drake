@@ -277,6 +277,7 @@ class TestPlant(unittest.TestCase):
         self.assertIs(
             plant.GetFrameByName(name="Link1"),
             plant.GetFrameByName(name="Link1", model_instance=model_instance))
+        self.assertTrue(plant.HasModelInstanceNamed(name="acrobot"))
         self.assertEqual(
             model_instance, plant.GetModelInstanceByName(name="acrobot"))
         self.assertIsInstance(
