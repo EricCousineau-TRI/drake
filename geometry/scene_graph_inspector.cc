@@ -1,5 +1,7 @@
 #include "drake/geometry/scene_graph_inspector.h"
 
+#include <memory>
+
 namespace drake {
 namespace geometry {
 

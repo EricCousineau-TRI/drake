@@ -255,8 +255,7 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::arg("lower_limits"), py::arg("upper_limits"),
             cls_doc.set_acceleration_limits.doc)
         .def("set_default_positions", &Class::set_default_positions,
-            py::arg("default_positions"),
-            cls_doc.set_default_positions.doc);
+            py::arg("default_positions"), cls_doc.set_default_positions.doc);
   }
 
   // BallRpyJoint
@@ -329,8 +328,7 @@ void DoScalarDependentDefinitions(py::module m, T) {
             py::arg("name"), py::arg("frame_on_parent"),
             py::arg("frame_on_child"), py::arg("axis"), py::arg("damping") = 0,
             cls_doc.ctor.doc_5args)
-        .def("revolute_axis", &Class::revolute_axis,
-            cls_doc.revolute_axis.doc)
+        .def("revolute_axis", &Class::revolute_axis, cls_doc.revolute_axis.doc)
         .def("damping", &Class::damping, cls_doc.damping.doc)
         .def("get_angle", &Class::get_angle, py::arg("context"),
             cls_doc.get_angle.doc)

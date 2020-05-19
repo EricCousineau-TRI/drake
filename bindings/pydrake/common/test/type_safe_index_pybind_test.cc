@@ -72,8 +72,9 @@ GTEST_TEST(TypeSafeIndexTest, CheckCasting) {
   CheckValue("Index(10) == 10", true);
   CheckValue("10 == Index(10)", true);
   // Store values for hash computation so that their id()s cannot be recycled
-  // by the GC; otherwise, we'd get a false positive if the correct has
-  // functionality were missing due the default implementation of `__hash__`.
+  // by the GC; otherwise, if the correct `__hash__` implementation were
+  // missing and it used the default implementation (using `id()`), we'd get a
+  // false positive.
   py::exec("a = Index(10); b = Index(10); c = Index(9)");
   CheckValue("hash(a) == hash(b)", true);
   CheckValue("hash(a) == hash(c)", false);

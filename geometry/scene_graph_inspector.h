@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -387,9 +388,11 @@ class SceneGraphInspector {
     state_->GetShape(id).Reify(reifier);
   }
 
-  /** Obtains a GeometryInstance that represents the geometry indicated by the 
-   given `id`. Note that the GeometryInstance's id() will be completely unique,
-   and ready to be added as a new geometry.
+  /** Obtains a new GeometryInstance that copies the geometry indicated by the
+   given `id`.
+   @return A new GeometryInstance that is ready to be added as a new geometry.
+           All roles/properties will be copied, the shape will be cloned based
+           off of the original, but the returned id() will completely unique.
    @throws std::logic_error if the `id` does not refer to a valid geometry.  */
   std::unique_ptr<GeometryInstance>
   CloneGeometryInstance(GeometryId id) const;

@@ -964,7 +964,7 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   ///
   /// <h4>Geometry registration with roles</h4>
   ///
-  /// Geometries can be associated with bodies via the `RegisterXXXGeometry`
+  /// Geometries can be associated with bodies via the `RegisterFooGeometry`
   /// family of methods. In SceneGraph, geometries have @ref geometry_roles
   /// "roles". The `RegisterCollisionGeometry()` methods register geometry with
   /// SceneGraph and assign it the proximity role. The
@@ -1901,7 +1901,7 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
     X_WB_default_list_[body.index()] = X_WB;
   }
 
-  /// Gets the default pose of `body` as set by `SetDefaultFreeBodyPose`.
+  /// Gets the default pose of `body` as set by SetDefaultFreeBodyPose().
   /// @param[in] body
   ///   Body whose default pose will be retrieved.
   const math::RigidTransform<double>& GetDefaultFreeBodyPose(

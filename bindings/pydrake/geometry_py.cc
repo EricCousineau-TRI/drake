@@ -364,8 +364,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def("FindCollisionCandidates",
             &QueryObject<T>::FindCollisionCandidates,
             doc.QueryObject.FindCollisionCandidates.doc)
-        .def("HasCollisions",
-            &QueryObject<T>::HasCollisions, doc.QueryObject.HasCollisions.doc)
+        .def("HasCollisions", &QueryObject<T>::HasCollisions,
+            doc.QueryObject.HasCollisions.doc)
         .def(
             "RenderColorImage",
             [](const Class* self, const render::CameraProperties& camera,
@@ -739,9 +739,8 @@ void def_geometry_testing(py::module m) {
   BindIdentifier<FakeId>(m, "FakeId", "Fake documentation.");
   // Get a valid, constant FakeId to test hashing with new instances returned.
   FakeId fake_id_constant{FakeId::get_new_id()};
-  m.def("get_fake_id_constant", [fake_id_constant]() {
-    return fake_id_constant;
-  });
+  m.def("get_fake_id_constant",
+      [fake_id_constant]() { return fake_id_constant; });
 }
 
 void def_geometry_all(py::module m) {

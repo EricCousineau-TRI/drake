@@ -362,7 +362,8 @@ class TestPlant(unittest.TestCase):
         self.assertEqual(len(a_lower), nv)
         a_upper = joint.acceleration_upper_limits()
         self.assertEqual(len(a_upper), nv)
-        joint.set_acceleration_limits(lower_limits=a_lower, upper_limits=a_upper)
+        joint.set_acceleration_limits(
+            lower_limits=a_lower, upper_limits=a_upper)
 
     def _test_joint_actuator_api(self, T, joint_actuator):
         JointActuator = JointActuator_[T]
