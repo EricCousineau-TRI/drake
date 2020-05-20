@@ -731,7 +731,8 @@ Note: The above is for the C++ documentation. For Python, use
         .def("GetSubsystemByName", &Diagram<T>::GetSubsystemByName,
             py::arg("name"), py_reference_internal,
             doc.Diagram.GetSubsystemByName.doc)
-        .def("GetSystems",
+        .def(
+            "GetSystems",
             [](Diagram<T>* self) {
               py::list out;
               py::object self_py = py::cast(self, py_reference);
