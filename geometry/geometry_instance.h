@@ -112,10 +112,12 @@ class GeometryInstance {
   /** Releases the shape from the instance.  */
   std::unique_ptr<Shape> release_shape() { return std::move(shape_); }
 
-  /** Returns the *canonicalized* name for the instance. */
+  /** Returns the *canonicalized* name for the instance.
+   @sa @ref canonicalized_geometry_names "Canonicalized names"  */
   const std::string& name() const { return name_; }
 
-  /** Sets the *canonicalized* name for the instance. */
+  /** Sets the *canonicalized* name for the instance.
+   @sa @ref canonicalized_geometry_names "Canonicalized names"  */
   void set_name(const std::string& name);
 
   /** Sets the proximity properties for the given instance.  */

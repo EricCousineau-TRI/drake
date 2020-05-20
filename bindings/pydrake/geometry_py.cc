@@ -580,7 +580,6 @@ void DoScalarIndependentDefinitions(py::module m) {
             py::arg("scale") = 1.0, doc.Convex.ctor.doc)
         .def("filename", &Convex::filename, doc.Convex.filename.doc)
         .def("scale", &Convex::scale, doc.Convex.scale.doc);
-
   }
 
   // GeometryFrame
