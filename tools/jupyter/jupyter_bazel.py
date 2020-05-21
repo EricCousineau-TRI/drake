@@ -1,8 +1,10 @@
 import argparse
 import os
 import sys
+from textwrap import dedent
 import warnings
 
+import jupyter_core
 from jupyter_core.command import main as _jupyter_main
 # http://nbconvert.readthedocs.io/en/latest/execute_api.html
 import nbformat
@@ -47,6 +49,25 @@ def _jupyter_bazel_notebook_main(cur_dir, notebook_file, argv):
             # Change IPython directory to use test directory.
             config_dir = os.path.join(tmp_dir, "jupyter")
             os.environ["IPYTHONDIR"] = config_dir
+            os.environ["JUPYTER_CONFIG_DIR"] = config_dir
+            os.makedirs(config_dir)
+            config_file = os.path.join(config_dir, "jupyter_nbconvert_config.py")
+            print(config_file)
+
+            # # This can generate the file... but it's not used?
+            # sys.argv = ["jupyter", "nbconvert", "--generate-config"]
+            # _jupyter_main()
+
+            # This does not seem to be used???
+            with open(config_file, "w") as f:
+                f.write(dedent("""\
+                assert False
+                c.Application.log_level = asdf
+                c.KernelManager.kernel_cmd = ['--debug']
+                #c.ConnectionFileMixin.shell_port = 0
+                ## set the stdin (ROUTER) port [default: random]
+                #c.ConnectionFileMixin.stdin_port = 0
+                """))
         # Escalate warnings for non-writable directories for settings
         # directories.
         warnings.filterwarnings(
