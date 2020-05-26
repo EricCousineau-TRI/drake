@@ -9,6 +9,7 @@
 
 #include "drake/common/copyable_unique_ptr.h"
 #include "drake/common/drake_copyable.h"
+#include "drake/common/eigen_types.h"
 #include "drake/common/hash.h"
 #include "drake/common/is_cloneable.h"
 #include "drake/common/nice_type_name.h"
@@ -43,6 +44,39 @@ using ValueForwardingCtorEnabled = typename std::enable_if_t<
   !std::is_fundamental<T>::value &&
   // Disambiguate our copy implementation from our clone implementation.
   (choose_copy == std::is_copy_constructible<T>::value)>;
+
+// Simplify the Eigen type: discard all attributes, only keep dimension and
+// scalar type, and ensure it's dynamically-sized.
+template <typename Derived>
+static auto SimplifyEigenType(const Derived& value) {
+  using Scalar = typename Derived::Scalar;
+  if constexpr (Derived::ColsAtCompileTime == 1) {
+    return VectorX<Scalar>(value);
+  } else {
+    return MatrixX<Scalar>(value);
+  }
+}
+
+// Ensure that all Eigen types are simplified for Python.
+template <typename ValueType>
+static const auto& MaybeConvertInput(const ValueType& value) {
+  if constexpr (is_eigen_type<ValueType>::value) {
+    return SimplifyEigenType(value);
+  } else {
+    return value;
+  }
+}
+
+template <typename T>
+using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename ValueType>
+using value_allowed_type_t =
+    remove_cvref_t<decltype(MaybeConvertInput(std::declval<ValueType>()))>;
+
+template <typename ValueType>
+inline constexpr bool type_requires_conversion_v =
+    !std::is_same_v<ValueType, value_allowed_type_t<ValueType>>;
 
 }  // namespace internal
 #endif
@@ -169,6 +203,12 @@ template <typename T>
 class Value : public AbstractValue {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Value)
+
+  static_assert(
+      !internal::type_requires_conversion_v<T>,
+      "This type requires conversion and is not allowed in Value<T>. Please "
+      "use AbstractValue::Make(T{}) and GetValue<T>(const AbstractValue&) "
+      "instead.");
 
   /// Constructs a Value<T> using T's default constructor, if available.
   /// This is only available for T's that support default construction.

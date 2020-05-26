@@ -406,32 +406,6 @@ class GeometryProperties {
       const std::string& group_name, const std::string& name,
       bool throw_for_bad_group) const;
 
-  // Simplify the Eigen type: discard all attributes, only keep dimension and
-  // scalar type, and ensure it's dynamically-sized.
-  template <typename Derived>
-  static auto SimplifyEigenType(const Derived& value) {
-    using Scalar = typename Derived::Scalar;
-    if constexpr (Derived::ColsAtCompileTime == 1) {
-      return VectorX<Scalar>(value);
-    } else {
-      return MatrixX<Scalar>(value);
-    }
-  }
-
-  // Ensure that all Eigen types are simplified for Python.
-  template <typename ValueType>
-  static auto MaybeConvertInput(ValueType value) {
-    if constexpr (is_eigen_type<ValueType>::value) {
-      return SimplifyEigenType(value);
-    } else {
-      return value;
-    }
-  }
-
-  template <typename ValueType>
-  using resolve_internal_type =
-      decltype(MaybeConvertInput(std::declval<ValueType>()));
-
   // Get the wrapped value from an AbstractValue, or throw an error message
   // that is easily traceable to this class.
   template <typename ValueType>
