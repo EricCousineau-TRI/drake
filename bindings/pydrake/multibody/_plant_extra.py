@@ -1,5 +1,6 @@
 import textwrap as _textwrap
 import typing as _typing
+import sys
 
 import pydrake.autodiffutils as _ad
 import pydrake.symbolic as _sym
@@ -22,7 +23,9 @@ The deprecated code will be removed from Drake on or after 2020-09-01.
 
 
 @_cpp_template.TemplateClass.define(
-    "VectorExternallyAppliedSpatialForced_", _PARAM_LIST)
+    "VectorExternallyAppliedSpatialForced_",
+    _PARAM_LIST,
+    scope=sys.modules[__name__])
 def VectorExternallyAppliedSpatialForced_(param):
     T, = param
 
