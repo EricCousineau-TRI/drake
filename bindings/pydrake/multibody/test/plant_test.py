@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 import unittest
 
 import numpy as np
@@ -719,8 +720,8 @@ class TestPlant(unittest.TestCase):
                 self.target_body_index = target_body_index
                 self.DeclareAbstractOutputPort(
                     "spatial_forces_vector",
-                    lambda: AbstractValue.Make(
-                        VectorExternallyAppliedSpatialForced_[T]()),
+                    lambda: Value[
+                        List[VectorExternallyAppliedSpatialForced_[T]]],
                     self.DoCalcAbstractOutput)
                 self.DeclareVectorOutputPort(
                     "generalized_forces",
@@ -738,8 +739,7 @@ class TestPlant(unittest.TestCase):
                 test_force.p_BoBq_B = np.zeros(3)
                 test_force.F_Bq_W = SpatialForce_[T](
                     tau=[0., 0., 0.], f=[0., 0., 1.])
-                y_data.set_value(VectorExternallyAppliedSpatialForced_[T]([
-                    test_force]))
+                y_data.set_value([test_force])
 
             def DoCalcVectorOutput(self, context, y_data):
                 y_data.SetFromVector(np.zeros(self.nv))

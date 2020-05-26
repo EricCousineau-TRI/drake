@@ -112,9 +112,11 @@ inline py::object GetPyParamScalarImpl(
   return py::cast(Value);
 }
 
-// Gets Python literal for a generic C++ list.
+// Gets Python literal for a generic C++ list that is not registered using
+// PYBIND11_MAKE_OPAQUE.
 template <
-    typename T, typename SFINAIE = is_generic_pybind<std::vector<T>>::value>
+    typename T,
+    typename SFINAE = internal::is_generic_pybind_v<std::vector<T>>>
 inline py::object GetPyParamScalarImpl(type_pack<std::vector<T>> = {}) {
   return py::module::import("typing").attr("List")[GetPyParamScalarImpl<T>()];
 }
