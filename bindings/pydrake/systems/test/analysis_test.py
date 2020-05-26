@@ -2,20 +2,22 @@ import unittest
 
 from pydrake.symbolic import Variable, Expression
 from pydrake.systems.primitives import (
+    ConstantVectorSource,
     SymbolicVectorSystem,
-    SymbolicVectorSystem_
+    SymbolicVectorSystem_,
 )
 from pydrake.systems.framework import EventStatus
 from pydrake.systems.analysis import (
     RungeKutta2Integrator_,
     RegionOfAttraction,
     RegionOfAttractionOptions,
-    Simulator
+    Simulator,
+    SimulatorStatus,
 )
 from pydrake.trajectories import PiecewisePolynomial
 
 
-class AnalysisTest(unittest.TestCase):
+class TestAnalysis(unittest.TestCase):
     def test_region_of_attraction(self):
         x = Variable("x")
         sys = SymbolicVectorSystem(state=[x], dynamics=[-x+x**3])
@@ -48,6 +50,27 @@ class AnalysisTest(unittest.TestCase):
         self.assertEqual(pp.end_time(), 1.0)
         self.assertIsNone(integrator.get_dense_output())
 
+    def test_simulator_status(self):
+        SimulatorStatus.ReturnReason.kReachedBoundaryTime
+        SimulatorStatus.ReturnReason.kReachedTerminationCondition
+        SimulatorStatus.ReturnReason.kEventHandlerFailed
+
+        system = ConstantVectorSource([1.])
+        simulator = Simulator(system)
+        status = simulator.AdvanceTo(1.)
+        self.assertEqual(
+            status.FormatMessage(),
+            "Simulator successfully reached the boundary time (1.0).")
+        self.assertTrue(status.succeeded())
+        self.assertEqual(status.boundary_time(), 1.)
+        self.assertEqual(status.return_time(), 1.)
+        self.assertEqual(
+            status.reason(),
+            SimulatorStatus.ReturnReason.kReachedBoundaryTime)
+        self.assertIsNone(status.system())
+        self.assertEqual(status.message(), "")
+        self.assertTrue(status.IsIdenticalStatus(status))
+
     def test_system_monitor(self):
         x = Variable("x")
         sys = SymbolicVectorSystem(state=[x], dynamics=[-x+x**3])
@@ -60,5 +83,11 @@ class AnalysisTest(unittest.TestCase):
             else:
                 return EventStatus.DidNothing()
 
-        simulator.AdvanceTo(2.)
-        print(simulator.get_context().get_time())
+        self.assertIsNone(simulator.get_monitor())
+        simulator.set_monitor(monitor)
+        status = simulator.AdvanceTo(2.)
+        self.assertEqual(
+            status.reason(),
+            SimulatorStatus.ReturnReason.kReachedTerminationCondition)
+        self.assertLess(status.return_time(), 1.1)
+

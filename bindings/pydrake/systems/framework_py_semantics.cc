@@ -164,7 +164,7 @@ void DefineFrameworkPySemantics(py::module m) {
             py::arg("system"), py::arg("message"),
             cls_doc.Failed.doc)
         .def("severity", &Class::severity, cls_doc.severity.doc)
-        .def("system", &Class::system, cls_doc.system.doc)
+        .def("system", &Class::system, py_reference, cls_doc.system.doc)
         .def("message", &Class::message, cls_doc.message.doc)
         .def("KeepMoreSevere", &Class::KeepMoreSevere,
             cls_doc.KeepMoreSevere.doc);
