@@ -590,9 +590,8 @@ void DoScalarIndependentDefinitions(py::module m) {
         .def("size", &Box::size, py_reference_internal, doc.Box.size.doc);
     py::class_<HalfSpace, Shape>(m, "HalfSpace", doc.HalfSpace.doc)
         .def(py::init<>(), doc.HalfSpace.ctor.doc)
-        .def_static("MakePose", &HalfSpace::MakePose,
-            py::arg("Hz_dir_F"), py::arg("p_FB"),
-            doc.HalfSpace.MakePose.doc);
+        .def_static("MakePose", &HalfSpace::MakePose, py::arg("Hz_dir_F"),
+            py::arg("p_FB"), doc.HalfSpace.MakePose.doc);
     py::class_<Mesh, Shape>(m, "Mesh", doc.Mesh.doc)
         .def(py::init<std::string, double>(), py::arg("absolute_filename"),
             py::arg("scale") = 1.0, doc.Mesh.ctor.doc)
