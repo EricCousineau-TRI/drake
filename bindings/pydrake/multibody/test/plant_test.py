@@ -43,6 +43,7 @@ from pydrake.multibody.tree import (
 from pydrake.multibody.math import (
     SpatialForce_,
     SpatialVelocity_,
+    SpatialAcceleration_,
 )
 from pydrake.multibody.plant import (
     AddMultibodyPlantSceneGraph,
@@ -639,7 +640,7 @@ class TestPlant(unittest.TestCase):
         self.assertEqual(plant.GetAccelerationUpperLimits().shape, (nv,))
 
     @numpy_compare.check_all_types
-    def test_model_instance_port_access(self, T):
+    def test_port_access(self, T):
         # N.B. We actually test the values because some of the value bindings
         # are somewhat special snowflakes.
         MultibodyPlant = MultibodyPlant_[T]
@@ -691,23 +692,25 @@ class TestPlant(unittest.TestCase):
                     model_instance=model).Eval(context),
                 np.ndarray)
 
-        def check_output_port_that_cannot_be_used_in_python(port):
+        def extract_list_value(port):
             self.assertIsInstance(port, OutputPort)
-            if T == Expression:
-                return
-            with self.assertRaises(RuntimeError) as cm:
-                port.Eval(context)
-            self.assertIn("`get_value` cannot be called", str(cm.exception))
+            value = port.Eval(context)
+            self.assertIsInstance(value, list)
+            self.assertGreater(len(value), 0)
+            return value[0]
 
-        # TODO(eric.cousineau): Make `Value[List[T]]` work so we can test Eval
-        # for these items (#13387). Currently, these ports cannot be used for
-        # Python systems.
-        check_output_port_that_cannot_be_used_in_python(
-            plant.get_body_poses_output_port())
-        check_output_port_that_cannot_be_used_in_python(
-            plant.get_body_spatial_velocities_output_port())
-        check_output_port_that_cannot_be_used_in_python(
-            plant.get_body_spatial_accelerations_output_port())
+        self.assertIsInstance(
+            extract_list_value(plant.get_body_poses_output_port()),
+            RigidTransform_[T])
+        self.assertIsInstance(
+            extract_list_value(
+                plant.get_body_spatial_velocities_output_port()),
+            SpatialVelocity_[T])
+        if T != Expression:
+            self.assertIsInstance(
+                extract_list_value(
+                    plant.get_body_spatial_accelerations_output_port()),
+                SpatialAcceleration_[T])
         # TODO(eric.cousineau): Merge `check_applied_force_input_ports` into
         # this test.
 
@@ -738,10 +741,10 @@ class TestPlant(unittest.TestCase):
                 self.set_name("applied_force_test_system")
                 self.nv = nv
                 self.target_body_index = target_body_index
+                forces_cls = Value[List[ExternallyAppliedSpatialForce_[T]]]
                 self.DeclareAbstractOutputPort(
                     "spatial_forces_vector",
-                    lambda: Value[
-                        List[ExternallyAppliedSpatialForce_[T]]],
+                    lambda: forces_cls(),
                     self.DoCalcAbstractOutput)
                 self.DeclareVectorOutputPort(
                     "generalized_forces",
