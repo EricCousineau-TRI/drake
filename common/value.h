@@ -45,38 +45,58 @@ using ValueForwardingCtorEnabled = typename std::enable_if_t<
   // Disambiguate our copy implementation from our clone implementation.
   (choose_copy == std::is_copy_constructible<T>::value)>;
 
+// N.B. Using type tag because trying to convert via value directly breaks for
+// classes with deleted move or copy constructors.
+template <typename T>
+struct type_tag { using type = T; };
+
 // Simplify the Eigen type: discard all attributes, only keep dimension and
 // scalar type, and ensure it's dynamically-sized.
 template <typename Derived>
-static auto SimplifyEigenType(const Derived& value) {
+auto SimplifyEigenType(type_tag<Derived> = {}) {
   using Scalar = typename Derived::Scalar;
   if constexpr (Derived::ColsAtCompileTime == 1) {
-    return VectorX<Scalar>(value);
+    return type_tag<VectorX<Scalar>>{};
   } else {
-    return MatrixX<Scalar>(value);
+    return type_tag<MatrixX<Scalar>>{};
   }
 }
 
 // Ensure that all Eigen types are simplified for Python.
-template <typename ValueType>
-static const auto& MaybeConvertInput(const ValueType& value) {
-  if constexpr (is_eigen_type<ValueType>::value) {
-    return SimplifyEigenType(value);
+template <typename U>
+auto ResolveValueType(type_tag<U> tag = {}) {
+  if constexpr (is_eigen_type<U>::value) {
+    return SimplifyEigenType(tag);
   } else {
-    return value;
+    return tag;
   }
 }
 
 template <typename T>
 using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
-template <typename ValueType>
-using value_allowed_type_t =
-    remove_cvref_t<decltype(MaybeConvertInput(std::declval<ValueType>()))>;
+template <typename U>
+using resolve_value_type_t = typename decltype(ResolveValueType<U>())::type;
 
-template <typename ValueType>
-inline constexpr bool type_requires_conversion_v =
-    !std::is_same_v<ValueType, value_allowed_type_t<ValueType>>;
+template <typename T>
+inline constexpr bool value_type_requires_conversion_v =
+    !std::is_same_v<T, resolve_value_type_t<T>>;
+
+template <typename U, typename T>
+bool AssertValueIsConvertible(const T& value) {
+  if constexpr (is_eigen_type<T>::value) {
+    static_assert(std::is_same_v<T, resolve_value_type_t<U>>, "Must be same");;
+    // N.B. This only occurs with Eigen types.
+    // Normally, Eigen size checks are only performed for debug builds. We
+    // instead force these to happen in release mode too.
+    if constexpr (U::ColsAtCompileTime != Eigen::Dynamic) {
+      DRAKE_THROW_UNLESS(value.cols() == U::ColsAtCompileTime);
+    }
+    if constexpr (U::RowsAtCompileTime != Eigen::Dynamic) {
+      DRAKE_THROW_UNLESS(value.rows() == U::RowsAtCompileTime);
+    }
+  }
+}
 
 }  // namespace internal
 #endif
@@ -176,22 +196,35 @@ class AbstractValue {
   [[noreturn]] void ThrowCastError(const std::string&) const;
 
   template <typename T>
-  friend GetAbstractValue(const AbstractValue& value);
+  friend auto GetAbstractValue(const AbstractValue& value);
 
   // The TypeHash<T>::value supplied by the Value<T> constructor.
   const size_t type_hash_;
 };
 
-template <typename T>
+template <typename U>
 auto GetAbstractValue(const AbstractValue& value) {
-  using U = internal::value_allowed_type_t<T>;
-  return value.cast<U>().get_value();
+  using T = internal::resolve_value_type_t<U>;
+  const T& v = value.cast<T>().get_value();
+  internal::AssertValueIsConvertible<U>(v);
+  return v;
 }
 
-template <typename T>
-void SetAbstractValue(AbstractValue* value, const T& v) {
-  using U = internal::value_allowed_type_t<T>;
-  return value0>cast<U>().set_value(v);
+template <typename U, typename T = internal::resolve_value_type_t<U>>
+std::optional<U> MaybeGetAbstractValue(const AbstractValue& value) {
+  if (const T* v = value.cast<T>().maybe_get_value()) {
+    internal::AssertValueIsConvertible<U>(*v);
+    return *v;
+  } else {
+    return std::nullopt;
+  }
+}
+
+template <typename U>
+void SetAbstractValue(AbstractValue* value, const U& v) {
+  DRAKE_DEMAND(value != nullptr);
+  using T = internal::resolve_value_type_t<U>;
+  return value->cast<T>().set_value(v);
 }
 
 /// A container class for an arbitrary type T.  This class inherits from
@@ -220,7 +253,11 @@ class Value : public AbstractValue {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Value)
 
   static_assert(
-      !internal::type_requires_conversion_v<T>,
+      std::is_same_v<T, internal::remove_cvref_t<T>>,
+      "T should not have const, volatile, or reference specifiers.");
+
+  static_assert(
+      !internal::value_type_requires_conversion_v<T>,
       "This type requires conversion and is not allowed in Value<T>. Please "
       "use AbstractValue::Make(T{}), GetAbstractValue<T>(...), and "
       "SetAbstractValue<T>(...) instead.");
@@ -666,7 +703,7 @@ struct ValueTraitsImpl<T, false> {
 
 template <typename T>
 std::unique_ptr<AbstractValue> AbstractValue::Make(const T& value) {
-  using U = internal::value_allowed_type_t<T>;
+  using U = internal::resolve_value_type_t<T>;
   return std::unique_ptr<AbstractValue>(new Value<U>(value));
 }
 

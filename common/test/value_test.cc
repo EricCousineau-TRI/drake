@@ -10,8 +10,14 @@
 #include <gtest/gtest.h>
 
 #include "drake/common/drake_copyable.h"
+#include "drake/common/eigen_types.h"
 #include "drake/common/test_utilities/expect_no_throw.h"
 #include "drake/systems/framework/test_utilities/my_vector.h"
+
+using Eigen::Matrix3d;
+using Eigen::MatrixXd;
+using Eigen::Vector3d;
+using Eigen::VectorXd;
 
 namespace drake {
 namespace test {
@@ -348,6 +354,23 @@ GTEST_TEST(ValueTest, SubclassOfValueSurvivesClone) {
       dynamic_cast<PrintInterface*>(cloned.get());
   ASSERT_NE(nullptr, printable_erased);
   EXPECT_EQ("5,6", printable_erased->print());
+}
+
+// Tests eigen types.
+GTEST_TEST(ValueTest, EigenTypeMetaTest) {
+  using internal::resolve_value_type_t;
+  static_assert(
+      std::is_same_v<resolve_value_type_t<VectorXd>, VectorXd>,
+      "Should not be converted");
+  static_assert(
+      std::is_same_v<resolve_value_type_t<Vector3d>, VectorXd>,
+      "Should be converted");
+  static_assert(
+      std::is_same_v<resolve_value_type_t<MatrixXd>, MatrixXd>,
+      "Should not be converted");
+  static_assert(
+      std::is_same_v<resolve_value_type_t<Matrix3d>, MatrixXd>,
+      "Should be converted");
 }
 
 // Check that TypeHash is extracting exactly the right strings from
