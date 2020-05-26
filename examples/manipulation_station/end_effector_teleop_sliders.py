@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 try:
     import tkinter as tk
@@ -19,7 +20,7 @@ from pydrake.systems.framework import (BasicVector, DiagramBuilder,
                                        LeafSystem)
 from pydrake.systems.lcm import LcmPublisherSystem
 from pydrake.systems.meshcat_visualizer import MeshcatVisualizer
-from pydrake.systems.primitives import FirstOrderLowPassFilter
+from pydrake.systems.primitives import FirstOrderLowPassFilter, SignalLogger
 from pydrake.systems.sensors import ImageToLcmImageArrayT, PixelType
 from pydrake.systems.planar_scenegraph_visualizer import \
     PlanarSceneGraphVisualizer
@@ -313,6 +314,16 @@ def main():
     builder.Connect(wsg_buttons.GetOutputPort("force_limit"),
                     station.GetInputPort("wsg_force_limit"))
 
+    # When in regression test mode, log our joint velocities to later check
+    # that they were sufficiently quiet.
+    num_iiwa_joints = station.num_iiwa_joints()
+    if args.test:
+        iiwa_velocities = builder.AddSystem(SignalLogger(num_iiwa_joints))
+        builder.Connect(station.GetOutputPort("iiwa_velocity_estimated"),
+                        iiwa_velocities.get_input_port(0))
+    else:
+        iiwa_velocities = None
+
     diagram = builder.Build()
     simulator = Simulator(diagram)
 
@@ -323,9 +334,16 @@ def main():
         station, simulator.get_mutable_context())
 
     station.GetInputPort("iiwa_feedforward_torque").FixValue(
-        station_context, np.zeros(station.num_iiwa_joints()))
+        station_context, np.zeros(num_iiwa_joints))
 
-    simulator.AdvanceTo(1e-6)
+    # If the diagram is only the hardware interface, then we must advance it a
+    # little bit so that first LCM messages get processed. A simulated plant is
+    # already publishing correct positions even without advancing, and indeed
+    # we must not advance a simulated plant until the sliders and filters have
+    # been initialized to match the plant.
+    if args.hardware:
+        simulator.AdvanceTo(1e-6)
+
     q0 = station.GetOutputPort("iiwa_position_measured").Eval(
         station_context)
     differential_ik.parameters.set_nominal_joint_position(q0)
@@ -341,6 +359,17 @@ def main():
 
     simulator.set_target_realtime_rate(args.target_realtime_rate)
     simulator.AdvanceTo(args.duration)
+
+    # Ensure that our initialization logic was correct, by inspecting our
+    # logged joint velocities.
+    if args.test:
+        for time, qdot in zip(iiwa_velocities.sample_times(),
+                              iiwa_velocities.data().transpose()):
+            # TODO(jwnimmer-tri) We should be able to do better than a 40
+            # rad/sec limit, but that's the best we can enforce for now.
+            if qdot.max() > 0.1:
+                print(f"ERROR: large qdot {qdot} at time {time}")
+                sys.exit(1)
 
 
 if __name__ == '__main__':
