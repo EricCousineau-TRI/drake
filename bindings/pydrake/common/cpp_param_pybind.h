@@ -97,11 +97,11 @@ py::object GetParamAliases();
 py::object GetPyParamScalarImpl(const std::type_info& tinfo);
 
 // Gets Python type for a C++ type (base case).
-template <typename T>
+template <typename T, typename = void>
 inline py::object GetPyParamScalarImpl(type_pack<T> = {}) {
   static_assert(!py::detail::is_pyobject<T>::value,
       "You cannot use `pybind11` types (e.g. `py::object`). Use a publicly "
-      "visible replacement type instead, please.");
+      "visible replacement type instead (e.g. `drake::pydrake::Object`).");
   return GetPyParamScalarImpl(typeid(T));
 }
 
@@ -116,9 +116,11 @@ inline py::object GetPyParamScalarImpl(
 // PYBIND11_MAKE_OPAQUE.
 template <
     typename T,
-    typename SFINAE = internal::is_generic_pybind_v<std::vector<T>>>
+    typename SFINAE = std::enable_if_t<
+        internal::is_generic_pybind_v<std::vector<T>>>>
 inline py::object GetPyParamScalarImpl(type_pack<std::vector<T>> = {}) {
-  return py::module::import("typing").attr("List")[GetPyParamScalarImpl<T>()];
+  py::object py_T = GetPyParamScalarImpl(type_pack<T>{});
+  return py::module::import("typing").attr("List")[py_T];
 }
 
 }  // namespace internal
