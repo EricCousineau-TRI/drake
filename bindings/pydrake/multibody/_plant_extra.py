@@ -4,6 +4,7 @@ import typing as _typing
 import pydrake.autodiffutils as _ad
 import pydrake.symbolic as _sym
 from pydrake.common import cpp_template as _cpp_template
+from pydrake.common.value import Value as _Value
 from pydrake.common.deprecation import deprecated as _deprecated
 
 _PARAM_LIST = (
@@ -24,17 +25,17 @@ The deprecated code will be removed from Drake on or after 2020-09-01.
     "VectorExternallyAppliedSpatialForced_", _PARAM_LIST)
 def VectorExternallyAppliedSpatialForced_(param):
     T, = param
-    preferred_cls = _typing.List[ExternallyAppliedSpatialForced_[T]]
+    preferred_cls = _typing.List[ExternallyAppliedSpatialForce_[T]]
 
     class Impl(preferred_cls):
-        _PREFERRED_CLS = _typing.List[ExternallyAppliedSpatialForced_[T]]
+        _PREFERRED_CLS = _typing.List[ExternallyAppliedSpatialForce_[T]]
         def __init__(self, value=None):
             if value is not None:
                 super().__init__()
             else:
                 super().__init__(value)
 
-    Impl.__doc__ = f"Warning:\n{indent(_deprecation_msg, '    ')}"
+    Impl.__doc__ = f"Warning:\n{_textwrap.indent(_deprecation_msg, '    ')}"
     return Impl
 
 
@@ -44,8 +45,8 @@ def _deprecate_vector_instantiations():
         cls, _ = VectorExternallyAppliedSpatialForced_.deprecate_instantiation(
             param, _deprecation_msg)
         # Add deprecated alias to Value[].
-        Value.add_instantiation(param, cls._PREFERRED_CLS)
-        Value.deprecate_instantiation(param, _deprecation_msg)
+        _Value.add_instantiation(param, cls._PREFERRED_CLS)
+        _Value.deprecate_instantiation(param, _deprecation_msg)
 
 
 _deprecate_vector_instantiations()

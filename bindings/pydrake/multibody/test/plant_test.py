@@ -66,7 +66,7 @@ from pydrake.multibody.benchmarks.acrobot import (
 from pydrake.common import FindResourceOrThrow
 from pydrake.common.deprecation import install_numpy_warning_filters
 from pydrake.common.test_utilities import numpy_compare
-from pydrake.common.value import AbstractValue
+from pydrake.common.value import AbstractValue, Value
 from pydrake.geometry import (
     Box,
     GeometryId,
@@ -721,7 +721,7 @@ class TestPlant(unittest.TestCase):
                 self.DeclareAbstractOutputPort(
                     "spatial_forces_vector",
                     lambda: Value[
-                        List[VectorExternallyAppliedSpatialForced_[T]]],
+                        List[ExternallyAppliedSpatialForce_[T]]],
                     self.DoCalcAbstractOutput)
                 self.DeclareVectorOutputPort(
                     "generalized_forces",
