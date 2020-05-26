@@ -62,6 +62,7 @@ drake_pybind_library(
     py_deps = [
         ":module_py",
         "//bindings/pydrake/common:cpp_template_py",
+        "//bindings/pydrake/common:value_py",
     ],
 )
 
