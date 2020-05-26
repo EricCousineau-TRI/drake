@@ -83,8 +83,7 @@ GTEST_TEST(CppParamTest, Packs) {
 GTEST_TEST(CppParamTest, Typing) {
   ASSERT_TRUE(CheckPyParam<std::vector<int>>("List[int],"));
   ASSERT_TRUE(CheckPyParam<std::vector<std::vector<int>>>("List[List[int]],"));
-  ASSERT_TRUE(
-      CheckPyParam<std::vector<CustomCppType>>("List[CustomCppType],"));
+  ASSERT_TRUE(CheckPyParam<std::vector<CustomCppType>>("List[CustomCppType],"));
 }
 
 int main(int argc, char** argv) {
