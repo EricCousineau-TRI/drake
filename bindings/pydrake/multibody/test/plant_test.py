@@ -66,6 +66,7 @@ from pydrake.multibody.benchmarks.acrobot import (
 from pydrake.common import FindResourceOrThrow
 from pydrake.common.deprecation import install_numpy_warning_filters
 from pydrake.common.test_utilities import numpy_compare
+from pydrake.common.test_utilities.deprecation import catch_drake_warnings
 from pydrake.common.value import AbstractValue, Value
 from pydrake.geometry import (
     Box,
@@ -709,6 +710,21 @@ class TestPlant(unittest.TestCase):
         # TODO(eric.cousineau): Merge `check_applied_force_input_ports` into
         # this test.
 
+    @numpy_compare.check_all_types
+    def test_deprecated_vector_value(self, T):
+        with catch_drake_warnings(expected_count=1) as w:
+            cls = VectorExternallyAppliedSpatialForced_[T]
+        with catch_drake_warnings(expected_count=1) as w:
+            value_cls = Value[cls]
+        self.assertIn("list()", str(w[0].message))
+        self.assertIs(
+            value_cls, Value[List[ExternallyAppliedSpatialForce_[T]]])
+        force = ExternallyAppliedSpatialForce_[T]()
+        example_empty = cls()
+        example_nonempty = cls([force])
+        self.assertEqual(example_empty, [])
+        self.assertEqual(example_nonempty, [force])
+
     @TemplateSystem.define("AppliedForceTestSystem_")
     def AppliedForceTestSystem_(T):
 
@@ -733,16 +749,16 @@ class TestPlant(unittest.TestCase):
                     self, other.nv, other.target_body_index,
                     converter=converter)
 
-            def DoCalcAbstractOutput(self, context, y_data):
+            def DoCalcAbstractOutput(self, context, spatial_forces_vector):
                 test_force = ExternallyAppliedSpatialForce_[T]()
                 test_force.body_index = self.target_body_index
                 test_force.p_BoBq_B = np.zeros(3)
                 test_force.F_Bq_W = SpatialForce_[T](
                     tau=[0., 0., 0.], f=[0., 0., 1.])
-                y_data.set_value([test_force])
+                spatial_forces_vector.set_value([test_force])
 
-            def DoCalcVectorOutput(self, context, y_data):
-                y_data.SetFromVector(np.zeros(self.nv))
+            def DoCalcVectorOutput(self, context, generalized_forces):
+                generalized_forces.SetFromVector(np.zeros(self.nv))
 
         return Impl
 

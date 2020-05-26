@@ -25,12 +25,12 @@ The deprecated code will be removed from Drake on or after 2020-09-01.
     "VectorExternallyAppliedSpatialForced_", _PARAM_LIST)
 def VectorExternallyAppliedSpatialForced_(param):
     T, = param
-    preferred_cls = _typing.List[ExternallyAppliedSpatialForce_[T]]
 
-    class Impl(preferred_cls):
-        _PREFERRED_CLS = _typing.List[ExternallyAppliedSpatialForce_[T]]
+    class Impl(list):
+        _PREFERRED_PARAM = _typing.List[ExternallyAppliedSpatialForce_[T]]
+
         def __init__(self, value=None):
-            if value is not None:
+            if value is None:
                 super().__init__()
             else:
                 super().__init__(value)
@@ -44,9 +44,10 @@ def _deprecate_vector_instantiations():
         # Deprecate old type.
         cls, _ = VectorExternallyAppliedSpatialForced_.deprecate_instantiation(
             param, _deprecation_msg)
-        # Add deprecated alias to Value[].
-        _Value.add_instantiation(param, cls._PREFERRED_CLS)
-        _Value.deprecate_instantiation(param, _deprecation_msg)
+        # Add deprecated alias to Value[] using the correct new class.
+        preferred_cls = _Value[cls._PREFERRED_PARAM]
+        _Value.add_instantiation(cls, preferred_cls)
+        _Value.deprecate_instantiation(cls, _deprecation_msg)
 
 
 _deprecate_vector_instantiations()
