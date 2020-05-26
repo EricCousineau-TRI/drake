@@ -112,6 +112,13 @@ inline py::object GetPyParamScalarImpl(
   return py::cast(Value);
 }
 
+// Gets Python literal for a generic C++ list.
+template <
+    typename T, typename SFINAIE = is_generic_pybind<std::vector<T>>::value>
+inline py::object GetPyParamScalarImpl(type_pack<std::vector<T>> = {}) {
+  return py::module::import("typing").attr("List")[GetPyParamScalarImpl<T>()];
+}
+
 }  // namespace internal
 
 /// Gets the canonical Python parameters for each C++ type.
