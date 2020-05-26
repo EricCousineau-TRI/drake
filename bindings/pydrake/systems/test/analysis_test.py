@@ -49,6 +49,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertIsNone(integrator.get_dense_output())
 
     def test_system_monitor(self):
+        x = Variable("x")
         sys = SymbolicVectorSystem(state=[x], dynamics=[-x+x**3])
         simulator = Simulator(sys)
 

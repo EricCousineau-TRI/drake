@@ -31,6 +31,7 @@ from pydrake.systems.framework import (
     DiscreteUpdateEvent, DiscreteUpdateEvent_,
     DiscreteValues, DiscreteValues_,
     Event, Event_,
+    EventStatus,
     InputPort, InputPort_,
     kUseDefaultName,
     LeafContext, LeafContext_,
