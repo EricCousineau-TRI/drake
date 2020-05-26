@@ -263,7 +263,7 @@ class GeometryProperties {
   template <typename ValueType>
   void AddProperty(const std::string& group_name, const std::string& name,
                    const ValueType& value) {
-    AddPropertyAbstract(group_name, name, Value(MaybeConvertInput(value)));
+    AddPropertyAbstract(group_name, name, AbstractValue::MakeDirect(value));
   }
 
   /** Adds a property with the given `name` and type-erased `value` to the the
@@ -412,26 +412,16 @@ class GeometryProperties {
   static const auto& GetValueOrThrow(
       const std::string& method, const std::string& group_name,
       const std::string& name, const AbstractValue& abstract) {
-    using InternalType = resolve_internal_type<ValueType>;
-    const InternalType* value = abstract.maybe_get_value<InternalType>();
+    using T = drake::internal::resolve_value_type_t<ValueType>;
+    const T* value = abstract.maybe_get_value<T>();
     if (value == nullptr) {
       throw std::logic_error(fmt::format(
           "{}(): The property '{}' in group '{}' exists, "
           "but is of a different type. Requested '{}', but found '{}'",
-          method, name, group_name, NiceTypeName::Get<InternalType>(),
+          method, name, group_name, NiceTypeName::Get<T>(),
           abstract.GetNiceTypeName()));
     }
-    if constexpr (!std::is_same<ValueType, InternalType>::value) {
-      // N.B. This only occurs with Eigen types.
-      // Normally, Eigen size checks are only performed for debug builds. We
-      // instead force these to happen in release mode too.
-      if constexpr (ValueType::ColsAtCompileTime != Eigen::Dynamic) {
-        DRAKE_THROW_UNLESS(value->cols() == ValueType::ColsAtCompileTime);
-      }
-      if constexpr (ValueType::RowsAtCompileTime != Eigen::Dynamic) {
-        DRAKE_THROW_UNLESS(value->rows() == ValueType::RowsAtCompileTime);
-      }
-    }
+    drake::internal::AssertValueIsConvertible<ValueType>(*value);
     return *value;
   }
 

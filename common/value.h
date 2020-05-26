@@ -122,8 +122,13 @@ class AbstractValue {
 
   virtual ~AbstractValue();
 
-  /// Returns an AbstractValue containing the given @p value. The type U may be
+  /// Returns Value<T> containing the given @p value. The type U may be
   /// converted.
+  template <typename U>
+  static auto MakeDirect(const U& value);
+
+  /// Returns unique_ptr<AbstractValue> containing the given @p value. The type
+  /// U may be converted.
   template <typename U>
   static std::unique_ptr<AbstractValue> Make(const U& value);
 
@@ -714,6 +719,12 @@ template <typename U>
 std::unique_ptr<AbstractValue> AbstractValue::Make(const U& value) {
   using T = internal::resolve_value_type_t<U>;
   return std::unique_ptr<AbstractValue>(new Value<T>(value));
+}
+
+template <typename U>
+auto AbstractValue::MakeDirect(const U& value) {
+  using T = internal::resolve_value_type_t<U>;
+  return Value<T>(value);
 }
 
 template <typename T>
