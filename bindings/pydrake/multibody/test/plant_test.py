@@ -712,6 +712,7 @@ class TestPlant(unittest.TestCase):
 
     @numpy_compare.check_all_types
     def test_deprecated_vector_value(self, T):
+        print(VectorExternallyAppliedSpatialForced_)
         with catch_drake_warnings(expected_count=1) as w:
             cls = VectorExternallyAppliedSpatialForced_[T]
         with catch_drake_warnings(expected_count=1) as w:
