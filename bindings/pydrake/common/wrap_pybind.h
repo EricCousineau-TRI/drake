@@ -25,8 +25,9 @@ namespace internal {
 // a reference passed through. Otherwise, the type uses type-conversion:
 // https://pybind11.readthedocs.io/en/stable/advanced/cast/index.html
 template <typename T>
-using is_generic_pybind = std::is_base_of<py::detail::type_caster_generic,
-    py::detail::make_caster<T>>;
+using is_generic_pybind =
+    std::is_base_of<
+        py::detail::type_caster_generic, py::detail::make_caster<T>>;
 
 template <typename T>
 inline constexpr bool is_generic_pybind_v = is_generic_pybind<T>::value;

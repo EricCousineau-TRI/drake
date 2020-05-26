@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 #include "drake/bindings/pydrake/common/type_pack.h"
 #include "drake/bindings/pydrake/common/wrap_pybind.h"
@@ -97,7 +98,7 @@ py::object GetParamAliases();
 py::object GetPyParamScalarImpl(const std::type_info& tinfo);
 
 // Gets Python type for a C++ type (base case).
-template <typename T, typename = void>
+template <typename T>
 inline py::object GetPyParamScalarImpl(type_pack<T> = {}) {
   static_assert(!py::detail::is_pyobject<T>::value,
       "You cannot use `pybind11` types (e.g. `py::object`). Use a publicly "
@@ -114,13 +115,15 @@ inline py::object GetPyParamScalarImpl(
 
 // Gets Python literal for a generic C++ list that is not registered using
 // PYBIND11_MAKE_OPAQUE.
-template <
-    typename T,
-    typename SFINAE = std::enable_if_t<
-        internal::is_generic_pybind_v<std::vector<T>>>>
+template <typename T>
 inline py::object GetPyParamScalarImpl(type_pack<std::vector<T>> = {}) {
+  // Get inner type for validation.
   py::object py_T = GetPyParamScalarImpl(type_pack<T>{});
-  return py::module::import("typing").attr("List")[py_T];
+  if constexpr (!internal::is_generic_pybind_v<std::vector<T>>) {
+    return py::module::import("typing").attr("List")[py_T];
+  } else {
+    return GetPyParamScalarImpl(typeid(std::vector<T>));
+  }
 }
 
 }  // namespace internal
