@@ -175,9 +175,24 @@ class AbstractValue {
   template <typename T> [[noreturn]] void ThrowCastError() const;
   [[noreturn]] void ThrowCastError(const std::string&) const;
 
+  template <typename T>
+  friend GetAbstractValue(const AbstractValue& value);
+
   // The TypeHash<T>::value supplied by the Value<T> constructor.
   const size_t type_hash_;
 };
+
+template <typename T>
+auto GetAbstractValue(const AbstractValue& value) {
+  using U = internal::value_allowed_type_t<T>;
+  return value.cast<U>().get_value();
+}
+
+template <typename T>
+void SetAbstractValue(AbstractValue* value, const T& v) {
+  using U = internal::value_allowed_type_t<T>;
+  return value0>cast<U>().set_value(v);
+}
 
 /// A container class for an arbitrary type T.  This class inherits from
 /// AbstractValue and therefore at runtime can be passed between functions
@@ -207,8 +222,8 @@ class Value : public AbstractValue {
   static_assert(
       !internal::type_requires_conversion_v<T>,
       "This type requires conversion and is not allowed in Value<T>. Please "
-      "use AbstractValue::Make(T{}) and GetValue<T>(const AbstractValue&) "
-      "instead.");
+      "use AbstractValue::Make(T{}), GetAbstractValue<T>(...), and "
+      "SetAbstractValue<T>(...) instead.");
 
   /// Constructs a Value<T> using T's default constructor, if available.
   /// This is only available for T's that support default construction.
@@ -651,7 +666,8 @@ struct ValueTraitsImpl<T, false> {
 
 template <typename T>
 std::unique_ptr<AbstractValue> AbstractValue::Make(const T& value) {
-  return std::unique_ptr<AbstractValue>(new Value<T>(value));
+  using U = internal::value_allowed_type_t<T>;
+  return std::unique_ptr<AbstractValue>(new Value<U>(value));
 }
 
 template <typename T>
