@@ -148,7 +148,7 @@ void DefineFrameworkPySemantics(py::module m) {
     py::enum_<Enum>(cls, "Severity", enum_doc.doc)
         .value("kDidNothing", Enum::kDidNothing, enum_doc.kDidNothing.doc)
         .value("kSucceeded", Enum::kSucceeded, enum_doc.kSucceeded.doc)
-        .value("kReachedTermination", Enum::kReachedTermination, 
+        .value("kReachedTermination", Enum::kReachedTermination,
             enum_doc.kReachedTermination.doc)
         .value("kFailed", Enum::kFailed, enum_doc.kFailed.doc);
 
@@ -156,13 +156,11 @@ void DefineFrameworkPySemantics(py::module m) {
     cls  // BR
         .def_static("DidNothing", &Class::DidNothing, cls_doc.DidNothing.doc)
         .def_static("Succeeded", &Class::Succeeded, cls_doc.Succeeded.doc)
-        .def_static(
-            "ReachedTermination", &Class::ReachedTermination,
+        .def_static("ReachedTermination", &Class::ReachedTermination,
             py::arg("system"), py::arg("message"),
             cls_doc.ReachedTermination.doc)
-        .def_static("Failed", &Class::Failed,
-            py::arg("system"), py::arg("message"),
-            cls_doc.Failed.doc)
+        .def_static("Failed", &Class::Failed, py::arg("system"),
+            py::arg("message"), cls_doc.Failed.doc)
         .def("severity", &Class::severity, cls_doc.severity.doc)
         .def("system", &Class::system, py_reference, cls_doc.system.doc)
         .def("message", &Class::message, cls_doc.message.doc)

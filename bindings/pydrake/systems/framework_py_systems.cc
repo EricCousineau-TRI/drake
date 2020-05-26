@@ -704,8 +704,7 @@ void DoScalarIndependentDefinitions(py::module m) {
     using Class = SystemBase;
     constexpr auto& cls_doc = doc.SystemBase;
     py::class_<Class>(m, "SystemBase", cls_doc.doc)
-        .def("GetSystemType", &Class::GetSystemType,
-            cls_doc.GetSystemType.doc)
+        .def("GetSystemType", &Class::GetSystemType, cls_doc.GetSystemType.doc)
         .def("get_name", &Class::get_name, cls_doc.get_name.doc)
         .def("set_name", &Class::set_name, cls_doc.set_name.doc)
         // Topology.
@@ -722,8 +721,7 @@ void DoScalarIndependentDefinitions(py::module m) {
         // Dependency tickets that do not have an index argument.
         .def_static("accuracy_ticket", &Class::accuracy_ticket,
             cls_doc.accuracy_ticket.doc)
-        .def_static("all_input_ports_ticket",
-            &Class::all_input_ports_ticket,
+        .def_static("all_input_ports_ticket", &Class::all_input_ports_ticket,
             cls_doc.all_input_ports_ticket.doc)
         .def_static("all_parameters_ticket", &Class::all_parameters_ticket,
             cls_doc.all_parameters_ticket.doc)
@@ -733,51 +731,37 @@ void DoScalarIndependentDefinitions(py::module m) {
             cls_doc.all_state_ticket.doc)
         .def_static("configuration_ticket", &Class::configuration_ticket,
             cls_doc.configuration_ticket.doc)
-        .def_static(
-            "ke_ticket", &Class::ke_ticket, cls_doc.ke_ticket.doc)
+        .def_static("ke_ticket", &Class::ke_ticket, cls_doc.ke_ticket.doc)
         .def_static("kinematics_ticket", &Class::kinematics_ticket,
             cls_doc.kinematics_ticket.doc)
         .def_static("nothing_ticket", &Class::nothing_ticket,
             cls_doc.nothing_ticket.doc)
+        .def_static("pa_ticket", &Class::pa_ticket, cls_doc.pa_ticket.doc)
+        .def_static("pc_ticket", &Class::pc_ticket, cls_doc.pc_ticket.doc)
+        .def_static("pe_ticket", &Class::pe_ticket, cls_doc.pe_ticket.doc)
+        .def_static("pn_ticket", &Class::pn_ticket, cls_doc.pn_ticket.doc)
+        .def_static("pnc_ticket", &Class::pnc_ticket, cls_doc.pnc_ticket.doc)
+        .def_static("q_ticket", &Class::q_ticket, cls_doc.q_ticket.doc)
+        .def_static("time_ticket", &Class::time_ticket, cls_doc.time_ticket.doc)
+        .def_static("v_ticket", &Class::v_ticket, cls_doc.v_ticket.doc)
+        .def_static("xa_ticket", &Class::xa_ticket, cls_doc.xa_ticket.doc)
+        .def_static("xc_ticket", &Class::xc_ticket, cls_doc.xc_ticket.doc)
         .def_static(
-            "pa_ticket", &Class::pa_ticket, cls_doc.pa_ticket.doc)
-        .def_static(
-            "pc_ticket", &Class::pc_ticket, cls_doc.pc_ticket.doc)
-        .def_static(
-            "pe_ticket", &Class::pe_ticket, cls_doc.pe_ticket.doc)
-        .def_static(
-            "pn_ticket", &Class::pn_ticket, cls_doc.pn_ticket.doc)
-        .def_static("pnc_ticket", &Class::pnc_ticket,
-            cls_doc.pnc_ticket.doc)
-        .def_static(
-            "q_ticket", &Class::q_ticket, cls_doc.q_ticket.doc)
-        .def_static("time_ticket", &Class::time_ticket,
-            cls_doc.time_ticket.doc)
-        .def_static(
-            "v_ticket", &Class::v_ticket, cls_doc.v_ticket.doc)
-        .def_static(
-            "xa_ticket", &Class::xa_ticket, cls_doc.xa_ticket.doc)
-        .def_static(
-            "xc_ticket", &Class::xc_ticket, cls_doc.xc_ticket.doc)
-        .def_static("xcdot_ticket", &Class::xcdot_ticket,
-            cls_doc.xcdot_ticket.doc)
-        .def_static(
-            "xd_ticket", &Class::xd_ticket, cls_doc.xd_ticket.doc)
-        .def_static(
-            "z_ticket", &Class::z_ticket, cls_doc.z_ticket.doc)
+            "xcdot_ticket", &Class::xcdot_ticket, cls_doc.xcdot_ticket.doc)
+        .def_static("xd_ticket", &Class::xd_ticket, cls_doc.xd_ticket.doc)
+        .def_static("z_ticket", &Class::z_ticket, cls_doc.z_ticket.doc)
         // Dependency tickets that do have an index argument.
         // (We do not bind output_port_ticket because it's marked "internal".)
-        .def("abstract_parameter_ticket",
-            &Class::abstract_parameter_ticket, py::arg("index"),
-            cls_doc.abstract_parameter_ticket.doc)
+        .def("abstract_parameter_ticket", &Class::abstract_parameter_ticket,
+            py::arg("index"), cls_doc.abstract_parameter_ticket.doc)
         .def("abstract_state_ticket", &Class::abstract_state_ticket,
             py::arg("index"), cls_doc.abstract_state_ticket.doc)
-        .def("cache_entry_ticket", &Class::cache_entry_ticket,
-            py::arg("index"), cls_doc.cache_entry_ticket.doc)
+        .def("cache_entry_ticket", &Class::cache_entry_ticket, py::arg("index"),
+            cls_doc.cache_entry_ticket.doc)
         .def("discrete_state_ticket", &Class::discrete_state_ticket,
             py::arg("index"), cls_doc.discrete_state_ticket.doc)
-        .def("input_port_ticket", &Class::input_port_ticket,
-            py::arg("index"), cls_doc.input_port_ticket.doc)
+        .def("input_port_ticket", &Class::input_port_ticket, py::arg("index"),
+            cls_doc.input_port_ticket.doc)
         .def("numeric_parameter_ticket", &Class::numeric_parameter_ticket,
             py::arg("index"), cls_doc.numeric_parameter_ticket.doc);
   }

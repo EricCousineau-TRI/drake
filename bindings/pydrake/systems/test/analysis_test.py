@@ -90,4 +90,3 @@ class TestAnalysis(unittest.TestCase):
             status.reason(),
             SimulatorStatus.ReturnReason.kReachedTerminationCondition)
         self.assertLess(status.return_time(), 1.1)
-

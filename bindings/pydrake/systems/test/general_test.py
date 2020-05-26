@@ -778,7 +778,8 @@ class TestGeneral(unittest.TestCase):
         status = EventStatus.ReachedTermination(system=system, message="done")
         # Check API.
         self.assertIsInstance(status, EventStatus)
-        self.assertEqual(status.severity(), EventStatus.Severity.kReachedTermination)
+        self.assertEqual(
+            status.severity(), EventStatus.Severity.kReachedTermination)
         self.assertIs(status.system(), system)
         self.assertEqual(status.message(), "done")
         self.assertIsInstance(status.KeepMoreSevere(status), EventStatus)

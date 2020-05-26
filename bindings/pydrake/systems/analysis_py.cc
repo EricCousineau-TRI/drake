@@ -135,10 +135,8 @@ PYBIND11_MODULE(analysis, m) {
             doc.Simulator.AdvanceTo.doc)
         .def("AdvancePendingEvents", &Simulator<T>::AdvancePendingEvents,
             doc.Simulator.AdvancePendingEvents.doc)
-        .def("set_monitor",
-            WrapCallbacks(&Simulator<T>::set_monitor),
-            py::arg("monitor"),
-            doc.Simulator.set_monitor.doc)
+        .def("set_monitor", WrapCallbacks(&Simulator<T>::set_monitor),
+            py::arg("monitor"), doc.Simulator.set_monitor.doc)
         .def("clear_monitor", &Simulator<T>::clear_monitor,
             doc.Simulator.clear_monitor.doc)
         .def("get_monitor", &Simulator<T>::get_monitor,
