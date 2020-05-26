@@ -235,6 +235,7 @@ class TestGeometry(unittest.TestCase):
             mut.Cylinder(radius=1.0, length=2.0),
             mut.Box(width=1.0, depth=2.0, height=3.0),
             mut.HalfSpace(),
+            mut.HalfSpace.MakePose(Hz_dir_F=[0, 1, 0], p_FB=[1, 1, 1]),
             mut.Mesh(absolute_filename=box_mesh_path, scale=1.0),
             mut.Convex(absolute_filename=box_mesh_path, scale=1.0)
         ]
