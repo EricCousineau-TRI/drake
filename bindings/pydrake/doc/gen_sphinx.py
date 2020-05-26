@@ -49,7 +49,6 @@ def get_submodules(name):
         if sys.modules[s_name] is None:
             continue
         out.append(s_name)
-    print(out)
     return sorted(out)
 
 

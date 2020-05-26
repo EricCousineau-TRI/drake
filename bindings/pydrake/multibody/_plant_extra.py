@@ -1,12 +1,12 @@
 import textwrap as _textwrap
 import typing as _typing
-import sys
+import sys as _sys
 
 import pydrake.autodiffutils as _ad
 import pydrake.symbolic as _sym
 from pydrake.common import cpp_template as _cpp_template
+from pydrake.common.deprecation import _warn_deprecated
 from pydrake.common.value import Value as _Value
-from pydrake.common.deprecation import deprecated as _deprecated
 
 _PARAM_LIST = (
     (float,),
@@ -23,31 +23,24 @@ The deprecated code will be removed from Drake on or after 2020-09-01.
 
 
 @_cpp_template.TemplateClass.define(
-    "VectorExternallyAppliedSpatialForced_",
-    _PARAM_LIST,
-    scope=sys.modules[__name__])
+    "VectorExternallyAppliedSpatialForced_", _PARAM_LIST,
+    # N.B. We must pass `scope` here for this code which is execute via a
+    # Python C extension.
+    scope=_sys.modules[__name__])
 def VectorExternallyAppliedSpatialForced_(param):
-    T, = param
 
     class Impl(list):
-        _PREFERRED_PARAM = _typing.List[ExternallyAppliedSpatialForce_[T]]
+        def __new__(cls, *args, **kwargs):
+            _warn_deprecated(_deprecation_msg)
+            return list(*args, **kwargs)
 
-        def __init__(self, value=None):
-            if value is None:
-                super().__init__()
-            else:
-                super().__init__(value)
-
+    # N.B. For whatever reason, Sphinx / Python docstrings work best in Sphinx
+    # when using a multiline string.
     Impl.__doc__ = f"""
     Warning:
         {_textwrap.indent(_deprecation_msg, ' '*8).lstrip()}
     """
-    # Impl.__doc__ = f"Warning:\n{}"
     return Impl
-
-
-VectorExternallyAppliedSpatialForced = (
-    VectorExternallyAppliedSpatialForced_[None])
 
 
 def _deprecate_vector_instantiations():
@@ -56,9 +49,16 @@ def _deprecate_vector_instantiations():
         cls, _ = VectorExternallyAppliedSpatialForced_.deprecate_instantiation(
             param, _deprecation_msg)
         # Add deprecated alias to Value[] using the correct new class.
-        preferred_cls = _Value[cls._PREFERRED_PARAM]
+        preferred_cls = _Value[
+            _typing.List[ExternallyAppliedSpatialForce_[param]]]
         _Value.add_instantiation(cls, preferred_cls)
         _Value.deprecate_instantiation(cls, _deprecation_msg)
 
+
+# Default instantiation.
+# N.B. This will not trigger a warning if a user constructs an instance of this
+# class.
+VectorExternallyAppliedSpatialForced = (
+    VectorExternallyAppliedSpatialForced_[None])
 
 _deprecate_vector_instantiations()

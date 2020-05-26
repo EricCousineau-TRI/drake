@@ -56,6 +56,7 @@ from pydrake.multibody.plant import (
     PointPairContactInfo_,
     PropellerInfo,
     Propeller_,
+    VectorExternallyAppliedSpatialForced,
     VectorExternallyAppliedSpatialForced_,
 )
 from pydrake.multibody.parsing import Parser
@@ -712,17 +713,19 @@ class TestPlant(unittest.TestCase):
 
     @numpy_compare.check_all_types
     def test_deprecated_vector_value(self, T):
-        print(VectorExternallyAppliedSpatialForced_)
-        with catch_drake_warnings(expected_count=1) as w:
+        with catch_drake_warnings(expected_count=2) as w:
             cls = VectorExternallyAppliedSpatialForced_[T]
-        with catch_drake_warnings(expected_count=1) as w:
             value_cls = Value[cls]
         self.assertIn("list()", str(w[0].message))
+        self.assertEqual(str(w[0].message), str(w[1].message))
+        if T == float:
+            self.assertIs(cls, VectorExternallyAppliedSpatialForced)
         self.assertIs(
             value_cls, Value[List[ExternallyAppliedSpatialForce_[T]]])
         force = ExternallyAppliedSpatialForce_[T]()
-        example_empty = cls()
-        example_nonempty = cls([force])
+        with catch_drake_warnings(expected_count=2):
+            example_empty = cls()
+            example_nonempty = cls([force])
         self.assertEqual(example_empty, [])
         self.assertEqual(example_nonempty, [force])
 
