@@ -5,6 +5,7 @@ from pydrake.systems.primitives import (
     SymbolicVectorSystem,
     SymbolicVectorSystem_
 )
+from pydrake.systems.framework import EventStatus
 from pydrake.systems.analysis import (
     RungeKutta2Integrator_,
     RegionOfAttraction,
@@ -46,3 +47,17 @@ class AnalysisTest(unittest.TestCase):
         self.assertEqual(pp.start_time(), 0.0)
         self.assertEqual(pp.end_time(), 1.0)
         self.assertIsNone(integrator.get_dense_output())
+
+    def test_system_monitor(self):
+        sys = SymbolicVectorSystem(state=[x], dynamics=[-x+x**3])
+        simulator = Simulator(sys)
+
+        def monitor(root_context):
+            context = sys.GetMyContextFromRoot(root_context)
+            if context.get_time() >= 1.:
+                return EventStatus.ReachedTermination(sys, "Time reached")
+            else:
+                return EventStatus.DidNothing()
+
+        simulator.AdvanceTo(2.)
+        print(simulator.get_context().get_time())
