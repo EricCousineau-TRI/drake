@@ -49,6 +49,7 @@ def get_submodules(name):
         if sys.modules[s_name] is None:
             continue
         out.append(s_name)
+    print(out)
     return sorted(out)
 
 
@@ -102,7 +103,7 @@ def write_doc_modules(output_dir, verbose=False):
         raise RuntimeError(
             "Please provide an absolute path: {}".format(output_dir))
     index_file = join(output_dir, "index.rst")
-    write_module(index_file, "pydrake", verbose)
+    write_module(index_file, "pydrake.multibody.plant", verbose)
 
 
 def main():

@@ -15,9 +15,9 @@ _PARAM_LIST = (
 )
 
 _deprecation_msg = """
-VectorExternallyAppliedSpatialForced and
-Value[VectorExternallyAppliedSpatialForced] are deprecated. Please use
-list() and Value[List[ExternallyAppliedSpatialForce]] instead.
+``VectorExternallyAppliedSpatialForced`` and
+``Value[VectorExternallyAppliedSpatialForced]`` are deprecated. Please use
+``list()`` and ``Value[List[ExternallyAppliedSpatialForce]]`` instead.
 The deprecated code will be removed from Drake on or after 2020-09-01.
 """.strip()
 
@@ -38,8 +38,16 @@ def VectorExternallyAppliedSpatialForced_(param):
             else:
                 super().__init__(value)
 
-    Impl.__doc__ = f"Warning:\n{_textwrap.indent(_deprecation_msg, '    ')}"
+    Impl.__doc__ = f"""
+    Warning:
+        {_textwrap.indent(_deprecation_msg, ' '*8).lstrip()}
+    """
+    # Impl.__doc__ = f"Warning:\n{}"
     return Impl
+
+
+VectorExternallyAppliedSpatialForced = (
+    VectorExternallyAppliedSpatialForced_[None])
 
 
 def _deprecate_vector_instantiations():
