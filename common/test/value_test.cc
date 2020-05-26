@@ -356,6 +356,16 @@ GTEST_TEST(ValueTest, SubclassOfValueSurvivesClone) {
   EXPECT_EQ("5,6", printable_erased->print());
 }
 
+// Tests const, volatile, and reference types.
+GTEST_TEST(ValueTest, AllowedTypesMetaTest) {
+  using T = int;
+  Value<T>{};
+  // Value<const T>{};  // Should trigger static assertion.
+  // Value<volatile T>{};  // Should trigger static assertion.
+  // Value<const T&>{};  // Should trigger static assertion.
+  // Value<T&&>{};  // Should trigger static assertion.
+}
+
 // Tests eigen types.
 GTEST_TEST(ValueTest, EigenTypeMetaTest) {
   using internal::resolve_value_type_t;
@@ -371,6 +381,14 @@ GTEST_TEST(ValueTest, EigenTypeMetaTest) {
   static_assert(
       std::is_same_v<resolve_value_type_t<Matrix3d>, MatrixXd>,
       "Should be converted");
+  Value<VectorXd>{};
+  // Value<Vector3d>{};  // Should trigger static assertion.
+  Value<MatrixXd>{};
+  // Value<Matrix3d>{};    // Should trigger static assertion.
+}
+
+GTEST_TEST(ValueTest, EigenTypeTest) {
+
 }
 
 // Check that TypeHash is extracting exactly the right strings from
