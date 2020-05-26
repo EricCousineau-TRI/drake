@@ -32,6 +32,7 @@ py::object GetConstructor(py::object py_T) {
   } else {
     // Use nominal type.
     return py_T;
+  }
 }
 
 }  // namespace internal
