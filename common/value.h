@@ -701,10 +701,10 @@ struct ValueTraitsImpl<T, false> {
 
 }  // namespace internal
 
-template <typename T>
-std::unique_ptr<AbstractValue> AbstractValue::Make(const T& value) {
-  using U = internal::resolve_value_type_t<T>;
-  return std::unique_ptr<AbstractValue>(new Value<U>(value));
+template <typename U>
+std::unique_ptr<AbstractValue> AbstractValue::Make(const U& value) {
+  using T = internal::resolve_value_type_t<U>;
+  return std::unique_ptr<AbstractValue>(new Value<T>(value));
 }
 
 template <typename T>

@@ -14,9 +14,9 @@
 #include "drake/common/test_utilities/expect_no_throw.h"
 #include "drake/systems/framework/test_utilities/my_vector.h"
 
-using Eigen::Matrix3d;
+using Eigen::Matrix2d;
 using Eigen::MatrixXd;
-using Eigen::Vector3d;
+using Eigen::Vector2d;
 using Eigen::VectorXd;
 
 namespace drake {
@@ -373,22 +373,51 @@ GTEST_TEST(ValueTest, EigenTypeMetaTest) {
       std::is_same_v<resolve_value_type_t<VectorXd>, VectorXd>,
       "Should not be converted");
   static_assert(
-      std::is_same_v<resolve_value_type_t<Vector3d>, VectorXd>,
+      std::is_same_v<resolve_value_type_t<Vector2d>, VectorXd>,
       "Should be converted");
   static_assert(
       std::is_same_v<resolve_value_type_t<MatrixXd>, MatrixXd>,
       "Should not be converted");
   static_assert(
-      std::is_same_v<resolve_value_type_t<Matrix3d>, MatrixXd>,
+      std::is_same_v<resolve_value_type_t<Matrix2d>, MatrixXd>,
       "Should be converted");
   Value<VectorXd>{};
-  // Value<Vector3d>{};  // Should trigger static assertion.
+  // Value<Vector2d>{};  // Should trigger static assertion.
   Value<MatrixXd>{};
-  // Value<Matrix3d>{};    // Should trigger static assertion.
+  // Value<Matrix2d>{};    // Should trigger static assertion.
 }
 
 GTEST_TEST(ValueTest, EigenTypeTest) {
+  {
+    VectorXd vector(2);
+    vector << 1, 2;
+    auto value = AbstractValue::Make(vector);
+    value->set_value(vector);
+    EXPECT_EQ(value->get_value<VectorXd>(), vector);
+    EXPECT_EQ(abstract->maybe_get_value<Vector2d>(), nullptr);
+  }
+  {
+    Vector2d vector_fixed(1, 2);
+    auto value = AbstractValue::Make(vector_fixed);
+    value->set_value<Vector2d>(vector_fixed);
+    EXPECT_NE(value->maybe_get_value<Vector2d>(), vector_fixed);
+    EXPECT_EQ(*value->get_value<VectorXd>(), vector_fixed);
+    EXPECT_EQ(GetAbstractValue<Vector2d>(*value), vector_fixed);
+    vector_fixed *= 2;
+    abstract->set_value(vector_fixed);
+    EXPECT_EQ(abstract->get_value<VectorXd>(), vector_fixed);
+    EXPECT_EQ(abstract->maybe_get_value<Vector2d>(), nullptr);
+    vector_fixed *= 2;
+    SetAbstractValue(abstract, vector_fixed);
+    EXPECT_EQ(value->get_value(), vector_fixed);
+  }
 
+  // MatrixXd matrix(2, 2);
+  // matrix << 1, 2, 3, 4;
+  // Matrix2d matrix_fixed;
+  // matrix_fixed << 1, 2, 3, 4;
+
+  
 }
 
 // Check that TypeHash is extracting exactly the right strings from
