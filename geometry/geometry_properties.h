@@ -5,8 +5,8 @@
 #include <string>
 #include <unordered_map>
 
-#include <Eigen/Dense>
 #include "fmt/ostream.h"
+#include <Eigen/Dense>
 
 #include "drake/common/copyable_unique_ptr.h"
 #include "drake/common/eigen_types.h"
