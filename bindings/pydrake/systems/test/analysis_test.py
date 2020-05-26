@@ -85,8 +85,11 @@ class TestAnalysis(unittest.TestCase):
 
         self.assertIsNone(simulator.get_monitor())
         simulator.set_monitor(monitor)
+        self.assertIsNotNone(simulator.get_monitor())
         status = simulator.AdvanceTo(2.)
         self.assertEqual(
             status.reason(),
             SimulatorStatus.ReturnReason.kReachedTerminationCondition)
         self.assertLess(status.return_time(), 1.1)
+        simulator.clear_monitor()
+        self.assertIsNone(simulator.get_monitor())
