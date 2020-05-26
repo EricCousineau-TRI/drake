@@ -83,8 +83,11 @@ class TestValue(unittest.TestCase):
         self.assertIsInstance(value, Value[MoveOnlyType])
         value = AbstractValue.Make({"x": 10})
         self.assertIsInstance(value, Value[object])
+        # N.B. Empty lists cannot have their type inferred, so the type will
+        # default to `Value[object]`.
         value = AbstractValue.Make([])
         self.assertIsInstance(value, Value[object])
+        # N.B. Non-empty lists can have their type inferred.
         value = AbstractValue.Make([CustomType()])
         self.assertIsInstance(value, Value[List[CustomType]])
 
