@@ -388,36 +388,62 @@ GTEST_TEST(ValueTest, EigenTypeMetaTest) {
 }
 
 GTEST_TEST(ValueTest, EigenTypeTest) {
+  // Dynamic vector. Also tests edge cases for conversion.
   {
     VectorXd vector(2);
     vector << 1, 2;
     auto value = AbstractValue::Make(vector);
     value->set_value(vector);
     EXPECT_EQ(value->get_value<VectorXd>(), vector);
-    EXPECT_EQ(abstract->maybe_get_value<Vector2d>(), nullptr);
+    EXPECT_EQ(GetAbstractValue<Vector2d>(*value), vector);
+    EXPECT_EQ(*MaybeGetAbstractValue<Vector2d>(*value), vector);
+    EXPECT_EQ(MaybeGetAbstractValue<Matrix2d>(*value), std::nullopt);
+    EXPECT_THROW(
+        GetAbstractValue<Eigen::Vector3d>(*value),
+        std::runtime_error);
+    vector *= 2;
+    SetAbstractValue(value.get(), vector);
+    EXPECT_EQ(value->get_value<VectorXd>(), vector);
   }
+  // Fixed vector.
   {
     Vector2d vector_fixed(1, 2);
     auto value = AbstractValue::Make(vector_fixed);
-    value->set_value<Vector2d>(vector_fixed);
-    EXPECT_NE(value->maybe_get_value<Vector2d>(), vector_fixed);
-    EXPECT_EQ(*value->get_value<VectorXd>(), vector_fixed);
+    value->set_value<VectorXd>(vector_fixed);
+    EXPECT_EQ(value->get_value<VectorXd>(), vector_fixed);
     EXPECT_EQ(GetAbstractValue<Vector2d>(*value), vector_fixed);
     vector_fixed *= 2;
-    abstract->set_value(vector_fixed);
-    EXPECT_EQ(abstract->get_value<VectorXd>(), vector_fixed);
-    EXPECT_EQ(abstract->maybe_get_value<Vector2d>(), nullptr);
-    vector_fixed *= 2;
-    SetAbstractValue(abstract, vector_fixed);
-    EXPECT_EQ(value->get_value(), vector_fixed);
+    SetAbstractValue(value.get(), vector_fixed);
+    EXPECT_EQ(value->get_value<VectorXd>(), vector_fixed);
   }
-
-  // MatrixXd matrix(2, 2);
-  // matrix << 1, 2, 3, 4;
-  // Matrix2d matrix_fixed;
-  // matrix_fixed << 1, 2, 3, 4;
-
-  
+  // Dynamic matrix.
+  {
+    MatrixXd matrix(2, 2);
+    matrix << 1, 2, 3, 4;
+    auto value = AbstractValue::Make(matrix);
+    value->set_value(matrix);
+    EXPECT_EQ(value->get_value<MatrixXd>(), matrix);
+    EXPECT_THROW(
+        GetAbstractValue<Eigen::Matrix3d>(*value),
+        std::runtime_error);
+    matrix *= 2;
+    SetAbstractValue(value.get(), matrix);
+    EXPECT_EQ(value->get_value<MatrixXd>(), matrix);
+  }
+  // Fixed matrix.
+  {
+    Matrix2d matrix_fixed;
+    matrix_fixed << 1, 2, 3, 4;
+    auto value = AbstractValue::Make(matrix_fixed);
+    value->set_value<MatrixXd>(matrix_fixed);
+    EXPECT_EQ(value->get_value<MatrixXd>(), matrix_fixed);
+    EXPECT_THROW(
+        GetAbstractValue<Eigen::Matrix3d>(*value),
+        std::runtime_error);
+    matrix_fixed *= 2;
+    SetAbstractValue(value.get(), matrix_fixed);
+    EXPECT_EQ(value->get_value<MatrixXd>(), matrix_fixed);
+  }
 }
 
 // Check that TypeHash is extracting exactly the right strings from

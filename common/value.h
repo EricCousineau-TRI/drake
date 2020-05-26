@@ -83,7 +83,7 @@ inline constexpr bool value_type_requires_conversion_v =
     !std::is_same_v<T, resolve_value_type_t<T>>;
 
 template <typename U, typename T>
-bool AssertValueIsConvertible(const T& value) {
+void AssertValueIsConvertible(const T& value) {
   if constexpr (is_eigen_type<T>::value) {
     static_assert(std::is_same_v<T, resolve_value_type_t<U>>, "Must be same");;
     // N.B. This only occurs with Eigen types.
@@ -121,9 +121,10 @@ class AbstractValue {
 
   virtual ~AbstractValue();
 
-  /// Returns an AbstractValue containing the given @p value.
-  template <typename T>
-  static std::unique_ptr<AbstractValue> Make(const T& value);
+  /// Returns an AbstractValue containing the given @p value. The type U may be
+  /// converted.
+  template <typename U>
+  static std::unique_ptr<AbstractValue> Make(const U& value);
 
   /// Returns the value wrapped in this AbstractValue as a const reference.
   /// The reference remains valid only until this object is set or destroyed.
@@ -195,24 +196,29 @@ class AbstractValue {
   template <typename T> [[noreturn]] void ThrowCastError() const;
   [[noreturn]] void ThrowCastError(const std::string&) const;
 
-  template <typename T>
-  friend auto GetAbstractValue(const AbstractValue& value);
-
   // The TypeHash<T>::value supplied by the Value<T> constructor.
   const size_t type_hash_;
 };
 
+/// Gets an abstract value, possibly translating type U and (implicitly)
+/// converting the value.
 template <typename U>
 auto GetAbstractValue(const AbstractValue& value) {
   using T = internal::resolve_value_type_t<U>;
-  const T& v = value.cast<T>().get_value();
+  const T& v = value.get_value<T>();
   internal::AssertValueIsConvertible<U>(v);
   return v;
 }
 
-template <typename U, typename T = internal::resolve_value_type_t<U>>
+/// Gets an abstract value, possibly translating type U and (implicitly)
+/// converting the value. If the underlying type T is not used, will return
+/// nullopt.
+/// @throws std::runtime_error if the stored value is incompatible with the
+///   requested type U.
+template <typename U>
 std::optional<U> MaybeGetAbstractValue(const AbstractValue& value) {
-  if (const T* v = value.cast<T>().maybe_get_value()) {
+  using T = internal::resolve_value_type_t<U>;
+  if (const T* v = value.maybe_get_value<T>()) {
     internal::AssertValueIsConvertible<U>(*v);
     return *v;
   } else {
@@ -220,11 +226,13 @@ std::optional<U> MaybeGetAbstractValue(const AbstractValue& value) {
   }
 }
 
+/// Sets an abstract value, possibly translating type U and implicitly
+/// converting the value.
 template <typename U>
 void SetAbstractValue(AbstractValue* value, const U& v) {
   DRAKE_DEMAND(value != nullptr);
   using T = internal::resolve_value_type_t<U>;
-  return value->cast<T>().set_value(v);
+  return value->set_value<T>(v);
 }
 
 /// A container class for an arbitrary type T.  This class inherits from
@@ -259,8 +267,8 @@ class Value : public AbstractValue {
   static_assert(
       !internal::value_type_requires_conversion_v<T>,
       "This type requires conversion and is not allowed in Value<T>. Please "
-      "use AbstractValue::Make(T{}), GetAbstractValue<T>(...), and "
-      "SetAbstractValue<T>(...) instead.");
+      "use AbstractValue::Make, GetAbstractValue, and SetAbstractValue "
+      "instead.");
 
   /// Constructs a Value<T> using T's default constructor, if available.
   /// This is only available for T's that support default construction.
