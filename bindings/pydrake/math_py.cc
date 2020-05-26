@@ -137,6 +137,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
     // .def("IsNearlyEqualTo", ...)
     // .def("IsExactlyEqualTo", ...)
     AddValueInstantiation<RigidTransform<T>>(m);
+    // Some ports need `Value<std::vector<Class>>`.
+    AddValueInstantiation<std::vector<RigidTransform<T>>>(m);
   }
 
   {
@@ -207,6 +209,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
     DefCopyAndDeepCopy(&cls);
     DefCast<T>(&cls, cls_doc.cast.doc);
     AddValueInstantiation<RotationMatrix<T>>(m);
+    // Some ports need `Value<std::vector<Class>>`.
+    AddValueInstantiation<std::vector<RigidTransform<T>>>(m);
   }
 
   {

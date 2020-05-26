@@ -938,7 +938,7 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def_readwrite("p_BoBq_B", &Class::p_BoBq_B, cls_doc.p_BoBq_B.doc)
         .def_readwrite("F_Bq_W", &Class::F_Bq_W, cls_doc.F_Bq_W.doc);
     AddValueInstantiation<Class>(m);
-    // Ports tend to use `std::vector<Class>`. Bind the value type for this.
+    // Some ports need `Value<std::vector<Class>>`.
     AddValueInstantiation<std::vector<Class>>(m);
   }
 
