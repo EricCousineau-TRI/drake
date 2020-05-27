@@ -13,3 +13,6 @@ build --action_env=PATH=/usr/bin:/bin
 # https://github.com/RobotLocomotion/drake/issues/8475
 build --action_env=PYTHONNOUSERSITE=1
 build --test_env=PYTHONNOUSERSITE=1
+
+# HACK: Make it work?
+build --test_env=PATH=/home/eacousineau/.local/opt/cpython/3.8.2/bin:/usr/bin:/bin
