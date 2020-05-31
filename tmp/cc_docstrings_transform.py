@@ -67,13 +67,30 @@ class Docline:
         return f"{self.filename}:{self.num:<5}: {self.raw_line}"
 
 
-class Docstring:
+class Chunk:
     def __init__(self, line):
         assert isinstance(line, Docline)
         self.lines = [line]
+
+    def add_line(self, line):
+        assert line.num == self.lines[-1] + 1
+        self.lines.append(line)
+
+    def __str__(self):
+        return "\n".join(str(x) for x in self.lines)
+
+    def __repr__(self):
+        return (
+            f"<{self.__class__} {self.lines[0].filename}:"
+            f"{self.lines[0].num}-{self.lines[-1].num}>")
+
+
+class Docstring(Chunk):
+    def __init__(self, line):
         self.primary_type = line.start_type
         self.secondary_type = Type.OTHER
         self._done = False
+        super().__init__(line)
 
     def maybe_add_next_line(self, line):
         add_line = False
@@ -95,7 +112,7 @@ class Docstring:
         else:
             assert False
         if add_line:
-            self.lines.append(line)
+            self.add_line(line)
             return True
         else:
             return False
@@ -110,14 +127,6 @@ class Docstring:
             assert self._done, f"Needs termination: {self.lines[-1]}"
         else:
             self._done = True
-
-    def __str__(self):
-        return "\n".join(str(x) for x in self.lines)
-
-    def __repr__(self):
-        return (
-            f"<Docstring {self.lines[0].filename}:"
-            f"{self.lines[0].num}-{self.lines[-1].num}>")
 
 
 def reformat_docstring(raw_lines, docstring):
@@ -134,7 +143,8 @@ def reformat_docstring(raw_lines, docstring):
     else:
         new_lines = [f"{indent}/** {first_line.text.lstrip()}\n"]
         for line in lines[1:]:
-            new_lines.append(f"{indent}{line.text}\n")
+            new_line = f"{indent}{line.text}".rstrip()
+            new_lines.append(f"{new_line}\n")
         new_lines.append(f"{indent} */\n")
     # Replace lines.
     del raw_lines[first_line_num:last_line_num + 1]
@@ -142,27 +152,50 @@ def reformat_docstring(raw_lines, docstring):
         raw_lines.insert(first_line_num + i, new_line)
 
 
-def parse_docstrings(filename, raw_lines):
-    # Add final line to fake an ending sentinel.
-    raw_lines = raw_lines + ["\n"]
-    docstrings = []
+def parse_chunks(filename, raw_lines):
+    chunks = []
+    chunk = None
     docstring = None
     for num, raw_line in enumerate(raw_lines):
         line = Docline(filename, num, raw_line)
-        added_line = False
+
         if docstring is None:
+            is_docstring_line = False
             if line.start_type in Type.PRIMARY_TYPES:
-                added_line = True
+                is_docstring_line = True
                 docstring = Docstring(line)
         else:
-            added_line = docstring.maybe_add_next_line(line)
-        needs_new_docstring = (not added_line or docstring.is_finished())
-        if needs_new_docstring and docstring is not None:
+            is_docstring_line = docstring.maybe_add_next_line(line)
+
+        if is_docstring_line:
+            complete_docstring = docstring.is_finished()
+            complete_chunk = (chunk is not None)
+            if chunk is None:
+                chunk = Chunk(line)
+            else:
+                chunk.add_line(line)
+        else:
+            complete_docstring = (docstring is not None)
+            complete_chunk = False
+
+        if complete_docstring:
             docstring.finish_or_die()
-            docstrings.append(docstring)
+            chunks.append(docstring)
             docstring = None
-    assert docstring is None
-    return docstrings
+        if complete_chunk:
+            chunks.append(chunk)
+            chunk = None
+
+        # We should always have either a chunk or a docstring.
+        assert chunk is not None or docstring is not None
+
+    # All docstrings should be finished.
+    if docstring is not None:
+        docstring.finish_or_die()
+        chunks.append(docstring)
+    if chunk is not None:
+        chunks.append(chunk)
+    return chunks
 
 
 def main():
@@ -175,6 +208,7 @@ def main():
         raw_lines = list(f.readlines())
     docstrings = parse_docstrings(filename, raw_lines)
     # Replace docstrings with "re-rendered" version.
+    new_lines = []
     for docstring in docstrings:
         reformat_docstring(raw_lines, docstring)
     with open(filename, "w") as f:
