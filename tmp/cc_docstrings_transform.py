@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 from enum import Enum
 from os.path import abspath, dirname, join, basename
 from subprocess import run, STDOUT, PIPE
@@ -114,7 +115,31 @@ class Docstring:
         return "\n".join(str(x) for x in self.lines)
 
     def __repr__(self):
-        return f"<Docstring {self.lines[0].filename}:{self.lines[0].num}-{self.lines[-1].num}>"
+        return (
+            f"<Docstring {self.lines[0].filename}:"
+            f"{self.lines[0].num}-{self.lines[-1].num}>")
+
+
+def reformat_docstring(raw_lines, docstring):
+    lines = docstring.lines
+    first_line_num = lines[0].num
+    last_line_num = lines[-1].num
+    first_line = lines[0]
+    while lines[-1].text.strip() == "":
+        lines = lines[:-1]
+    indent = first_line.indent
+    # Wrapping?
+    if len(lines) == 1:
+        new_lines = [f"{indent}/** {first_line.text.lstrip()} */\n"]
+    else:
+        new_lines = [f"{indent}/** {first_line.text.lstrip()}\n"]
+        for line in lines[1:]:
+            new_lines.append(f"{indent}{line.text}\n")
+        new_lines.append(f"{indent} */\n")
+    # Replace lines.
+    del raw_lines[first_line_num:last_line_num + 1]
+    for i, new_line in enumerate(new_lines):
+        raw_lines.insert(first_line_num + i, new_line)
 
 
 def parse_docstrings(filename, raw_lines):
@@ -141,16 +166,21 @@ def parse_docstrings(filename, raw_lines):
 
 
 def main():
-    # filename = "common/cond.h"
-    filename = "multibody/plant/multibody_plant.h"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", type=str)
+    args = parser.parse_args()
+    filename = args.filename
 
     with open(filename, "r") as f:
         raw_lines = list(f.readlines())
-        filename = f.name
     docstrings = parse_docstrings(filename, raw_lines)
+    # Replace docstrings with "re-rendered" version.
     for docstring in docstrings:
-        print(docstring)
-        print("---")
+        reformat_docstring(raw_lines, docstring)
+    with open(filename, "w") as f:
+        for line in raw_lines:
+            f.write(line)
+
 
 assert  __name__ == "__main__"
 main()
