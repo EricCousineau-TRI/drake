@@ -138,7 +138,8 @@ def parse_docstrings(filename, raw_lines):
 
 
 def main():
-    filename = "common/cond.h"
+    # filename = "common/cond.h"
+    filename = "multibody/plant/multibody_plant.h"
 
     with open(filename, "r") as f:
         raw_lines = list(f.readlines())
