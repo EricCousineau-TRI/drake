@@ -56,9 +56,12 @@ class Docline:
         self.raw_line = raw_line[:-1]
         self.indent, without_indent = split_indent(self.raw_line)
         self.start_type, self.end_type = Type.parse(without_indent)
-        self.text = without_indent[len(self.start_type):-len(self.end_type)]
+        self.text = without_indent[len(self.start_type):]
         if self.end_type == Type.COMMENT_END:
-            self.text = self.text.rstrip("*")
+            self.text = self.text[:-len(self.end_type)].rstrip("*")
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
 
     def __str__(self):
         return f"{self.filename}:{self.num + 1:<5}: {self.raw_line}"
