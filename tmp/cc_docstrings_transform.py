@@ -60,7 +60,7 @@ class Docline:
                 self.text = self.text[:-len("*/")].rstrip("*")
 
     def __str__(self):
-        return f"{self.filename}:{self.num}: {self.raw_line}"
+        return f"{self.filename}:{self.num:<5}: {self.raw_line}"
 
 
 class Docstring:
@@ -99,35 +99,42 @@ class Docstring:
     def is_finished(self):
         return self._done
 
-    def finish(self):
+    def finish_or_die(self):
+        if self.is_finished():
+            return
         if self.primary_type == Type.DOUBLE_STAR:
-            # print(self)
             assert self._done, f"Needs termination: {self.lines[-1]}"
         else:
             self._done = True
 
     def __str__(self):
-        # text_lines = ["---"] + [str(x) for x in self.lines]
-        # print(text_lines)
-        return "" #"\n".join(text_lines)
+        return "\n".join(str(x) for x in self.lines)
+
+    def __repr__(self):
+        return f"<Docstring {self.lines[0].filename}:{self.lines[0].num}-{self.lines[-1].num}>"
 
 
 def parse_docstrings(filename, raw_lines):
+    # Add final line to fake an ending sentinel.
+    raw_lines = raw_lines + ["\n"]
     docstrings = []
     docstring = None
     for num, raw_line in enumerate(raw_lines):
         line = Docline(filename, num, raw_line)
-        if docstring is None or docstring.is_finished():
+        added_line = False
+        if docstring is None:
             if line.start_type in Type.PRIMARY_TYPES:
+                added_line = True
                 docstring = Docstring(line)
         else:
-            if not docstring.maybe_add_next_line(line):
-                docstring.finish()
-                docstrings.append(docstring)
-    if docstring is not None and not docstring.is_finished():
-        docstring.finish()
-        docstrings.append(docstring)
-    return docstrings, raw_lines
+            added_line = docstring.maybe_add_next_line(line)
+        needs_new_docstring = (not added_line or docstring.is_finished())
+        if needs_new_docstring and docstring is not None:
+            docstring.finish_or_die()
+            docstrings.append(docstring)
+            docstring = None
+    assert docstring is None
+    return docstrings
 
 
 def main():
@@ -135,11 +142,11 @@ def main():
 
     with open(filename, "r") as f:
         raw_lines = list(f.readlines())
-        docstrings = parse_docstrings(f.name, raw_lines)
+        filename = f.name
+    docstrings = parse_docstrings(filename, raw_lines)
     for docstring in docstrings:
-        print(repr(docstring))
+        print(docstring)
         print("---")
-
 
 assert  __name__ == "__main__"
 main()
