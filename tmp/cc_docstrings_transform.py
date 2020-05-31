@@ -12,6 +12,9 @@ class Type:
     SINGLE_STAR = "* "
     COMMENT_END = "*/"
 
+    # TODO(eric): Some lines are just `//@{` and `//@}`... should all sections
+    # be like that?
+
     PRIMARY_TYPES = (TRIPLE_SLASH, DOUBLE_STAR)
     SECONDARY_TYPES = (OTHER, SINGLE_STAR)
 
