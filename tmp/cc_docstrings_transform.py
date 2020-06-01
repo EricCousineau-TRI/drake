@@ -8,30 +8,30 @@ from textwrap import dedent, indent
 from subprocess import run, STDOUT, PIPE
 
 
-class Type:
+class Token:
     NOTHING = ""
     TRIPLE_SLASH = "///"
-    DOUBLE_STAR = "/**"
+    DOUBLE_STAR_SLASH = "/**"
     SINGLE_STAR = "*"
     COMMENT_END = "*/"
 
     @staticmethod
     def parse(text):
-        start_type = Type.NOTHING
-        end_type = Type.NOTHING
+        start_type = Token.NOTHING
+        end_type = Token.NOTHING
         if len(text) > 0:
             # Text must already be stripped..
             assert text[0] != " ", repr(text)
             assert text[-1] != " "
             if text.startswith("///"):
-                start_type = Type.TRIPLE_SLASH
+                start_type = Token.TRIPLE_SLASH
             elif text.startswith("/**"):
-                start_type = Type.DOUBLE_STAR
-            elif text.startswith("* "):
-                start_type = Type.SINGLE_STAR
-            possible_end = (Type.NOTHING, Type.SINGLE_STAR, Type.DOUBLE_STAR)
+                start_type = Token.DOUBLE_STAR_SLASH
+            elif text.startswith("* ") or text.strip() == "*":
+                start_type = Token.SINGLE_STAR
+            possible_end = (Token.NOTHING, Token.SINGLE_STAR, Token.DOUBLE_STAR_SLASH)
             if start_type in possible_end and text.endswith("*/"):
-                end_type = Type.COMMENT_END
+                end_type = Token.COMMENT_END
         return start_type, end_type
 
 
@@ -52,7 +52,7 @@ class Docline:
         assert "\n" not in raw_line
         self.raw_line = raw_line
         self.indent, without_indent = split_indent(self.raw_line)
-        self.start_type, self.end_type = Type.parse(without_indent)
+        self.start_type, self.end_type = Token.parse(without_indent)
         self._set_text(f"{self.indent}{self.start_type}")
 
     def _set_text(self, prefix):
@@ -62,7 +62,7 @@ class Docline:
         assert self.raw_line.startswith(prefix), (
             repr(self.raw_line), repr(prefix))
         self.text = self.raw_line[len(prefix):]
-        if self.end_type == Type.COMMENT_END:
+        if self.end_type == Token.COMMENT_END:
             self.text = self.text[:-len(self.end_type)].rstrip("*").rstrip()
 
     def reset_indent(self, indent):
@@ -70,7 +70,11 @@ class Docline:
         self._set_text(self.indent)
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
+        return (
+            f"<{self.__class__.__name__} "
+            f"{self.filename}:{self.num + 1} "
+            f"start_type={repr(self.start_type)} end_type={repr(self.end_type)}"
+            f">")
 
     def __str__(self):
         return self.format(num_width=3)
@@ -108,7 +112,7 @@ class Chunk:
 
 class GenericChunk(Chunk):
     def add_line(self, line):
-        if line.start_type in (Type.TRIPLE_SLASH, Type.DOUBLE_STAR):
+        if line.start_type in (Token.TRIPLE_SLASH, Token.DOUBLE_STAR_SLASH):
             return False
         else:
             return super().add_line(line)
@@ -146,7 +150,7 @@ class DocstringChunk(Chunk):
 
 class TripleSlashChunk(DocstringChunk):
     def add_line(self, line):
-        if line.start_type != Type.TRIPLE_SLASH:
+        if line.start_type != Token.TRIPLE_SLASH:
             return False
         return super().add_line(line)
 
@@ -168,45 +172,52 @@ class DoubleStarChunk(DocstringChunk):
             return text.strip()
 
     def add_line(self, line):
+        if len(self.lines) == 0 and line.start_type != Token.DOUBLE_STAR_SLASH:
+            return False
         if self._finished:
             return False
+
+        def lines_str():
+            tmp = Chunk()
+            tmp.lines = self.lines + [line]
+            return str(tmp)
+
         do_add_line = False
+
+        if line.end_type == Token.COMMENT_END:
+            self._finished = True
+            do_add_line = True
+
         if len(self.lines) == 0:
-            if line.start_type != Type.DOUBLE_STAR:
-                return False
-            else:
-                do_add_line = True
+            do_add_line = True
         else:
             if self.secondary_type is None:
-                if line.start_type == Type.SINGLE_STAR:
-                    self.secondary_type = Type.SINGLE_STAR
+                if line.start_type == Token.SINGLE_STAR:
+                    self.secondary_type = Token.SINGLE_STAR
                 else:
-                    self.secondary_type = Type.NOTHING
-            if self.secondary_type == Type.NOTHING:
+                    self.secondary_type = Token.NOTHING
+            if self.secondary_type == Token.NOTHING:
                 do_add_line = True
                 # Reset indentation to match first line.
                 line.reset_indent(self.lines[0].indent)
             else:
-                if line.start_type != Type.SINGLE_STAR:
-                    raise UserError(f"Must continue with single star: {line}")
+                if not do_add_line and line.start_type != Token.SINGLE_STAR:
+                    print(repr(line))
+                    raise UserError(
+                        f"Must continue with single star:\n"
+                        f"{lines_str()}")
                 do_add_line = True
-        if line.end_type == Type.COMMENT_END:
-            self._finished = True
-            do_add_line = True
         if not do_add_line:
-            tmp = Chunk()
-            tmp.lines = self.lines + [line]
-            # for line in tmp.lines:
-            #     print(f"{(line.start_type, line.end_type)}: {line}")
-            assert self._finished, f"Needs termination:\n{tmp}"
+            assert self._finished, (
+                f"Needs termination:\n{lines_str()}")
         if do_add_line:
             return super().add_line(line)
 
 
 def new_chunk(line):
-    if line.start_type == Type.TRIPLE_SLASH:
+    if line.start_type == Token.TRIPLE_SLASH:
         chunk = TripleSlashChunk()
-    elif line.start_type == Type.DOUBLE_STAR:
+    elif line.start_type == Token.DOUBLE_STAR_SLASH:
         chunk = DoubleStarChunk()
     else:
         chunk = GenericChunk()
