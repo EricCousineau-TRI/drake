@@ -14,12 +14,6 @@ class Type:
     SINGLE_STAR = "*"
     COMMENT_END = "*/"
 
-    # TODO(eric): Some lines are just `//@{` and `//@}`... should all sections
-    # be like that?
-
-    PRIMARY_TYPES = (TRIPLE_SLASH, DOUBLE_STAR)
-    SECONDARY_TYPES = (NOTHING, SINGLE_STAR)
-
     @staticmethod
     def parse(text):
         start_type = Type.NOTHING
@@ -113,65 +107,13 @@ class Chunk:
 
 class GenericChunk(Chunk):
     def add_line(self, line):
-        if line.start_type in Type.PRIMARY_TYPES:
+        if line.start_type in (Type.TRIPLE_SLASH, Type.DOUBLE_STAR):
             return False
         else:
             return super().add_line(line)
 
 
 class DocstringChunk(Chunk):
-    def __init__(self):
-        self.primary_type = None
-        self.secondary_type = None
-        self._finished = False
-        super().__init__()
-
-    def add_line(self, line):
-        if self._finished:
-            return False
-        is_first_line = False
-
-        if self.primary_type is None:
-            if line.start_type not in Type.PRIMARY_TYPES:
-                return False
-            is_first_line = True
-            self.primary_type = line.start_type
-
-        do_add_line = False
-        if self.primary_type == Type.TRIPLE_SLASH:
-            if line.start_type == Type.TRIPLE_SLASH:
-                do_add_line = True
-            else:
-                self._finished = True
-        elif self.primary_type == Type.DOUBLE_STAR:
-            if is_first_line:
-                do_add_line = True
-            elif line.start_type in Type.SECONDARY_TYPES:
-                if self.secondary_type is None:
-                    # Use new secondary type.
-                    self.secondary_type = line.start_type
-                    do_add_line = True
-                elif line.start_type == self.secondary_type:
-                    # Require secondary type.
-                    do_add_line = True
-                if do_add_line and self.secondary_type == Type.NOTHING:
-                    # Readjust indentation to match first line.
-                    line.reset_indent(self.lines[0].indent)
-            if line.end_type == Type.COMMENT_END:
-                do_add_line = True
-                self._finished = True
-            if not do_add_line:
-                tmp = Chunk()
-                tmp.lines = self.lines + [line]
-                for line in tmp.lines:
-                    print(f"{(line.start_type, line.end_type)}: {line}")
-                assert self._finished, f"Needs termination:\n{tmp}"
-        if do_add_line:
-            return super().add_line(line)
-        else:
-            assert self._finished
-            return False
-
     def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
         # Remove empty leading and trailing lines.
@@ -192,36 +134,72 @@ class DocstringChunk(Chunk):
         return text.strip()
 
 
+class TripleSlashChunk(DocstringChunk):
+    def add_line(self, line):
+        if line.start_type != Type.TRIPLE_SLASH:
+            return False
+        return super().add_line(line)
+
+
+class DoubleStarChunk(DocstringChunk):
+    def __init__(self):
+        self.secondary_type = None
+        self._finished = False
+        super().__init__()
+
+    def add_line(self, line):
+        if self._finished:
+            return False
+        do_add_line = False
+        if len(self.lines) == 0:
+            if line.start_type != Type.DOUBLE_STAR:
+                return False
+            else:
+                do_add_line = True
+        elif line.start_type in (Type.NOTHING, Type.SINGLE_STAR):
+            secondary_matches = (line.start_type == self.secondary_type)
+            if self.secondary_type is None or secondary_matches:
+                self.secondary_type = line.start_type
+                do_add_line = True
+                if line.start_type == Type.NOTHING:
+                    # Reset indentation to match first line.
+                    line.reset_indent(self.lines[0].indent)
+        if line.end_type == Type.COMMENT_END:
+            self._finished = True
+            do_add_line = True
+        if not do_add_line:
+            tmp = Chunk()
+            tmp.lines = self.lines + [line]
+            for line in tmp.lines:
+                print(f"{(line.start_type, line.end_type)}: {line}")
+            assert self._finished, f"Needs termination:\n{tmp}"
+        if do_add_line:
+            return super().add_line(line)
+
+
+def new_chunk(line):
+    if line.start_type == Type.TRIPLE_SLASH:
+        chunk = TripleSlashChunk()
+    elif line.start_type == Type.DOUBLE_STAR:
+        chunk = DoubleStarChunk()
+    else:
+        chunk = GenericChunk()
+    assert chunk.add_line(line), line
+    return chunk
+
+
 def parse_chunks(filename, raw_lines):
-
-    def finish_chunk(chunk):
-        if len(chunk) > 0:
-            chunks.append(chunk)
-
-    def next_chunk(chunk):
-        if isinstance(chunk, GenericChunk):
-            return DocstringChunk()
-        else:
-            return GenericChunk()
-
     chunks = []
-    active_chunk = GenericChunk()
+    active_chunk = None
     for num, raw_line in enumerate(raw_lines):
         line = Docline(filename, num, raw_line)
-        possible_chunks = [
-            lambda: active_chunk,
-            lambda: next_chunk(active_chunk),
-        ]
-        for chunk_func in possible_chunks:
-            chunk = chunk_func()
-            if chunk.add_line(line):
-                active_chunk = chunk
-                break
-            else:
-                finish_chunk(chunk)
-        else:
-            assert False
-    finish_chunk(active_chunk)
+        if active_chunk is None:
+            active_chunk = new_chunk(line)
+        elif not active_chunk.add_line(line):
+            chunks.append(active_chunk)
+            active_chunk = new_chunk(line)
+        assert active_chunk is not None
+    chunks.append(active_chunk)
     return chunks
 
 
@@ -312,7 +290,7 @@ def test():
         print(text)
         texts.append(text)
         print("---")
-    assert len(texts) == 5
+    assert len(texts) == 5, len(texts)
     for text in texts[1:]:
         assert text == texts[0]
 
