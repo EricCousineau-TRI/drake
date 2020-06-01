@@ -34,7 +34,7 @@ class Type:
                 start_type = Type.DOUBLE_STAR
             elif text.startswith("*"):
                 start_type = Type.SINGLE_STAR
-            possible_end = (Type.NOTHING, Type.DOUBLE_STAR)
+            possible_end = (Type.NOTHING, Type.SINGLE_STAR, Type.DOUBLE_STAR)
             if start_type in possible_end and text.endswith("*/"):
                 end_type = Type.COMMENT_END
         return start_type, end_type
@@ -163,6 +163,8 @@ class DocstringChunk(Chunk):
             if not do_add_line:
                 tmp = Chunk()
                 tmp.lines = self.lines + [line]
+                for line in tmp.lines:
+                    print(f"{(line.start_type, line.end_type)}: {line}")
                 assert self._finished, f"Needs termination:\n{tmp}"
         if do_add_line:
             return super().add_line(line)
@@ -319,20 +321,20 @@ def test():
     new_lines = reformat_chunk(docstring)
     print("\n".join(new_lines))
 
-    # ragged = dedent("""\
-    #     /// abc
-    #     /// def
-    #     ///ghe
-    # """.rstrip())
+    ragged = dedent("""\
+        /// abc
+        /// def
+        ///ghe
+    """.rstrip())
 
-    # chunk, = parse_chunks("test", ragged.split("\n"))
-    # # Ragged indent.
-    # try:
-    #     print(chunk.get_docstring_text())
-    #     assert False
-    # except AssertionError as e:
-    #     assert "ragged indentation" in str(e)
-    #     print(str(e))
+    chunk, = parse_chunks("test", ragged.split("\n"))
+    # Ragged indent.
+    try:
+        print(chunk.get_docstring_text())
+        assert False
+    except AssertionError as e:
+        assert "ragged indentation" in str(e)
+        print(str(e))
 
 
 def main():
