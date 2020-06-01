@@ -11,7 +11,7 @@ class Type:
     NOTHING = ""
     TRIPLE_SLASH = "///"
     DOUBLE_STAR = "/**"
-    SINGLE_STAR = "* "
+    SINGLE_STAR = "*"
     COMMENT_END = "*/"
 
     # TODO(eric): Some lines are just `//@{` and `//@}`... should all sections
@@ -32,7 +32,7 @@ class Type:
                 start_type = Type.TRIPLE_SLASH
             elif text.startswith("/**"):
                 start_type = Type.DOUBLE_STAR
-            elif text.startswith("* "):
+            elif text.startswith("*"):
                 start_type = Type.SINGLE_STAR
             if text.endswith("*/"):
                 end_type = Type.COMMENT_END
@@ -59,13 +59,18 @@ class Docline:
         self._set_text(f"{self.indent}{self.start_type}")
 
     def _set_text(self, prefix):
-        assert self.raw_line.startswith(prefix)
+        if self.raw_line.strip() == "":
+            self.text = ""
+            return
+        assert self.raw_line.startswith(prefix), (
+            repr(self.raw_line), repr(prefix))
         self.text = self.raw_line[len(prefix):]
         if self.end_type == Type.COMMENT_END:
             self.text = self.text[:-len(self.end_type)].rstrip("*").rstrip()
 
     def reset_indent(self, indent):
-        self._set_text(indent)
+        self.indent = indent
+        self._set_text(self.indent)
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
@@ -99,9 +104,6 @@ class Chunk:
             f"<{self.__class__} {self.lines[0].filename}:"
             f"{self.lines[0].num + 1}-{self.lines[-1].num + 1}>")
 
-    def finish_or_die(self):
-        raise NotImplemented
-
 
 class GenericChunk(Chunk):
     def add_line(self, line):
@@ -109,9 +111,6 @@ class GenericChunk(Chunk):
             return False
         else:
             return super().add_line(line)
-
-    def finish_or_die(self):
-        pass
 
 
 class DocstringChunk(Chunk):
@@ -149,39 +148,37 @@ class DocstringChunk(Chunk):
                 elif line.start_type == self.secondary_type:
                     # Require secondary type.
                     do_add_line = True
-                if do_add_line and line.start_type == Type.NOTHING:
+                if do_add_line and self.secondary_type == Type.NOTHING:
                     # Readjust indentation to match first line.
                     line.reset_indent(self.lines[0].indent)
             if line.end_type == Type.COMMENT_END:
                 do_add_line = True
                 self._finished = True
+            if not do_add_line:
+                assert self._finished, f"Needs termination:\n{self}\n{line}"
         if do_add_line:
             return super().add_line(line)
         else:
+            assert self._finished
             return False
 
-    def finish_or_die(self):
-        if self._finished:
-            return
-        if self.primary_type == Type.DOUBLE_STAR:
-            assert self._finished, f"Needs termination:\n{self}"
-        else:
-            self._finished = True
-
-    def get_docstring_text_lines(self):
+    def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
         # Remove empty leading and trailing lines.
         while text_lines[0].strip() == "":
             del text_lines[0]
         while text_lines[-1].strip() == "":
             del text_lines[-1]
-        return text_lines, self.lines[0].indent
+        # Ensure first line has no space.
+        text = text_lines[0].lstrip() + "\n"
+        # Dedent all following lines.
+        text += dedent("\n".join(text_lines[1:]))
+        return text.strip()
 
 
 def parse_chunks(filename, raw_lines):
 
     def finish_chunk(chunk):
-        chunk.finish_or_die()
         if len(chunk) > 0:
             chunks.append(chunk)
 
@@ -213,7 +210,8 @@ def parse_chunks(filename, raw_lines):
 
 
 def reformat_docstring(docstring):
-    text_lines, indent = docstring.get_docstring_text_lines()
+    indent = docstring.lines[0].indent
+    text_lines = docstring.get_docstring_text_lines()
     # Can't have nested comments :(
     text_lines = [x.replace("*/", "* /") for x in text_lines]
     first_line = text_lines[0]
@@ -232,32 +230,52 @@ def reformat_docstring(docstring):
 
 
 def test():
-    expected = dedent("""\
+    block = dedent("""\
         /** abc
-         def  */
+
+         def
+           ghi
+
+         jkl */
+
+        /**     abc
+
+         def
+           ghi
+
+         jkl */
+
+        /** abc
+
+            def
+              ghi
+
+            jkl
+                **/
+
+        /// abc
+        ///
+        /// def
+        ///   ghi
+        ///
+        /// jkl
+
+        /**
+         *  abc
+         *
+         *  def
+         *    ghi
+         *
+         *  jkl
+         **/
     """.rstrip())
-    blocks = (
-        expected,
-        dedent("""\
-            /** abc
-                def
-                    */
-        """.rstrip()),
-        dedent("""\
-            /// abc
-            /// def
-        """.rstrip()),
-        dedent("""\
-            /**
-                abc
-                def
-             **/
-        """.rstrip()),
-    )
-    for block in blocks:
-        chunk, = parse_chunks("test", block.split("\n"))
-        new_lines = reformat_docstring(chunk)
-        print("".join(new_lines), end="")
+    chunks = parse_chunks("test", block.split("\n"))
+    for docstring in chunks:
+        if not isinstance(docstring, DocstringChunk):
+            continue
+        # print(docstring)
+        text = docstring.get_docstring_text()
+        print(text)
         print("---")
 
 
