@@ -362,7 +362,25 @@ def format_docstring(docstring):
 
 def reformat_chunk(chunk):
     if isinstance(chunk, DocstringChunk):
-        return format_docstring(chunk)
+        # Multi-pass for idempotent.
+        # TODO(eric): Fix this.
+        first_line = chunk.lines[0]
+        filename = first_line.filename
+        start_num = first_line.num
+        prev_lines = None
+        new_chunk = chunk
+        for i in range(2):
+            new_lines = format_docstring(new_chunk)
+            if prev_lines is not None:
+                if new_lines == prev_lines:
+                    break
+                else:
+                    new_chunk = parse_single_chunk(
+                        new_lines, filename, start_num)
+            prev_lines = new_lines
+        else:
+            assert False, chunk
+        return new_lines
     else:
         return chunk.to_text_lines()
 
