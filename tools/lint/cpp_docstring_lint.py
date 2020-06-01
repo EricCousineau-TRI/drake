@@ -97,6 +97,16 @@ class Docline:
         return f"{self.filename}:{self.num + 1:<{num_width}}: {self.raw_line}"
 
 
+def format_lines(lines, abbrev=False):
+    num_width = len(str(lines[-1].num))
+    text_lines = [x.format(num_width) for x in lines]
+    if abbrev and len(lines) > 5:
+        text_lines = [
+            text_lines[0], text_lines[1], "...",
+            text_lines[-2], text_lines[-1]]
+    return "\n".join(text_lines)
+
+
 class Chunk:
     def __init__(self):
         self.lines = []
@@ -118,8 +128,7 @@ class Chunk:
         pass
 
     def __str__(self):
-        num_width = len(str(self.lines[-1].num))
-        return "\n".join(x.format(num_width) for x in self.lines)
+        return format_lines(self.lines)
 
     def __len__(self):
         return len(self.lines)
@@ -259,11 +268,6 @@ class DoubleStarChunk(DocstringChunk):
         if self._finished:
             return False
 
-        def lines_str():
-            tmp = Chunk()
-            tmp.lines = self.lines + [line]
-            return str(tmp)
-
         do_add_line = False
 
         if line.end_token == Token.STAR_SLASH_END:
@@ -284,14 +288,16 @@ class DoubleStarChunk(DocstringChunk):
                 line.reset_indent(self.lines[0].indent)
             else:
                 if not do_add_line and line.start_token != Token.SINGLE_STAR:
+                    lines_str = format_lines(self.lines + [line])
                     raise UserError(
                         f"Must continue with single star:\n"
                         f"{repr(line)}\n"
-                        f"{lines_str()}")
+                        f"{lines_str}")
                 do_add_line = True
         if not do_add_line:
+            lines_str = format_lines(self.lines + [line])
             assert self._finished, (
-                f"Needs termination:\n{lines_str()}")
+                f"Needs termination:\n{lines_str}")
         if do_add_line:
             return super().add_line(line)
 
@@ -584,21 +590,21 @@ def reorder_chunks(chunks, lint):
     matches = mkdoc_issue.find_all(chunks)
     for match in matches:
         (doc,), ws, (comment,), (generic,) = match
-        original = [doc] + ws + [comment, generic]
-        start = chunks.index(original[0])
-        for x in original:
-            chunks.remove(x)
-        print("<<<")
-        print_chunks(original)
-
-        comment.lines = [
-            x for x in comment.lines if x.text.strip() != ""]
-        new = [comment] + ws + [doc, generic]
-        for i, x in enumerate(new):
-            chunks.insert(start + i, x)
-        print(">>>")
-        print_chunks(new)
-        print()
+        if lint:
+            print("ERROR: Docstring must be placed next to symbol for ")
+            print("ERROR: for mkdoc.py.")
+            error_lines = [doc.lines[-1], comment.lines[0]]
+            print(format_lines(error_lines))
+        else:
+            original = [doc] + ws + [comment, generic]
+            start = chunks.index(original[0])
+            for x in original:
+                chunks.remove(x)
+            comment.lines = [
+                x for x in comment.lines if x.text.strip() != ""]
+            new = [comment] + ws + [doc, generic]
+            for i, x in enumerate(new):
+                chunks.insert(start + i, x)
     return chunks
 
 
@@ -621,18 +627,15 @@ def lint_chunk(chunk, new_lines):
         new_lines, first_line.filename, first_line.num)
     # Compare.
     if chunk.to_text_lines() != new_chunk.to_text_lines():
-        print("<<<")
-        print(chunk)
-        print(">>>")
-        print(new_chunk)
-        print()
+        print("ERROR: Docstring formatting is incorrect")
+        print(format_lines(chunk.lines[:2]))
 
 
 def transform(filename, lint):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
-    # chunks = reorder_chunks(chunks, lint)
+    chunks = reorder_chunks(chunks, lint)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
