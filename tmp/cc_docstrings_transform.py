@@ -172,7 +172,13 @@ class DocstringChunk(Chunk):
         # Ensure first line has no space.
         text = text_lines[0].lstrip() + "\n"
         # Dedent all following lines.
-        text += dedent("\n".join(text_lines[1:]))
+        final_part = dedent("\n".join(text_lines[1:]))
+        if len(final_part) > 0:
+            # Ensure that first nonempty line does not start with whitespace
+            # (ragged indentation).
+            if final_part.lstrip("\n")[0] == " ":
+                assert False, f"Must not have ragged indentation:\n{self}"
+        text += final_part
         return text.strip()
 
 
@@ -211,9 +217,10 @@ def parse_chunks(filename, raw_lines):
 
 def reformat_docstring(docstring):
     indent = docstring.lines[0].indent
-    text_lines = docstring.get_docstring_text_lines()
+    text = docstring.get_docstring_text()
     # Can't have nested comments :(
-    text_lines = [x.replace("*/", "* /") for x in text_lines]
+    text = text.replace("*/", "* /")
+    text_lines = text.split("\n")
     first_line = text_lines[0]
     if len(text_lines) == 1:
         new_lines = [f"{indent}/** {first_line} */\n"]
@@ -275,8 +282,19 @@ def test():
             continue
         # print(docstring)
         text = docstring.get_docstring_text()
-        print(text)
+        print("".join(reformat_docstring(docstring)), end="")
         print("---")
+
+    ragged = dedent("""\
+        /// abc
+        /// def
+        ///ghe
+    """.rstrip())
+
+    chunk, = parse_chunks("test", ragged.split("\n"))
+    # Ragged indent.
+    # print(chunk.get_docstring_text())
+
 
 
 def main():
