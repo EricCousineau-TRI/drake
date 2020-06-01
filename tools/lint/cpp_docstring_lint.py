@@ -392,8 +392,8 @@ def reformat_chunk(chunk):
     if isinstance(chunk, DocstringChunk):
         # Multi-pass for idempotent.
         # TODO(eric): Fix this.
-        start_chunk = chunk
-        first_line = start_chunk.lines[0]
+        chunks = [chunk]
+        first_line = chunk.lines[0]
         prev_lines = None
         for i in range(3):
             new_lines = format_docstring(chunk)
@@ -401,14 +401,16 @@ def reformat_chunk(chunk):
                 if new_lines == prev_lines:
                     break
                 else:
-                    chunk = parse_single_chunk(
-                        new_lines, first_line.filename, first_line.num)
+                    pass
+            chunk = parse_single_chunk(
+                new_lines, first_line.filename, first_line.num)
+            chunks.append(chunk)
             prev_lines = new_lines
         else:
-            print("<<<")
-            print(start_chunk)
-            print(">>>")
-            print(chunk)
+            for i, chunk in enumerate(chunks):
+                print(f"i = {i}")
+                print(chunk)
+                print("---")
             assert False, "Bug in indempotent check"
         return new_lines
     else:
