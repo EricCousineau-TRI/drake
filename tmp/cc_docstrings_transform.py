@@ -232,11 +232,11 @@ def reformat_docstring(docstring):
         new_lines = [f"{indent}/** {first_line}\n"]
         for line in text_lines[1:-1]:
             if line:
-                new_lines.append(f"{indent}{line}\n")
+                new_lines.append(f"{indent} {line}\n")
             else:
                 new_lines.append("\n")
         last_line = text_lines[-1]
-        new_lines.append(f"{indent}{last_line}  */\n")
+        new_lines.append(f"{indent} {last_line}  */\n")
     return new_lines
 
 
@@ -316,6 +316,10 @@ def main():
     args = parser.parse_args()
     filename = args.filename
 
+    if filename == "<test>":
+        test()
+        return
+
     with open(filename, "r") as f:
         raw_lines = list(f.readlines())
     chunks = parse_chunks(filename, raw_lines)
@@ -326,11 +330,10 @@ def main():
             new_lines += reformat_docstring(chunk)
         else:
             new_lines += [x.raw_line + "\n" for x in chunk.lines]
-    # with open(filename, "w") as f:
-    #     for line in new_lines:
-    #         f.write(line)
+    with open(filename, "w") as f:
+        for line in new_lines:
+            f.write(line)
 
 
 assert  __name__ == "__main__"
-# main()
-test()
+main()
