@@ -266,6 +266,9 @@ def format_docstring(docstring):
             return [f"{new_line}{suffix}"]
 
     if len(text_lines) == 1:
+        if "://" in first_line:
+            # Weird behavior with bogus lint?
+            return [f"{indent}/// {first_line}"]
         new_lines = maybe_wrap(f"/** {first_line}", " */")
     else:
         new_lines = [f"{indent}/** {first_line}"]
