@@ -111,6 +111,9 @@ class Chunk:
         self.lines.append(line)
         return True
 
+    def to_text_lines(self):
+        return [line.raw_line for line in self.lines]
+
     def assert_finished(self):
         pass
 
@@ -293,7 +296,7 @@ class DoubleStarChunk(DocstringChunk):
             return super().add_line(line)
 
 
-def new_chunk(line):
+def make_new_chunk(line):
     for cls in chunk_cls_list():
         chunk = cls()
         if chunk.add_line(line):
@@ -309,11 +312,11 @@ def parse_chunks(filename, raw_lines):
     for num, raw_line in enumerate(raw_lines):
         line = Docline(filename, num, raw_line)
         if active_chunk is None:
-            active_chunk = new_chunk(line)
+            active_chunk = make_new_chunk(line)
         elif not active_chunk.add_line(line):
             active_chunk.assert_finished()
             chunks.append(active_chunk)
-            active_chunk = new_chunk(line)
+            active_chunk = make_new_chunk(line)
         assert active_chunk is not None
     active_chunk.assert_finished()
     chunks.append(active_chunk)
@@ -359,12 +362,9 @@ def format_docstring(docstring):
 
 def reformat_chunk(chunk):
     if isinstance(chunk, DocstringChunk):
-        new_lines = format_docstring(chunk)
+        return format_docstring(chunk)
     else:
-        new_lines = []
-        for line in chunk.lines:
-            new_lines.append(line.raw_line)
-    return new_lines
+        return chunk.to_text_lines()
 
 
 def test():
@@ -556,7 +556,7 @@ def print_chunks(chunks):
         print(chunk)
 
 
-def reorder_chunks(chunks):
+def reorder_chunks(chunks, lint):
     mkdoc_issue = Regex([
         Regex.Single(is_meaningful_docstring),
         Regex.Any(is_whitespace),
@@ -584,34 +584,60 @@ def reorder_chunks(chunks):
     return chunks
 
 
-def transform(filename, dry_run):
+def parse_single_chunk(new_lines, filename, start_num):
+    chunk = None
+    for i, new_line in enumerate(new_lines):
+        fake_line = Docline(filename, start_num + i, new_line)
+        if chunk is None:
+            chunk = make_new_chunk(fake_line)
+        else:
+            assert chunk.add_line(fake_line), fake_line
+    chunk.assert_finished()
+    return chunk
+
+
+def lint_chunk(chunk, new_lines):
+    first_line = chunk.lines[0]
+    new_chunk = parse_single_chunk(
+        new_lines, first_line.filename, first_line.num)
+    if chunk.to_text_lines() != new_chunk.to_text_lines():
+        print("<<<")
+        print(chunk)
+        print(">>>")
+        print(new_chunk)
+        print()
+
+
+def transform(filename, lint):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
-    chunks = reorder_chunks(chunks)
+    # chunks = reorder_chunks(chunks, lint)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
-        new_lines += reformat_chunk(chunk)
-    if dry_run:
-        return
-    with open(filename, "w") as f:
-        f.write("\n".join(new_lines))
-        f.write("\n")
+        new_lines_i = reformat_chunk(chunk)
+        if lint:
+            lint_chunk(chunk, new_lines_i)
+        new_lines += new_lines_i
+    if not lint:
+        with open(filename, "w") as f:
+            f.write("\n".join(new_lines))
+            f.write("\n")
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", type=str, nargs="*")
     parser.add_argument("--all", action="store_true")
-    parser.add_argument("-n", "--dry_run", action="store_true")
+    parser.add_argument("--lint", action="store_true")
     args = parser.parse_args()
 
     filenames = args.filenames
 
     if args.all:
         assert len(filenames) == 0
-        source_tree = abspath(join(dirname(__file__), ".."))
+        source_tree = join(dirname(__file__), "../..")
         os.chdir(source_tree)
         result = run(
             ["find", ".", "-name", "*.h"], check=True, stdout=PIPE, encoding="utf8")
@@ -627,13 +653,7 @@ def main():
         return
 
     for filename in filenames:
-        try:
-            transform(filename, dry_run=args.dry_run)
-            if not args.dry_run:
-                # Run it once more (for "idempotent" check...).
-                transform(filename, dry_run=False)
-        except UserError as e:
-            print(indent(str(e), prefix="  "))
+        transform(filename, lint=args.lint)
 
 
 assert  __name__ == "__main__"
