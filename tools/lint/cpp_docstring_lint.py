@@ -368,26 +368,6 @@ def format_docstring(docstring):
     return new_lines
 
 
-"""
-ERROR: Docstring formatting is incorrect
-./multibody/optimization/sliding_friction_complementarity_constraint.h:82:   /** Getter for the slack variable c, used in the constraint
-./multibody/optimization/sliding_friction_complementarity_constraint.h:83: 
-
-ERROR: Docstring formatting is incorrect
-./multibody/tree/revolute_mobilizer.h:58:   /** @retval axis_F The rotation axis as a unit vector expressed in the inboard
-./multibody/tree/revolute_mobilizer.h:59:                   frame F. */
-
-ERROR: Docstring formatting is incorrect
-./solvers/sdpa_free_format.h:97: /** SDPA format with free variables.
-./solvers/sdpa_free_format.h:98: 
-
-ERROR: Docstring formatting is incorrect
-./systems/analysis/test_utilities/quadratic_scalar_system.h:11: /** System where the state at (scalar) time t corresponds to the quadratic
-./systems/analysis/test_utilities/quadratic_scalar_system.h:12:   equation St² + St + 3, where S is a user-defined Scalar (4 by default). */
-
-
-"""
-
 def reformat_chunk(chunk):
     if isinstance(chunk, DocstringChunk):
         # Multi-pass for idempotent.
