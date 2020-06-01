@@ -148,7 +148,7 @@ class RigidBody : public Body<T> {
   /// @name Methods to access position kinematics quantities.
   /// The input PositionKinematicsCache to these methods must be in sync with
   /// context.  These method's APIs will be deprecated when caching arrives.
-  ///@{
+  /// @{
 
   /// (Advanced) Extract this body's pose in world (from the position
   /// kinematics).

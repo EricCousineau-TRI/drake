@@ -130,7 +130,7 @@ template <class Tag>
 class TypeSafeIndex {
  public:
   /// @name           Constructors
-  ///@{
+  /// @{
 
   /// Default constructor; the result is an _invalid_ index. This only
   /// exists to serve applications which require a default constructor.
