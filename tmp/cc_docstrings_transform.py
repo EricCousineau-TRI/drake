@@ -3,6 +3,7 @@
 import argparse
 from enum import Enum
 from os.path import abspath, dirname, join, basename
+from textwrap import dedent, indent
 from subprocess import run, STDOUT, PIPE
 
 
@@ -52,19 +53,19 @@ class Docline:
     def __init__(self, filename, num, raw_line):
         self.filename = filename
         self.num = num
-        assert raw_line[-1] == "\n"
-        self.raw_line = raw_line[:-1]
+        self.raw_line = raw_line.rstrip()
         self.indent, without_indent = split_indent(self.raw_line)
         self.start_type, self.end_type = Type.parse(without_indent)
-        self.text = without_indent[len(self.start_type):]
+        self._set_text(f"{self.indent}{self.start_type}")
+
+    def _set_text(self, prefix):
+        assert self.raw_line.startswith(prefix)
+        self.text = self.raw_line[len(prefix):]
         if self.end_type == Type.COMMENT_END:
-            self.text = self.text[:-len(self.end_type)].rstrip("*")
+            self.text = self.text[:-len(self.end_type)].rstrip("*").rstrip()
 
     def reset_indent(self, indent):
-        assert self.raw_line.startswith(indent)
-        self.text = self.raw_line[len(indent):]
-        if self.end_type == Type.COMMENT_END:
-            self.text = self.text[:-len(self.end_type)].rstrip("*")
+        self._set_text(indent)
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
@@ -167,6 +168,15 @@ class DocstringChunk(Chunk):
         else:
             self._finished = True
 
+    def get_docstring_text_lines(self):
+        text_lines = [line.text for line in self.lines]
+        # Remove empty leading and trailing lines.
+        while text_lines[0].strip() == "":
+            del text_lines[0]
+        while text_lines[-1].strip() == "":
+            del text_lines[-1]
+        return text_lines, self.lines[0].indent
+
 
 def parse_chunks(filename, raw_lines):
 
@@ -203,32 +213,52 @@ def parse_chunks(filename, raw_lines):
 
 
 def reformat_docstring(docstring):
-
-    def sanitize(text):
-        # Can't have nested comments :(
-        text = text.replace("*/", "* /")
-        return text.rstrip()
-
-    lines = docstring.lines
-    first_line = lines[0]
-    while lines[-1].text.strip() == "":
-        lines = lines[:-1]
-    indent = first_line.indent
-    # Wrapping?
-    first_line_text = sanitize(first_line.text.lstrip())
-    if len(lines) == 1:
-        new_lines = [f"{indent}/** {first_line_text} */\n"]
+    text_lines, indent = docstring.get_docstring_text_lines()
+    # Can't have nested comments :(
+    text_lines = [x.replace("*/", "* /") for x in text_lines]
+    first_line = text_lines[0]
+    if len(text_lines) == 1:
+        new_lines = [f"{indent}/** {first_line} */\n"]
     else:
-        new_lines = [f"{indent}/** {first_line_text}\n"]
-        for line in lines[1:-1]:
-            text = sanitize(line.text)
-            if text:
-                new_lines.append(f"{indent}{text}\n")
+        new_lines = [f"{indent}/** {first_line}\n"]
+        for line in text_lines[1:-1]:
+            if line:
+                new_lines.append(f"{indent}{line}\n")
             else:
                 new_lines.append("\n")
-        last_line = lines[-1]
-        new_lines.append(f"{indent}{sanitize(last_line.text)}  */\n")
+        last_line = text_lines[-1]
+        new_lines.append(f"{indent}{last_line}  */\n")
     return new_lines
+
+
+def test():
+    expected = dedent("""\
+        /** abc
+         def  */
+    """.rstrip())
+    blocks = (
+        expected,
+        dedent("""\
+            /** abc
+                def
+                    */
+        """.rstrip()),
+        dedent("""\
+            /// abc
+            /// def
+        """.rstrip()),
+        dedent("""\
+            /**
+                abc
+                def
+             **/
+        """.rstrip()),
+    )
+    for block in blocks:
+        chunk, = parse_chunks("test", block.split("\n"))
+        new_lines = reformat_docstring(chunk)
+        print("".join(new_lines), end="")
+        print("---")
 
 
 def main():
@@ -247,10 +277,11 @@ def main():
             new_lines += reformat_docstring(chunk)
         else:
             new_lines += [x.raw_line + "\n" for x in chunk.lines]
-    with open(filename, "w") as f:
-        for line in new_lines:
-            f.write(line)
+    # with open(filename, "w") as f:
+    #     for line in new_lines:
+    #         f.write(line)
 
 
 assert  __name__ == "__main__"
-main()
+# main()
+test()
