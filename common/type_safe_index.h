@@ -155,10 +155,10 @@ class TypeSafeIndex {
   TypeSafeIndex(TypeSafeIndex&& other) noexcept : index_(other.index_) {
     other.index_ = kDefaultInvalid;
   }
-  ///@}
+  /// @}
 
   /// @name       Assignment
-  ///@{
+  /// @{
 
   TypeSafeIndex& operator=(const TypeSafeIndex&) = default;
 
@@ -168,10 +168,10 @@ class TypeSafeIndex {
     return *this;
   }
 
-  ///@}
+  /// @}
 
   /// @name     Utility methods
-  ///@{
+  /// @{
 
   /// Implicit conversion-to-int operator.
   operator int() const {
@@ -189,10 +189,10 @@ class TypeSafeIndex {
     return index_ >= 0;
   }
 
-  ///@}
+  /// @}
 
   /// @name Arithmetic operators
-  ///@{
+  /// @{
 
   /// Prefix increment operator.
   const TypeSafeIndex& operator++() {
@@ -237,10 +237,10 @@ class TypeSafeIndex {
         index_, "Post-decrementing produced an invalid index."));
     return TypeSafeIndex(index_ + 1);
   }
-  ///@}
+  /// @}
 
   /// @name Compound assignment operators
-  ///@{
+  /// @{
 
   /// Addition assignment operator.
   /// In Debug builds, this method asserts that the resulting index is
@@ -311,7 +311,7 @@ class TypeSafeIndex {
   template <typename U>
   TypeSafeIndex<U>& operator-=(const TypeSafeIndex<U>& u) = delete;
 
-  ///@}
+  /// @}
 
   /// @name Exclusive comparison operators
   ///
@@ -320,7 +320,7 @@ class TypeSafeIndex {
   /// explicitly include indices of this type, but exclude indices of all other
   /// types.  This implicitly allows all _other_ objects that can be converted
   /// to int types.
-  ///@{
+  /// @{
 
   // Note for developers: Each comparison operator has a SFINAE-based version
   // for handling comparison with unsigned values (created to allow comparison
@@ -466,7 +466,7 @@ class TypeSafeIndex {
   template <typename U>
   bool operator>=(const TypeSafeIndex<U>& u) const = delete;
 
-  ///@}
+  /// @}
 
   /// Implements the @ref hash_append concept. And invalid index will
   /// successfully hash (in order to satisfy STL requirements), and it is up to

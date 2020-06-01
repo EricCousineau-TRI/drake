@@ -47,7 +47,7 @@ class AcrobotPlant : public systems::LeafSystem<T> {
   /// acrobot.
   void SetMITAcrobotParameters(systems::Parameters<T>* parameters) const;
 
-  ///@{
+  /// @{
   /// Manipulator equation of Acrobot: M(q)q̈ + bias(q,q̇) = B*u.
   ///
   /// - M[2x2] is the mass matrix.
@@ -56,7 +56,7 @@ class AcrobotPlant : public systems::LeafSystem<T> {
   // TODO(russt): Update this to the newest conventions.
   Vector2<T> DynamicsBiasTerm(const systems::Context<T> &context) const;
   Matrix2<T> MassMatrix(const systems::Context<T> &context) const;
-  ///@}
+  /// @}
 
   /// Evaluates the input port and returns the scalar value
   /// of the commanded torque.

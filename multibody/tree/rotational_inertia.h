@@ -743,7 +743,7 @@ class RotationalInertia {
     return RotationalInertia(*this).ShiftToThenAwayFromCenterOfMassInPlace(
                                     mass, p_PBcm_E, p_QBcm_E);
   }
-  ///@}
+  /// @}
 
  protected:
   /// Subtracts a rotational inertia `I_BP_E` from `this` rotational inertia.
