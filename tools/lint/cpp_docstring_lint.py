@@ -616,8 +616,10 @@ def parse_single_chunk(new_lines, filename, start_num):
 
 def lint_chunk(chunk, new_lines):
     first_line = chunk.lines[0]
+    # Reparse to ensure that our new chunk is still valid.
     new_chunk = parse_single_chunk(
         new_lines, first_line.filename, first_line.num)
+    # Compare.
     if chunk.to_text_lines() != new_chunk.to_text_lines():
         print("<<<")
         print(chunk)
