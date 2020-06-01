@@ -76,7 +76,10 @@ class Docline:
         return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
 
     def __str__(self):
-        return f"{self.filename}:{self.num + 1:<5}: {self.raw_line}"
+        return self.format(num_width=3)
+
+    def format(self, num_width):
+        return f"{self.filename}:{self.num + 1:<{num_width}}: {self.raw_line}"
 
 
 class Chunk:
@@ -94,7 +97,8 @@ class Chunk:
         return True
 
     def __str__(self):
-        return "\n".join(str(x) for x in self.lines)
+        num_width = len(str(self.lines[-1].num))
+        return "\n".join(x.format(num_width) for x in self.lines)
 
     def __len__(self):
         return len(self.lines)
