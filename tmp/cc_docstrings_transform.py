@@ -29,8 +29,10 @@ def parse_line_tokens(text):
             start_token = Token.SLASH_DOUBLE_STAR
         elif text.startswith("* ") or text.strip() == "*":
             start_token = Token.SINGLE_STAR
-        possible_end = (Token.NOTHING, Token.SINGLE_STAR, Token.SLASH_DOUBLE_STAR)
-        if start_token in possible_end and text.endswith("*/"):
+        has_start_token_for_end = (
+            start_token in
+                (Token.NOTHING, Token.SINGLE_STAR, Token.SLASH_DOUBLE_STAR))
+        if text.endswith("*/") and has_start_token_for_end:
             end_token = Token.STAR_SLASH_END
     return start_token, end_token
 
@@ -205,9 +207,9 @@ class DoubleStarChunk(DocstringChunk):
                 line.reset_indent(self.lines[0].indent)
             else:
                 if not do_add_line and line.start_token != Token.SINGLE_STAR:
-                    print(repr(line))
                     raise UserError(
                         f"Must continue with single star:\n"
+                        f"{repr(line)}\n"
                         f"{lines_str()}")
                 do_add_line = True
         if not do_add_line:
