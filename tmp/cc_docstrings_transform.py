@@ -215,10 +215,8 @@ def format_docstring(docstring):
     else:
         new_lines = [f"{indent}/** {first_line}"]
         for line in text_lines[1:-1]:
-            if line:
-                new_lines.append(f"{indent} {line}")
-            else:
-                new_lines.append("\n")
+            new_line = f"{indent} {line}".rstrip()
+            new_lines.append(new_line)
         last_line = text_lines[-1]
         new_lines.append(f"{indent} {last_line} */")
     return new_lines
