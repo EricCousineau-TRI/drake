@@ -257,7 +257,8 @@ def format_docstring(docstring):
     def maybe_wrap(text, suffix):
         new_line = f"{indent}{text}"
         too_long = len(new_line) + len(suffix) > MAX_LEN
-        if too_long or "@endcode" in text:
+        should_extend = ("@endcode" in text or "</pre>" in text)
+        if too_long or should_extend:
             return [
                 new_line,
                 f"{indent}{suffix}",
@@ -433,7 +434,7 @@ def main():
             transform(filename, dry_run=args.dry_run)
             if not args.dry_run:
                 # Run it once more (for "idempotent" check...).
-                transform(filename)
+                transform(filename, dry_run=False)
         except UserError as e:
             print(indent(str(e), prefix="  "))
 
