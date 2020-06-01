@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
-from enum import Enum
 import os
-from os.path import abspath, dirname, join, basename
-from textwrap import dedent, indent
-from subprocess import run, STDOUT, PIPE
+from textwrap import dedent
+from subprocess import run, PIPE
 import sys
 
 import numpy as np
@@ -705,7 +703,7 @@ def main():
 
     if args.all:
         assert len(filenames) == 0
-        source_tree = join(dirname(__file__), "../..")
+        source_tree = os.path.join(os.path.dirname(__file__), "../..")
         os.chdir(source_tree)
         result = run(
             ["find", ".", "-name", "*.h"], check=True, stdout=PIPE, encoding="utf8")
