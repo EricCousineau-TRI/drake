@@ -275,6 +275,10 @@ class DoubleStarChunk(DocstringChunk):
 
         if len(self.lines) == 0:
             do_add_line = True
+            if line.text and line.text[0] == "*":
+                text = line.text.lstrip("*")
+                line = Docline(
+                    line.filename, line.num, f"{line.indent}/**{text}")
         else:
             if self.secondary_type is None:
                 if line.start_token == Token.SINGLE_STAR:
@@ -357,8 +361,8 @@ def format_docstring(docstring):
             return [f"{indent}/// {first_line}"]
         new_lines = maybe_wrap(f"/** {first_line}", " */")
     else:
-        new_lines = [f"{indent}/** {first_line}"]
-        for line in text_lines[1:-1]:
+        new_lines = [f"{indent}/**"] # {first_line}"]
+        for line in text_lines[:-1]:
             new_line = f"{indent}{spacing}{line}".rstrip()
             new_lines.append(new_line)
         last_line = text_lines[-1]
