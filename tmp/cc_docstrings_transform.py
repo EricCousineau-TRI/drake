@@ -252,12 +252,12 @@ def reformat_chunk(chunk):
     else:
         new_lines = []
         for line in chunk.lines:
-            if chunk.text == "//@{":
+            if line.text == "//@{":
                 new_line = f"{line.indent}/** @{{ */"
-            elif chunk.text == "//@}":
+            elif line.text == "//@}":
                 new_line = f"{line.indent}/** @}} */"
             else:
-                new_line = x.raw_line
+                new_line = line.raw_line
             new_lines.append(new_line)
     return new_lines
 
