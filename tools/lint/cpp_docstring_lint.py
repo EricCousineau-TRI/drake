@@ -570,6 +570,8 @@ def is_generic_but_not_macro(chunk):
 
 def is_comment_but_not_nolint(chunk):
     if isinstance(chunk, CommentChunk):
+        # TODO(eric.cousineau): Figure out how to make cpplint play nicely with
+        # mkdoc.py?
         if chunk.lines[-1].text.strip().startswith("NOLINTNEXTLINE"):
             return False
         return True
@@ -684,6 +686,7 @@ def transform(filename, lint):
         with open(filename, "w") as f:
             f.write("\n".join(new_lines))
             f.write("\n")
+        return True
 
 
 def main():
@@ -717,7 +720,6 @@ def main():
         if not transform(filename, lint=not args.fix):
             good = False
     if not good:
-        print("Linting failed!")
         sys.exit(1)
 
 
