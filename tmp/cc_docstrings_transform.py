@@ -2,6 +2,7 @@
 
 import argparse
 from enum import Enum
+import os
 from os.path import abspath, dirname, join, basename
 from textwrap import dedent, indent
 from subprocess import run, STDOUT, PIPE
@@ -113,25 +114,28 @@ class GenericChunk(Chunk):
             return super().add_line(line)
 
 
+def _dedent_lines(lines, chunk):
+    # Dedent all following lines.
+    text = dedent("\n".join(lines))
+    if len(text) > 0:
+        # Ensure that first nonempty line does not start with whitespace
+        # (ragged indentation?).
+        if text.lstrip("\n")[0] == " ":
+            assert False, f"Must not have ragged indentation:\n{chunk}"
+    return text
+
+
+def _remove_empty_leading_trailing_lines(lines):
+    # Remove empty leading and trailing lines.
+    while lines[0].strip() == "":
+        del lines[0]
+    while lines[-1].strip() == "":
+        del lines[-1]
+
+
 class DocstringChunk(Chunk):
     def get_docstring_text(self):
-        text_lines = [line.text for line in self.lines]
-        # Remove empty leading and trailing lines.
-        while text_lines[0].strip() == "":
-            del text_lines[0]
-        while text_lines[-1].strip() == "":
-            del text_lines[-1]
-        # Ensure first line has no space.
-        text = text_lines[0].lstrip() + "\n"
-        # Dedent all following lines.
-        final_part = dedent("\n".join(text_lines[1:]))
-        if len(final_part) > 0:
-            # Ensure that first nonempty line does not start with whitespace
-            # (ragged indentation).
-            if final_part.lstrip("\n")[0] == " ":
-                assert False, f"Must not have ragged indentation:\n{self}"
-        text += final_part
-        return text.strip()
+        raise NotImplemented
 
 
 class TripleSlashChunk(DocstringChunk):
@@ -140,12 +144,25 @@ class TripleSlashChunk(DocstringChunk):
             return False
         return super().add_line(line)
 
+    def get_docstring_text(self):
+        text_lines = [line.text for line in self.lines]
+        _remove_empty_leading_trailing_lines(text_lines)
+        return _dedent_lines(text_lines, self).strip()
+
 
 class DoubleStarChunk(DocstringChunk):
     def __init__(self):
         self.secondary_type = None
         self._finished = False
         super().__init__()
+
+    def get_docstring_text(self):
+        text_lines = [line.text for line in self.lines]
+        _remove_empty_leading_trailing_lines(text_lines)
+        # Ensure first line has no space.
+        text = text_lines[0].lstrip() + "\n"
+        text += _dedent_lines(text_lines[1:], self)
+        return text.strip()
 
     def add_line(self, line):
         if self._finished:
@@ -331,24 +348,42 @@ def test():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("filename", type=str)
+    parser.add_argument("filenames", type=str, nargs="*")
+    parser.add_argument("--all", action="store_true")
     args = parser.parse_args()
-    filename = args.filename
 
-    if filename == "<test>":
+    filenames = args.filenames
+
+    if args.all:
+        assert len(filenames) == 0
+        source_tree = abspath(join(dirname(__file__), ".."))
+        os.chdir(source_tree)
+        result = run(
+            ["find", ".", "-name", "*.h"], check=True, stdout=PIPE, encoding="utf8")
+        filenames = result.stdout.split("\n")
+        filenames.sort()
+        for filename in list(filenames):
+            if "/attic/" in filename:
+                filenames.remove(filename)
+            if "/third_party/" in filename:
+                filenames.remove(filename)
+
+    if filenames == ["<test>"]:
         test()
         return
 
-    with open(filename, "r") as f:
-        raw_lines = [x.rstrip() for x in f.readlines()]
-    chunks = parse_chunks(filename, raw_lines)
-    # Replace docstrings with "re-rendered" version.
-    new_lines = []
-    for chunk in chunks:
-        new_lines += reformat_chunk(chunk)
-    with open(filename, "w") as f:
-        f.write("\n".join(new_lines))
-        f.write("\n")
+    for filename in filenames:
+        print(f"Reformat: {filename}")
+        with open(filename, "r") as f:
+            raw_lines = [x.rstrip() for x in f.readlines()]
+        chunks = parse_chunks(filename, raw_lines)
+        # Replace docstrings with "re-rendered" version.
+        new_lines = []
+        for chunk in chunks:
+            new_lines += reformat_chunk(chunk)
+        with open(filename, "w") as f:
+            f.write("\n".join(new_lines))
+            f.write("\n")
 
 
 assert  __name__ == "__main__"
