@@ -277,13 +277,18 @@ def test():
          **/
     """.rstrip())
     chunks = parse_chunks("test", block.split("\n"))
+    texts = []
     for docstring in chunks:
         if not isinstance(docstring, DocstringChunk):
             continue
         # print(docstring)
-        text = docstring.get_docstring_text()
-        print("".join(reformat_docstring(docstring)), end="")
+        text = "".join(reformat_docstring(docstring)).rstrip()
+        print(text)
+        texts.append(text)
         print("---")
+    assert len(texts) == 5
+    for text in texts[1:]:
+        assert text == texts[0]
 
     ragged = dedent("""\
         /// abc
@@ -293,8 +298,12 @@ def test():
 
     chunk, = parse_chunks("test", ragged.split("\n"))
     # Ragged indent.
-    # print(chunk.get_docstring_text())
-
+    try:
+        print(chunk.get_docstring_text())
+        assert False
+    except AssertionError as e:
+        assert "ragged indentation" in str(e)
+        print(str(e))
 
 
 def main():
