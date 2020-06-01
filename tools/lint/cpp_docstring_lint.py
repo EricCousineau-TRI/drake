@@ -333,6 +333,7 @@ def parse_chunks(filename, raw_lines):
 def format_docstring(docstring):
     MAX_LEN = 80
     indent = docstring.lines[0].indent
+    spacing = " "
     text = docstring.get_docstring_text()
     # Can't have nested comments :(
     # Replace with magical D-style stuff.
@@ -340,30 +341,35 @@ def format_docstring(docstring):
     text_lines = text.split("\n")
     first_line = text_lines[0]
 
-    def maybe_wrap(text, suffix):
-        new_line = f"{indent}{text}"
-        too_long = len(new_line) + len(suffix) > MAX_LEN
-        should_extend = ("@endcode" in text or "</pre>" in text)
-        if too_long or should_extend:
-            return [
-                new_line,
-                f"{indent}{suffix}",
+    def maybe_wrap(prefix, text, suffix):
+        if len(prefix) > 0 and text.startswith("@"):
+            lines = [
+                f"{indent}{prefix.rstrip()}",
+                f"{indent}{spacing}{text}{suffix}",
             ]
         else:
-            return [f"{new_line}{suffix}"]
+            lines = [f"{indent}{prefix}{text}{suffix}"]
+        too_long = len(lines[-1]) > MAX_LEN
+        should_extend = ("@endcode" in text or "</pre>" in text)
+        if too_long or should_extend:
+            lines = lines[:-1] + [
+                f"{indent}{text}",
+                f"{indent}{suffix}",
+            ]
+        return lines
 
     if len(text_lines) == 1:
-        if "://" in first_line:
+        if "https://" in first_line:
             # Weird behavior with bogus lint?
             return [f"{indent}/// {first_line}"]
-        new_lines = maybe_wrap(f"/** {first_line}", " */")
+        new_lines = maybe_wrap("/** ", first_line, " */")
     else:
-        new_lines = [f"{indent}/** {first_line}"]
+        new_lines = maybe_wrap("/** ", first_line, "")
         for line in text_lines[1:-1]:
-            new_line = f"{indent} {line}".rstrip()
+            new_line = f"{indent}{spacing}{line}".rstrip()
             new_lines.append(new_line)
         last_line = text_lines[-1]
-        new_lines += maybe_wrap(f" {last_line}", " */")
+        new_lines += maybe_wrap("", f"{spacing}{last_line}", " */")
     return new_lines
 
 
