@@ -15,24 +15,24 @@ class Token:
     SINGLE_STAR = "*"
     STAR_SLASH_END = "*/"
 
-    @staticmethod
-    def parse(text):
-        start_token = Token.NOTHING
-        end_token = Token.NOTHING
-        if len(text) > 0:
-            # Text must already be stripped..
-            assert text[0] != " ", repr(text)
-            assert text[-1] != " "
-            if text.startswith("///"):
-                start_token = Token.TRIPLE_SLASH
-            elif text.startswith("/**"):
-                start_token = Token.SLASH_DOUBLE_STAR
-            elif text.startswith("* ") or text.strip() == "*":
-                start_token = Token.SINGLE_STAR
-            possible_end = (Token.NOTHING, Token.SINGLE_STAR, Token.SLASH_DOUBLE_STAR)
-            if start_token in possible_end and text.endswith("*/"):
-                end_token = Token.STAR_SLASH_END
-        return start_token, end_token
+
+def parse_line_tokens(text):
+    start_token = Token.NOTHING
+    end_token = Token.NOTHING
+    if len(text) > 0:
+        # Text must already be stripped..
+        assert text[0] != " ", repr(text)
+        assert text[-1] != " "
+        if text.startswith("///"):
+            start_token = Token.TRIPLE_SLASH
+        elif text.startswith("/**"):
+            start_token = Token.SLASH_DOUBLE_STAR
+        elif text.startswith("* ") or text.strip() == "*":
+            start_token = Token.SINGLE_STAR
+        possible_end = (Token.NOTHING, Token.SINGLE_STAR, Token.SLASH_DOUBLE_STAR)
+        if start_token in possible_end and text.endswith("*/"):
+            end_token = Token.STAR_SLASH_END
+    return start_token, end_token
 
 
 def split_indent(line):
@@ -52,7 +52,7 @@ class Docline:
         assert "\n" not in raw_line
         self.raw_line = raw_line
         self.indent, without_indent = split_indent(self.raw_line)
-        self.start_token, self.end_token = Token.parse(without_indent)
+        self.start_token, self.end_token = parse_line_tokens(without_indent)
         self._set_text(f"{self.indent}{self.start_token}")
 
     def _set_text(self, prefix):
