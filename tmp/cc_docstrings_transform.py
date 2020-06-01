@@ -34,7 +34,8 @@ class Type:
                 start_type = Type.DOUBLE_STAR
             elif text.startswith("*"):
                 start_type = Type.SINGLE_STAR
-            if text.endswith("*/"):
+            possible_end = (Type.NOTHING, Type.DOUBLE_STAR)
+            if start_type in possible_end and text.endswith("*/"):
                 end_type = Type.COMMENT_END
         return start_type, end_type
 
@@ -168,6 +169,7 @@ class DocstringChunk(Chunk):
 
     def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
+        print(text_lines)
         # Remove empty leading and trailing lines.
         while text_lines[0].strip() == "":
             del text_lines[0]
@@ -280,34 +282,38 @@ def test():
          *  jkl
          **/
     """.rstrip())
-    chunks = parse_chunks("test", block.split("\n"))
-    texts = []
-    for docstring in chunks:
-        if not isinstance(docstring, DocstringChunk):
-            continue
-        # print(docstring)
-        text = "".join(reformat_docstring(docstring)).rstrip()
-        print(text)
-        texts.append(text)
-        print("---")
-    assert len(texts) == 5
-    for text in texts[1:]:
-        assert text == texts[0]
+    # chunks = parse_chunks("test", block.split("\n"))
+    # texts = []
+    # for docstring in chunks:
+    #     if not isinstance(docstring, DocstringChunk):
+    #         continue
+    #     # print(docstring)
+    #     text = "".join(reformat_docstring(docstring)).rstrip()
+    #     print(text)
+    #     texts.append(text)
+    #     print("---")
+    # assert len(texts) == 5
+    # for text in texts[1:]:
+    #     assert text == texts[0]
 
-    ragged = dedent("""\
-        /// abc
-        /// def
-        ///ghe
-    """.rstrip())
+    maybe = ["/// Hello /* world */"]
+    docstring, = parse_chunks("test", maybe)
+    print(reformat_docstring(docstring))
 
-    chunk, = parse_chunks("test", ragged.split("\n"))
-    # Ragged indent.
-    try:
-        print(chunk.get_docstring_text())
-        assert False
-    except AssertionError as e:
-        assert "ragged indentation" in str(e)
-        print(str(e))
+    # ragged = dedent("""\
+    #     /// abc
+    #     /// def
+    #     ///ghe
+    # """.rstrip())
+
+    # chunk, = parse_chunks("test", ragged.split("\n"))
+    # # Ragged indent.
+    # try:
+    #     print(chunk.get_docstring_text())
+    #     assert False
+    # except AssertionError as e:
+    #     assert "ragged indentation" in str(e)
+    #     print(str(e))
 
 
 def main():
