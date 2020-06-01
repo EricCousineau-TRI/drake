@@ -121,17 +121,20 @@ class Chunk:
 
     def __repr__(self):
         return (
-            f"<{self.__class__} {self.lines[0].filename}:"
+            f"<{self.__class__.__name__} {self.lines[0].filename}:"
             f"{self.lines[0].num + 1}-{self.lines[-1].num + 1}>")
 
 
 def chunk_cls_list():
     # N.B. Does not contain `GenericChunk`.
     return (
+        # Docstrings.
         TripleSlashChunk,
         DoubleStarChunk,
+        # Comments.
         DoubleSlashChunk,
         SingleStarChunk,
+        # Whitespace.
         WhitespaceChunk,
     )
 
@@ -213,9 +216,17 @@ class DocstringChunk(Chunk):
 
 class TripleSlashChunk(DocstringChunk):
     def add_line(self, line):
-        if line.start_token != Token.TRIPLE_SLASH:
-            return False
-        return super().add_line(line)
+        if line.start_token == Token.TRIPLE_SLASH:
+            return super().add_line(line)
+        else:
+            raw = line.raw_line.strip()
+            # Not really triple slash, but meh.
+            if raw in ("//@{", "//@}"):
+                new = f"/// {raw[2:]}"
+                line = Docline(line.filename, line.num, f"{line.indent}{new}")
+                return super().add_line(line)
+            else:
+                return False
 
 
 class DoubleStarChunk(DocstringChunk):
@@ -350,13 +361,7 @@ def reformat_chunk(chunk):
     else:
         new_lines = []
         for line in chunk.lines:
-            if line.text == "//@{":
-                new_line = f"{line.indent}/** @{{ */"
-            elif line.text == "//@}":
-                new_line = f"{line.indent}/** @}} */"
-            else:
-                new_line = line.raw_line
-            new_lines.append(new_line)
+            new_lines.append(line.raw_line)
     return new_lines
 
 
@@ -448,14 +453,94 @@ def test():
         print(str(e))
 
 
+class Regex:
+    class Part:
+        def consume(self, xs, index):
+            raise NotImplemented
+
+
+    class Single:
+        def __init__(self, check):
+            self._check = check
+
+        def __repr__(self):
+            return f"<Single {self._check}>"
+
+        def consume(self, xs, index):
+            x = xs[index]
+            if self._check(x):
+                return [x]
+            else:
+                return None
+
+
+    class Any:
+        def __init__(self, check):
+            self._check = check
+
+        def __repr__(self):
+            return f"<Any {self._check}>"
+
+        def consume(self, xs, index):
+            group = []
+            while self._check(xs[index]) and index < len(xs):
+                group.append(xs[index])
+                index += 1
+            return group
+
+
+    def __init__(self, parts):
+        self._parts = list(parts)
+
+    def __repr__(self):
+        return f"<Regex {self._parts}>"
+
+    def find_all(self, xs):
+        matches = []
+        index = 0
+        while index < len(xs):
+            start_index = index
+            groups = []
+            for part in self._parts:
+                if index == len(xs):
+                    groups = None
+                    break
+                group = part.consume(xs, index)
+                if group is not None:
+                    index += len(group)
+                    groups.append(group)
+                else:
+                    groups = None
+                    break
+            if groups is not None:
+                assert index > start_index
+                matches.append(groups)
+            else:
+                # Matching failed. Restart.
+                index = start_index + 1
+        return matches
+
+
+def isa(cls):
+
+    def func(x):
+        return isinstance(x, cls)
+
+    func.__qualname__ = func.__name__ = f"isa[{cls.__name__}]"
+    return func
+
+
 def reorder_chunks(chunks):
-    prev_chunk = None
-    for chunk in chunks:
-        if isinstance(chunk, CommentChunk) and isinstance(prev_chunk, DocstringChunk):
-            print(prev_chunk)
-            print(chunk)
-            print("---")
-        prev_chunk = chunk
+    mkdoc_issue = Regex([
+        Regex.Single(isa(DocstringChunk)),
+        Regex.Any(isa(WhitespaceChunk)),
+        Regex.Single(isa(CommentChunk)),
+        Regex.Single(isa(GenericChunk)),
+    ])
+    for groups in mkdoc_issue.find_all(chunks):
+        print(groups[0][0])
+        print(groups[2][0])
+        print("---")
     return chunks
 
 
