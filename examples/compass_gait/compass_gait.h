@@ -102,7 +102,7 @@ class CompassGait final : public systems::LeafSystem<T> {
     return this->template GetNumericParameter<CompassGaitParams>(context, 0);
   }
 
-  ///@{
+  /// @{
   /// Manipulator equation of CompassGait: M(q)v̇ + bias(q,v) = 0.
   ///
   /// - M is the 2x2 mass matrix.
@@ -110,7 +110,7 @@ class CompassGait final : public systems::LeafSystem<T> {
   ///   i.e. bias = C(q,v)*v - τ_g(q).
   Vector2<T> DynamicsBiasTerm(const systems::Context<T> &context) const;
   Matrix2<T> MassMatrix(const systems::Context<T> &context) const;
-  ///@}
+  /// @}
 
  private:
   static const CompassGaitContinuousState<T>& get_continuous_state(

@@ -181,7 +181,7 @@ class MGKukaIIwaRobot {
   /** @name Methods for returning mass
    *  These methods return the mass of robot links A, B, C, D, E, F, G (in kg).
    */
-  ///@{
+  /// @{
   double get_mass_of_link_A() const  { return MG_kuka_auto_generated_.mA; }
   double get_mass_of_link_B() const  { return MG_kuka_auto_generated_.mB; }
   double get_mass_of_link_C() const  { return MG_kuka_auto_generated_.mC; }
@@ -189,7 +189,7 @@ class MGKukaIIwaRobot {
   double get_mass_of_link_E() const  { return MG_kuka_auto_generated_.mE; }
   double get_mass_of_link_F() const  { return MG_kuka_auto_generated_.mF; }
   double get_mass_of_link_G() const  { return MG_kuka_auto_generated_.mG; }
-  ///@}
+  /// @}
 
  private:
   // This method calculates all the output quantities designated by the
