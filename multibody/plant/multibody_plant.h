@@ -109,6 +109,8 @@ enum class ContactModel {
 ///   @input_port{<span style="color:green">geometry_query</span>},
 ///   @output_port{continuous_state}
 ///   @output_port{body_poses}
+///   @output_port{body_spatial_velocities}
+///   @output_port{body_spatial_accelerations}
 ///   @output_port{generalized_acceleration}
 ///   @output_port{reaction_forces}
 ///   @output_port{contact_results}
@@ -424,7 +426,7 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   /// You can obtain the pose `X_WB` of a body B in the world frame W with:
   /// @code
   ///   const auto& X_WB_all = plant.get_body_poses_output_port().
-  ///       .Eval<std::vector<math::RigidTransform<double>>(plant_context);
+  ///       .Eval<std::vector<math::RigidTransform<double>>>(plant_context);
   ///   const BodyIndex arm_body_index = plant.GetBodyByName("arm").index();
   ///   const math::RigidTransform<double>& X_WArm = X_WB_all[arm_body_index];
   /// @endcode
@@ -432,7 +434,42 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   /// is indexed by BodyIndex, and it has size num_bodies().
   /// BodyIndex "zero" (0) always corresponds to the world body, with pose
   /// equal to the identity at all times.
+  /// @throws std::exception if called pre-finalize.
   const systems::OutputPort<T>& get_body_poses_output_port() const;
+
+  /// Returns the output port of all body spatial velocities in the world frame.
+  /// You can obtain the spatial velocity `V_WB` of a body B in the world frame
+  /// W with:
+  /// @code
+  ///   const auto& V_WB_all = plant.get_body_spatial_velocities_output_port().
+  ///       .Eval<std::vector<SpatialVelocity<double>>>(plant_context);
+  ///   const BodyIndex arm_body_index = plant.GetBodyByName("arm").index();
+  ///   const SpatialVelocity<double>& V_WArm = V_WB_all[arm_body_index];
+  /// @endcode
+  /// As shown in the example above, the resulting `std::vector` of body spatial
+  /// velocities is indexed by BodyIndex, and it has size num_bodies().
+  /// BodyIndex "zero" (0) always corresponds to the world body, with zero
+  /// spatial velocity at all times.
+  /// @throws std::exception if called pre-finalize.
+  const systems::OutputPort<T>& get_body_spatial_velocities_output_port() const;
+
+  /// Returns the output port of all body spatial accelerations in the world
+  /// frame. You can obtain the spatial acceleration `A_WB` of a body B in the
+  /// world frame W with:
+  /// @code
+  ///   const auto& A_WB_all =
+  ///   plant.get_body_spatial_accelerations_output_port().
+  ///       .Eval<std::vector<SpatialAcceleration<double>>>(plant_context);
+  ///   const BodyIndex arm_body_index = plant.GetBodyByName("arm").index();
+  ///   const SpatialVelocity<double>& A_WArm = A_WB_all[arm_body_index];
+  /// @endcode
+  /// As shown in the example above, the resulting `std::vector` of body spatial
+  /// accelerations is indexed by BodyIndex, and it has size num_bodies().
+  /// BodyIndex "zero" (0) always corresponds to the world body, with zero
+  /// spatial acceleration at all times.
+  /// @throws std::exception if called pre-finalize.
+  const systems::OutputPort<T>& get_body_spatial_accelerations_output_port()
+      const;
 
   /// Returns a constant reference to the input port for external actuation for
   /// a specific model instance.  This input port is a vector valued port, which
@@ -625,8 +662,8 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
     collision_geometries_ = other.collision_geometries_;
     X_WB_default_list_ = other.X_WB_default_list_;
     contact_model_ = other.contact_model_;
-    if (geometry_source_is_registered())
-      DeclareSceneGraphPorts();
+    penetration_allowance_ = other.penetration_allowance_;
+    if (geometry_source_is_registered()) DeclareSceneGraphPorts();
 
     // MultibodyTree::CloneToScalar() already called MultibodyTree::Finalize()
     // on the new MultibodyTree on U. Therefore we only Finalize the plant's
@@ -1367,6 +1404,9 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   /// @throws std::exception iff called post-finalize.
   void set_contact_model(ContactModel model);
 
+  // TODO(amcastro-tri): per work in #13064, we should reconsider whether to
+  // deprecate/remove this method alltogether or at least promote to proper
+  // camel case per GSG.
   /// Sets the penetration allowance used to estimate the coefficients in the
   /// penalty method used to impose non-penetration among bodies. Refer to the
   /// section @ref mbp_penalty_method "Contact by penalty method" for further
@@ -3630,6 +3670,16 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   // Declare the system-level cache entries specific to MultibodyPlant.
   void DeclareCacheEntries();
 
+  // Estimates a global set of point contact parameters given a
+  // `penetration_allowance`. See set_penetration_allowance()` for details.
+  // TODO(amcastro-tri): Once #13064 is resolved, make this a method outside MBP
+  // with signature:
+  // EstimatePointContactParameters(double penetration_allowance,
+  //                                MultibodyPlant<double>* plant)
+  // We will document the heuristics used by this method thoroughly so that we
+  // have a place we can refer users to for details.
+  void EstimatePointContactParameters(double penetration_allowance);
+
   // Helper method to assemble actuation input vector from the appropriate
   // ports.
   VectorX<T> AssembleActuationInput(
@@ -3649,6 +3699,13 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   // the algorithm and implementation.
   void CalcForwardDynamics(const systems::Context<T>& context,
                            internal::AccelerationKinematicsCache<T>* ac) const;
+
+  // Discrete system version of CalcForwardDynamics(). This method does not use
+  // O(n) forward dynamics but the discrete TAMSI solver, for further details
+  // please refer to @ref castro_etal_2019 "[Castro et al., 2019]"
+  void CalcForwardDynamicsDiscrete(
+      const drake::systems::Context<T>& context,
+      internal::AccelerationKinematicsCache<T>* ac) const;
 
   // Eval version of the method CalcForwardDynamics().
   const internal::AccelerationKinematicsCache<T>& EvalForwardDynamics(
@@ -3797,14 +3854,6 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   void CalcGeneralizedAccelerations(const drake::systems::Context<T>& context,
                                     VectorX<T>* vdot) const;
 
-  // Discrete system version of CalcGeneralizedAccelerations().
-  void CalcGeneralizedAccelerationsDiscrete(
-      const drake::systems::Context<T>& context, VectorX<T>* vdot) const;
-
-  // Continuous system version of CalcGeneralizedAccelerations().
-  void CalcGeneralizedAccelerationsContinuous(
-      const drake::systems::Context<T>& context, VectorX<T>* vdot) const;
-
   // Eval() version of the method CalcGeneralizedAccelerations().
   const VectorX<T>& EvalGeneralizedAccelerations(
       const systems::Context<T>& context) const {
@@ -3881,6 +3930,18 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   void CalcBodyPosesOutput(
       const systems::Context<T>& context,
       std::vector<math::RigidTransform<T>>* X_WB_all) const;
+
+  // Evaluates the spatial velocity V_WB of each body in the model and copies it
+  // into V_WB_all, indexed by BodyIndex.
+  void CalcBodySpatialVelocitiesOutput(
+      const systems::Context<T>& context,
+      std::vector<SpatialVelocity<T>>* V_WB_all) const;
+
+  // Evaluates the spatial acceleration A_WB of each body in the model and
+  // copies it into A_WB_all, indexed by BodyIndex.
+  void CalcBodySpatialAccelerationsOutput(
+      const systems::Context<T>& context,
+      std::vector<SpatialAcceleration<T>>* A_WB_all) const;
 
   // Method to compute spatial contact forces for continuous plants.
   void CalcSpatialContactForcesContinuous(
@@ -4099,6 +4160,10 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   };
   ContactByPenaltyMethodParameters penalty_method_contact_parameters_;
 
+  // Penetration allowance used to estimate ContactByPenaltyMethodParameters.
+  // See set_penetration_allowance() for details.
+  double penetration_allowance_{1.0e-3};
+
   // Stribeck model of friction.
   class StribeckModel {
    public:
@@ -4234,8 +4299,10 @@ class MultibodyPlant : public internal::MultibodyTreeSystem<T> {
   // Port for externally applied spatial forces F.
   systems::InputPortIndex applied_spatial_force_input_port_;
 
-  // Port for the pose of all bodies in the model.
+  // Ports for spatial kinematics.
   systems::OutputPortIndex body_poses_port_;
+  systems::OutputPortIndex body_spatial_velocities_port_;
+  systems::OutputPortIndex body_spatial_accelerations_port_;
 
   // A port presenting state x=[q v] for the whole system, and a vector of
   // ports presenting state subsets xᵢ=[qᵢ vᵢ] ⊆ x for each model instance i,

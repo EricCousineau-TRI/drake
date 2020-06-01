@@ -1,7 +1,6 @@
 #include "pybind11/eigen.h"
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
-#include "pybind11/stl_bind.h"
 
 #include "drake/bindings/pydrake/common/cpp_template_pybind.h"
 #include "drake/bindings/pydrake/common/default_scalars_pybind.h"
@@ -22,14 +21,6 @@
 #include "drake/multibody/plant/point_pair_contact_info.h"
 #include "drake/multibody/plant/propeller.h"
 #include "drake/multibody/tree/spatial_inertia.h"
-
-PYBIND11_MAKE_OPAQUE(
-    std::vector<drake::multibody::ExternallyAppliedSpatialForce<double>>);
-PYBIND11_MAKE_OPAQUE(std::vector<
-    drake::multibody::ExternallyAppliedSpatialForce<drake::AutoDiffXd>>);
-PYBIND11_MAKE_OPAQUE(
-    std::vector<drake::multibody::ExternallyAppliedSpatialForce<
-        drake::symbolic::Expression>>);
 
 namespace drake {
 namespace pydrake {
@@ -688,7 +679,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
             overload_cast_explicit<const systems::InputPort<T>&,
                 multibody::ModelInstanceIndex>(
                 &Class::get_actuation_input_port),
-            py_reference_internal, cls_doc.get_actuation_input_port.doc_1args)
+            py::arg("model_instance"), py_reference_internal,
+            cls_doc.get_actuation_input_port.doc_1args)
         .def("get_applied_generalized_force_input_port",
             overload_cast_explicit<const systems::InputPort<T>&>(
                 &Class::get_applied_generalized_force_input_port),
@@ -703,6 +695,16 @@ void DoScalarDependentDefinitions(py::module m, T) {
             overload_cast_explicit<const systems::OutputPort<T>&>(
                 &Class::get_body_poses_output_port),
             py_reference_internal, cls_doc.get_body_poses_output_port.doc)
+        .def("get_body_spatial_velocities_output_port",
+            overload_cast_explicit<const systems::OutputPort<T>&>(
+                &Class::get_body_spatial_velocities_output_port),
+            py_reference_internal,
+            cls_doc.get_body_spatial_velocities_output_port.doc)
+        .def("get_body_spatial_accelerations_output_port",
+            overload_cast_explicit<const systems::OutputPort<T>&>(
+                &Class::get_body_spatial_accelerations_output_port),
+            py_reference_internal,
+            cls_doc.get_body_spatial_accelerations_output_port.doc)
         .def("get_state_output_port",
             overload_cast_explicit<const systems::OutputPort<T>&>(
                 &Class::get_state_output_port),
@@ -710,7 +712,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def("get_state_output_port",
             overload_cast_explicit<const systems::OutputPort<T>&,
                 multibody::ModelInstanceIndex>(&Class::get_state_output_port),
-            py_reference_internal, cls_doc.get_state_output_port.doc_1args)
+            py::arg("model_instance"), py_reference_internal,
+            cls_doc.get_state_output_port.doc_1args)
         .def("get_generalized_acceleration_output_port",
             overload_cast_explicit<const systems::OutputPort<T>&>(
                 &Class::get_generalized_acceleration_output_port),
@@ -935,24 +938,8 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def_readwrite("p_BoBq_B", &Class::p_BoBq_B, cls_doc.p_BoBq_B.doc)
         .def_readwrite("F_Bq_W", &Class::F_Bq_W, cls_doc.F_Bq_W.doc);
     AddValueInstantiation<Class>(m);
-  }
-
-  // Opaquely bind std::vector<ExternallyAppliedSpatialForce> to enable
-  // Python systems to construct AbstractValues of this type with the type
-  // being legible for port connections.
-  {
-    using Class = std::vector<multibody::ExternallyAppliedSpatialForce<T>>;
-    // TODO(eric.cousineau): Try to make this specialization for
-    // `py::bind_vector` less boiler-platey, like
-    // `DefineTemplateClassWithDefault`.
-    const std::string default_name = "VectorExternallyAppliedSpatialForced";
-    const std::string template_name = default_name + "_";
-    auto cls = py::bind_vector<Class>(m, TemporaryClassName<Class>().c_str());
-    AddTemplateClass(m, template_name.c_str(), cls, param);
-    if (!py::hasattr(m, default_name.c_str())) {
-      m.attr(default_name.c_str()) = cls;
-    }
-    AddValueInstantiation<Class>(m);
+    // Some ports need `Value<std::vector<Class>>`.
+    AddValueInstantiation<std::vector<Class>>(m);
   }
 
   // Propeller
@@ -1049,6 +1036,8 @@ PYBIND11_MODULE(plant, m) {
           doc.PropellerInfo.thrust_ratio.doc)
       .def_readwrite("moment_ratio", &PropellerInfo::moment_ratio,
           doc.PropellerInfo.moment_ratio.doc);
+
+  ExecuteExtraPythonCode(m);
 }  // NOLINT(readability/fn_size)
 
 }  // namespace pydrake

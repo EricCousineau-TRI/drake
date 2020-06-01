@@ -16,6 +16,7 @@ kcov
 libblas-dev
 libbz2-dev
 libclang-6.0-dev
+libclang-9-dev
 libexpat1-dev
 libfreetype-dev
 libgflags-dev
@@ -59,6 +60,7 @@ python3-matplotlib-dbg
 python3-numpy-dbg
 python3-pandas
 python3-pydot
+python3-pygame
 python3-scipy-dbg
 python3-sphinx
 python3-sphinx-rtd-theme

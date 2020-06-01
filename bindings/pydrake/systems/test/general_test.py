@@ -101,6 +101,10 @@ class TestGeneral(unittest.TestCase):
         self.assertEqual(
             system.GetSystemType(),
             "drake::systems::Adder<double>")
+        system.set_name(name="adder")
+        self.assertEqual(system.get_name(), "adder")
+        self.assertEqual(system.GetSystemName(), "adder")
+        self.assertEqual(system.GetSystemPathname(), "::adder")
         self.assertEqual(system.num_input_ports(), 3)
         self.assertEqual(system.num_output_ports(), 1)
         u1 = system.GetInputPort("u1")
@@ -782,6 +786,7 @@ class TestGeneral(unittest.TestCase):
             status.severity(), EventStatus.Severity.kReachedTermination)
         self.assertIs(status.system(), system)
         self.assertEqual(status.message(), "done")
-        self.assertIsInstance(status.KeepMoreSevere(status), EventStatus)
+        self.assertIsInstance(
+            status.KeepMoreSevere(candidate=status), EventStatus)
         status = EventStatus.Failed(system=system, message="failed")
         self.assertIsInstance(status, EventStatus)

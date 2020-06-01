@@ -46,6 +46,7 @@ PYBIND11_MODULE(analysis, m) {
             enum_doc.kEventHandlerFailed.doc);
 
     cls  // BR
+         // TODO(eric.cousineau): Bind setter methods.
         .def("FormatMessage", &Class::FormatMessage, cls_doc.FormatMessage.doc)
         .def("succeeded", &Class::succeeded, cls_doc.succeeded.doc)
         .def("boundary_time", &Class::boundary_time, cls_doc.boundary_time.doc)
@@ -53,7 +54,7 @@ PYBIND11_MODULE(analysis, m) {
         .def("reason", &Class::reason, cls_doc.reason.doc)
         .def("system", &Class::system, py_reference, cls_doc.system.doc)
         .def("message", &Class::message, cls_doc.message.doc)
-        .def("IsIdenticalStatus", &Class::IsIdenticalStatus,
+        .def("IsIdenticalStatus", &Class::IsIdenticalStatus, py::arg("other"),
             cls_doc.IsIdenticalStatus.doc);
   }
 

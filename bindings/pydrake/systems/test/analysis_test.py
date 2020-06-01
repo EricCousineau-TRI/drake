@@ -69,7 +69,7 @@ class TestAnalysis(unittest.TestCase):
             SimulatorStatus.ReturnReason.kReachedBoundaryTime)
         self.assertIsNone(status.system())
         self.assertEqual(status.message(), "")
-        self.assertTrue(status.IsIdenticalStatus(status))
+        self.assertTrue(status.IsIdenticalStatus(other=status))
 
     def test_system_monitor(self):
         x = Variable("x")
