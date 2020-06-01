@@ -335,7 +335,7 @@ def parse_chunks(filename, raw_lines):
 def format_docstring(docstring):
     MAX_LEN = 80
     indent = docstring.lines[0].indent
-    spacing = " "
+    spacing = ""
     text = docstring.get_docstring_text()
     # Can't have nested comments :(
     # Replace with magical D-style stuff.
