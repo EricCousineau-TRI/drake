@@ -720,11 +720,17 @@ def main():
         test()
         return
 
-    good = True
+    bad_filenames = []
     for filename in filenames:
         if not transform(filename, lint=not args.fix):
-            good = False
-    if not good:
+            bad_filenames.append(filename)
+    if bad_filenames:
+        if len(bad_filenames) > 5:
+            text = "--all"
+        else:
+            text = ' '.join(bad_filenames)
+        print(f"To fix errors, please run:")
+        print(f"   ./tools/lint/cpp_docstring_lint.py --fix {text}")
         sys.exit(1)
 
 
