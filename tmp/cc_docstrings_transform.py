@@ -27,7 +27,7 @@ class Type:
                 start_type = Type.TRIPLE_SLASH
             elif text.startswith("/**"):
                 start_type = Type.DOUBLE_STAR
-            elif text.startswith("*"):
+            elif text.startswith("* "):
                 start_type = Type.SINGLE_STAR
             possible_end = (Type.NOTHING, Type.SINGLE_STAR, Type.DOUBLE_STAR)
             if start_type in possible_end and text.endswith("*/"):
@@ -118,10 +118,10 @@ class UserError(RuntimeError):
     pass
 
 
-def _dedent_lines(lines, chunk):
+def _dedent_lines(lines, chunk, require_nonragged):
     # Dedent all following lines.
     text = dedent("\n".join(lines))
-    if len(text) > 0:
+    if require_nonragged and len(text) > 0:
         # Ensure that first nonempty line does not start with whitespace
         # (ragged indentation?).
         if text.lstrip("\n")[0] == " ":
@@ -141,7 +141,7 @@ class DocstringChunk(Chunk):
     def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
         _remove_empty_leading_trailing_lines(text_lines)
-        return _dedent_lines(text_lines, self).strip()
+        return _dedent_lines(text_lines, self, require_nonragged=True).strip()
 
 
 class TripleSlashChunk(DocstringChunk):
@@ -163,9 +163,8 @@ class DoubleStarChunk(DocstringChunk):
         else:
             text_lines = [line.text for line in self.lines]
             _remove_empty_leading_trailing_lines(text_lines)
-            # Ensure first line has no space.
             text = text_lines[0].lstrip() + "\n"
-            text += _dedent_lines(text_lines[1:], self)
+            text += _dedent_lines(text_lines[1:], self, require_nonragged=False)
             return text.strip()
 
     def add_line(self, line):
