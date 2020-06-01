@@ -114,6 +114,10 @@ class GenericChunk(Chunk):
             return super().add_line(line)
 
 
+class UserError(RuntimeError):
+    pass
+
+
 def _dedent_lines(lines, chunk):
     # Dedent all following lines.
     text = dedent("\n".join(lines))
@@ -121,7 +125,7 @@ def _dedent_lines(lines, chunk):
         # Ensure that first nonempty line does not start with whitespace
         # (ragged indentation?).
         if text.lstrip("\n")[0] == " ":
-            assert False, f"Must not have ragged indentation:\n{chunk}"
+            raise UserError(f"Must not have ragged indentation:\n{chunk}")
     return text
 
 
@@ -135,7 +139,9 @@ def _remove_empty_leading_trailing_lines(lines):
 
 class DocstringChunk(Chunk):
     def get_docstring_text(self):
-        raise NotImplemented
+        text_lines = [line.text for line in self.lines]
+        _remove_empty_leading_trailing_lines(text_lines)
+        return _dedent_lines(text_lines, self).strip()
 
 
 class TripleSlashChunk(DocstringChunk):
@@ -143,11 +149,6 @@ class TripleSlashChunk(DocstringChunk):
         if line.start_type != Type.TRIPLE_SLASH:
             return False
         return super().add_line(line)
-
-    def get_docstring_text(self):
-        text_lines = [line.text for line in self.lines]
-        _remove_empty_leading_trailing_lines(text_lines)
-        return _dedent_lines(text_lines, self).strip()
 
 
 class DoubleStarChunk(DocstringChunk):
@@ -157,12 +158,15 @@ class DoubleStarChunk(DocstringChunk):
         super().__init__()
 
     def get_docstring_text(self):
-        text_lines = [line.text for line in self.lines]
-        _remove_empty_leading_trailing_lines(text_lines)
-        # Ensure first line has no space.
-        text = text_lines[0].lstrip() + "\n"
-        text += _dedent_lines(text_lines[1:], self)
-        return text.strip()
+        if self.lines[0].text == "":
+            return super().get_docstring_text()
+        else:
+            text_lines = [line.text for line in self.lines]
+            _remove_empty_leading_trailing_lines(text_lines)
+            # Ensure first line has no space.
+            text = text_lines[0].lstrip() + "\n"
+            text += _dedent_lines(text_lines[1:], self)
+            return text.strip()
 
     def add_line(self, line):
         if self._finished:
@@ -173,16 +177,19 @@ class DoubleStarChunk(DocstringChunk):
                 return False
             else:
                 do_add_line = True
-        elif line.start_type in (Type.NOTHING, Type.SINGLE_STAR):
+        else:
             if self.secondary_type is None:
-                self.secondary_type = line.start_type
+                if line.start_type == Type.SINGLE_STAR:
+                    self.secondary_type = Type.SINGLE_STAR
+                else:
+                    self.secondary_type = Type.NOTHING
             if self.secondary_type == Type.NOTHING:
                 do_add_line = True
                 # Reset indentation to match first line.
                 line.reset_indent(self.lines[0].indent)
             else:
-                assert line.start_type == Type.SINGLE_STAR, (
-                    f"Must continue with single star: {line}")
+                if line.start_type != Type.SINGLE_STAR:
+                    raise UserError(f"Must continue with single star: {line}")
                 do_add_line = True
         if line.end_type == Type.COMMENT_END:
             self._finished = True
@@ -328,22 +335,49 @@ def test():
     maybe = ["/// Hello /* world */"]
     docstring, = parse_chunks("test", maybe)
     new_lines = reformat_chunk(docstring)
+    assert new_lines == ["/** Hello /* world * / */"]
     print("\n".join(new_lines))
+
+    yar = dedent("""\
+        /**
+         * Something
+         *    with code
+         *
+         * Don't you see?
+         */
+    """.rstrip())
+    docstring, = parse_chunks("test", yar.split("\n"))
+    new_lines = reformat_chunk(docstring)
+    # Enusre this works...
+    text = "\n".join(new_lines)
+    print(text)
 
     ragged = dedent("""\
         /// abc
         /// def
         ///ghe
     """.rstrip())
-
     chunk, = parse_chunks("test", ragged.split("\n"))
     # Ragged indent.
     try:
         print(chunk.get_docstring_text())
         assert False
-    except AssertionError as e:
+    except UserError as e:
         assert "ragged indentation" in str(e)
         print(str(e))
+
+
+def transform(filename):
+    with open(filename, "r") as f:
+        raw_lines = [x.rstrip() for x in f.readlines()]
+    chunks = parse_chunks(filename, raw_lines)
+    # Replace docstrings with "re-rendered" version.
+    new_lines = []
+    for chunk in chunks:
+        new_lines += reformat_chunk(chunk)
+    with open(filename, "w") as f:
+        f.write("\n".join(new_lines))
+        f.write("\n")
 
 
 def main():
@@ -360,7 +394,7 @@ def main():
         os.chdir(source_tree)
         result = run(
             ["find", ".", "-name", "*.h"], check=True, stdout=PIPE, encoding="utf8")
-        filenames = result.stdout.split("\n")
+        filenames = result.stdout.strip().split("\n")
         filenames.sort()
         for filename in list(filenames):
             if "/attic/" in filename:
@@ -373,17 +407,11 @@ def main():
         return
 
     for filename in filenames:
-        print(f"Reformat: {filename}")
-        with open(filename, "r") as f:
-            raw_lines = [x.rstrip() for x in f.readlines()]
-        chunks = parse_chunks(filename, raw_lines)
-        # Replace docstrings with "re-rendered" version.
-        new_lines = []
-        for chunk in chunks:
-            new_lines += reformat_chunk(chunk)
-        with open(filename, "w") as f:
-            f.write("\n".join(new_lines))
-            f.write("\n")
+        print(f"Transform: {filename}")
+        try:
+            transform(filename)
+        except UserError as e:
+            print(indent(str(e), prefix="  "))
 
 
 assert  __name__ == "__main__"
