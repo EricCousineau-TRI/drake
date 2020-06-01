@@ -54,7 +54,8 @@ class Docline:
     def __init__(self, filename, num, raw_line):
         self.filename = filename
         self.num = num
-        self.raw_line = raw_line.rstrip()
+        assert "\n" not in raw_line
+        self.raw_line = raw_line
         self.indent, without_indent = split_indent(self.raw_line)
         self.start_type, self.end_type = Type.parse(without_indent)
         self._set_text(f"{self.indent}{self.start_type}")
@@ -160,7 +161,9 @@ class DocstringChunk(Chunk):
                 do_add_line = True
                 self._finished = True
             if not do_add_line:
-                assert self._finished, f"Needs termination:\n{self}\n{line}"
+                tmp = Chunk()
+                tmp.lines = self.lines + [line]
+                assert self._finished, f"Needs termination:\n{tmp}"
         if do_add_line:
             return super().add_line(line)
         else:
@@ -169,7 +172,6 @@ class DocstringChunk(Chunk):
 
     def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
-        print(text_lines)
         # Remove empty leading and trailing lines.
         while text_lines[0].strip() == "":
             del text_lines[0]
@@ -221,7 +223,7 @@ def parse_chunks(filename, raw_lines):
     return chunks
 
 
-def reformat_docstring(docstring):
+def format_docstring(docstring):
     indent = docstring.lines[0].indent
     text = docstring.get_docstring_text()
     # Can't have nested comments :(
@@ -229,16 +231,32 @@ def reformat_docstring(docstring):
     text_lines = text.split("\n")
     first_line = text_lines[0]
     if len(text_lines) == 1:
-        new_lines = [f"{indent}/** {first_line} */\n"]
+        new_lines = [f"{indent}/** {first_line} */"]
     else:
-        new_lines = [f"{indent}/** {first_line}\n"]
+        new_lines = [f"{indent}/** {first_line}"]
         for line in text_lines[1:-1]:
             if line:
-                new_lines.append(f"{indent} {line}\n")
+                new_lines.append(f"{indent} {line}")
             else:
                 new_lines.append("\n")
         last_line = text_lines[-1]
-        new_lines.append(f"{indent} {last_line}  */\n")
+        new_lines.append(f"{indent} {last_line} */")
+    return new_lines
+
+
+def reformat_chunk(chunk):
+    if isinstance(chunk, DocstringChunk):
+        new_lines = format_docstring(chunk)
+    else:
+        new_lines = []
+        for line in chunk.lines:
+            if chunk.text == "//@{":
+                new_line = f"{line.indent}/** @{{ */"
+            elif chunk.text == "//@}":
+                new_line = f"{line.indent}/** @}} */"
+            else:
+                new_line = x.raw_line
+            new_lines.append(new_line)
     return new_lines
 
 
@@ -282,23 +300,24 @@ def test():
          *  jkl
          **/
     """.rstrip())
-    # chunks = parse_chunks("test", block.split("\n"))
-    # texts = []
-    # for docstring in chunks:
-    #     if not isinstance(docstring, DocstringChunk):
-    #         continue
-    #     # print(docstring)
-    #     text = "".join(reformat_docstring(docstring)).rstrip()
-    #     print(text)
-    #     texts.append(text)
-    #     print("---")
-    # assert len(texts) == 5
-    # for text in texts[1:]:
-    #     assert text == texts[0]
+    chunks = parse_chunks("test", block.split("\n"))
+    texts = []
+    for docstring in chunks:
+        if not isinstance(docstring, DocstringChunk):
+            continue
+        # print(docstring)
+        text = "\n".join(reformat_chunk(docstring))
+        print(text)
+        texts.append(text)
+        print("---")
+    assert len(texts) == 5
+    for text in texts[1:]:
+        assert text == texts[0]
 
     maybe = ["/// Hello /* world */"]
     docstring, = parse_chunks("test", maybe)
-    print(reformat_docstring(docstring))
+    new_lines = reformat_chunk(docstring)
+    print("\n".join(new_lines))
 
     # ragged = dedent("""\
     #     /// abc
@@ -327,18 +346,15 @@ def main():
         return
 
     with open(filename, "r") as f:
-        raw_lines = list(f.readlines())
+        raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
-        if isinstance(chunk, DocstringChunk):
-            new_lines += reformat_docstring(chunk)
-        else:
-            new_lines += [x.raw_line + "\n" for x in chunk.lines]
+        new_lines += reformat_chunk(chunk)
     with open(filename, "w") as f:
-        for line in new_lines:
-            f.write(line)
+        f.write("\n".join(new_lines))
+        f.write("\n")
 
 
 assert  __name__ == "__main__"
