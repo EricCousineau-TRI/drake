@@ -157,21 +157,24 @@ class DoubleStarChunk(DocstringChunk):
             else:
                 do_add_line = True
         elif line.start_type in (Type.NOTHING, Type.SINGLE_STAR):
-            secondary_matches = (line.start_type == self.secondary_type)
-            if self.secondary_type is None or secondary_matches:
+            if self.secondary_type is None:
                 self.secondary_type = line.start_type
+            if self.secondary_type == Type.NOTHING:
                 do_add_line = True
-                if line.start_type == Type.NOTHING:
-                    # Reset indentation to match first line.
-                    line.reset_indent(self.lines[0].indent)
+                # Reset indentation to match first line.
+                line.reset_indent(self.lines[0].indent)
+            else:
+                assert line.start_type == Type.SINGLE_STAR, (
+                    f"Must continue with single star: {line}")
+                do_add_line = True
         if line.end_type == Type.COMMENT_END:
             self._finished = True
             do_add_line = True
         if not do_add_line:
             tmp = Chunk()
             tmp.lines = self.lines + [line]
-            for line in tmp.lines:
-                print(f"{(line.start_type, line.end_type)}: {line}")
+            # for line in tmp.lines:
+            #     print(f"{(line.start_type, line.end_type)}: {line}")
             assert self._finished, f"Needs termination:\n{tmp}"
         if do_add_line:
             return super().add_line(line)
@@ -204,21 +207,34 @@ def parse_chunks(filename, raw_lines):
 
 
 def format_docstring(docstring):
+    MAX_LEN = 80
     indent = docstring.lines[0].indent
     text = docstring.get_docstring_text()
     # Can't have nested comments :(
     text = text.replace("*/", "* /")
     text_lines = text.split("\n")
     first_line = text_lines[0]
+
+    def maybe_wrap(text, suffix):
+        new_line = f"{indent}{text}"
+        too_long = len(new_line) + len(suffix) > MAX_LEN
+        if too_long or "@endcode" in text:
+            return [
+                new_line,
+                f"{indent}{suffix}",
+            ]
+        else:
+            return [f"{new_line}{suffix}"]
+
     if len(text_lines) == 1:
-        new_lines = [f"{indent}/** {first_line} */"]
+        new_lines = maybe_wrap(f"/** {first_line}", " */")
     else:
         new_lines = [f"{indent}/** {first_line}"]
         for line in text_lines[1:-1]:
             new_line = f"{indent} {line}".rstrip()
             new_lines.append(new_line)
         last_line = text_lines[-1]
-        new_lines.append(f"{indent} {last_line} */")
+        new_lines += maybe_wrap(f" {last_line}", " */")
     return new_lines
 
 
