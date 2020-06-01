@@ -200,7 +200,7 @@ GTEST_TEST(SystemIdentificationTest, BasicEstimateParameters) {
 }
 
 /// Test to check parameter estimation for a basic spring-mass system.
-///@{
+/// @{
 
 struct State { double acceleration, velocity, position, force; };
 static const double kMass = 1;
@@ -465,7 +465,7 @@ GTEST_TEST(SystemIdentificationTest, PendulaIdentification) {
   }
 }
 
-///@}
+/// @}
 
 }  // anonymous namespace
 }  // namespace solvers

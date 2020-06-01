@@ -148,7 +148,7 @@ class RigidBody : public Body<T> {
   /// @name Methods to access position kinematics quantities.
   /// The input PositionKinematicsCache to these methods must be in sync with
   /// context.  These method's APIs will be deprecated when caching arrives.
-  ///@{
+  /// @{
 
   /// (Advanced) Extract this body's pose in world (from the position
   /// kinematics).
@@ -180,12 +180,12 @@ class RigidBody : public Body<T> {
       const internal::PositionKinematicsCache<T>& pc) const {
     return get_pose_in_world(pc).translation();
   }
-  ///@}
+  /// @}
 
   /// @name Methods to access velocity kinematics quantities.
   /// The input VelocityKinematicsCache to these methods must be in sync with
   /// context.  These method's APIs will be deprecated when caching arrives.
-  ///@{
+  /// @{
 
   /// (Advanced) Extract this body spatial velocity in world, expressed in
   /// world.
@@ -216,12 +216,12 @@ class RigidBody : public Body<T> {
       const internal::VelocityKinematicsCache<T>& vc) const {
     return get_spatial_velocity_in_world(vc).translational();
   }
-  ///@}
+  /// @}
 
   /// @name Methods to access acceleration kinematics quantities.
   /// The input AccelerationKinematicsCache to these methods must be in sync
   /// with context.  These method APIs will be deprecated when caching arrives.
-  ///@{
+  /// @{
 
   /// (Advanced) Extract this body spatial acceleration in world, expressed in
   /// world.
@@ -252,7 +252,7 @@ class RigidBody : public Body<T> {
       const internal::AccelerationKinematicsCache<T>& ac) const {
     return get_spatial_acceleration_in_world(ac).translational();
   }
-  ///@}
+  /// @}
 
  protected:
   std::unique_ptr<Body<double>> DoCloneToScalar(
