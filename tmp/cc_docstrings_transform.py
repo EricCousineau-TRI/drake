@@ -11,7 +11,9 @@ from subprocess import run, STDOUT, PIPE
 class Token:
     NOTHING = ""
     TRIPLE_SLASH = "///"
+    DOUBLE_SLASH = "//"
     SLASH_DOUBLE_STAR = "/**"
+    SLASH_SINGLE_STAR = "/*"
     SINGLE_STAR = "*"
     STAR_SLASH_END = "*/"
 
@@ -25,13 +27,18 @@ def parse_line_tokens(text):
         assert text[-1] != " "
         if text.startswith("///"):
             start_token = Token.TRIPLE_SLASH
+        elif text.startswith("//"):
+            start_token = Token.DOUBLE_SLASH
         elif text.startswith("/**"):
             start_token = Token.SLASH_DOUBLE_STAR
+        elif text.startswith("/*"):
+            start_token = Token.SLASH_SINGLE_STAR
         elif text.startswith("* ") or text.strip() == "*":
             start_token = Token.SINGLE_STAR
         has_start_token_for_end = (
-            start_token in
-                (Token.NOTHING, Token.SINGLE_STAR, Token.SLASH_DOUBLE_STAR))
+            start_token in (
+                Token.NOTHING, Token.SINGLE_STAR,
+                Token.SLASH_SINGLE_STAR, Token.SLASH_DOUBLE_STAR))
         if text.endswith("*/") and has_start_token_for_end:
             end_token = Token.STAR_SLASH_END
     return start_token, end_token
@@ -102,6 +109,9 @@ class Chunk:
         self.lines.append(line)
         return True
 
+    def assert_finished(self):
+        pass
+
     def __str__(self):
         num_width = len(str(self.lines[-1].num))
         return "\n".join(x.format(num_width) for x in self.lines)
@@ -117,10 +127,25 @@ class Chunk:
 
 class GenericChunk(Chunk):
     def add_line(self, line):
-        if line.start_token in (Token.TRIPLE_SLASH, Token.SLASH_DOUBLE_STAR):
+        # TODO(eric.cousineau): How to fix this greedy parsing?
+        other_chunk_tokens = (
+            Token.SLASH_DOUBLE_STAR,
+            Token.TRIPLE_SLASH,
+            Token.SLASH_SINGLE_STAR,
+            Token.DOUBLE_SLASH,
+        )
+        if line.start_token in other_chunk_tokens:
             return False
         else:
             return super().add_line(line)
+
+
+class WhitespaceChunk(Chunk):
+    def add_line(self, line):
+        if line.text.strip() == "":
+            return super().add_line(line)
+        else:
+            return False
 
 
 class UserError(RuntimeError):
@@ -146,6 +171,35 @@ def _remove_empty_leading_trailing_lines(lines):
         del lines[-1]
 
 
+class CommentChunk(Chunk):
+    pass
+
+
+class DoubleSlashChunk(CommentChunk):
+    def add_line(self, line):
+        if line.start_token != Token.DOUBLE_SLASH:
+            return False
+        return super().add_line(line)
+
+
+class SingleStarChunk(CommentChunk):
+    def __init__(self):
+        self._finished = False
+        super().__init__()
+
+    def add_line(self, line):
+        if len(self.lines) == 0 and line.start_token != Token.SLASH_SINGLE_STAR:
+            return False
+        if self._finished:
+            return False
+        if line.end_token == Token.STAR_SLASH_END:
+            self._finished = True
+        return super().add_line(line)
+
+    def assert_finished(self):
+        assert self._finished, f"Not closed:\n{self}"
+
+
 class DocstringChunk(Chunk):
     def get_docstring_text(self):
         text_lines = [line.text for line in self.lines]
@@ -165,6 +219,9 @@ class DoubleStarChunk(DocstringChunk):
         self.secondary_type = None
         self._finished = False
         super().__init__()
+
+    def assert_finished(self):
+        assert self._finished, f"Not closed:\n{self}"
 
     def get_docstring_text(self):
         if self.lines[0].text == "":
@@ -224,6 +281,12 @@ def new_chunk(line):
         chunk = TripleSlashChunk()
     elif line.start_token == Token.SLASH_DOUBLE_STAR:
         chunk = DoubleStarChunk()
+    elif line.start_token == Token.SLASH_SINGLE_STAR:
+        chunk = SingleStarChunk()
+    elif line.start_token == Token.DOUBLE_SLASH:
+        chunk = DoubleSlashChunk()
+    elif line.text.strip() == "":
+        chunk = WhitespaceChunk()
     else:
         chunk = GenericChunk()
     assert chunk.add_line(line), line
@@ -238,9 +301,11 @@ def parse_chunks(filename, raw_lines):
         if active_chunk is None:
             active_chunk = new_chunk(line)
         elif not active_chunk.add_line(line):
+            active_chunk.assert_finished()
             chunks.append(active_chunk)
             active_chunk = new_chunk(line)
         assert active_chunk is not None
+    active_chunk.assert_finished()
     chunks.append(active_chunk)
     return chunks
 
@@ -387,10 +452,22 @@ def test():
         print(str(e))
 
 
+def reorder_chunks(chunks):
+    prev_chunk = None
+    for chunk in chunks:
+        if isinstance(chunk, CommentChunk) and isinstance(prev_chunk, DocstringChunk):
+            print(prev_chunk)
+            print(chunk)
+            print("---")
+        prev_chunk = chunk
+    return chunks
+
+
 def transform(filename, dry_run):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
+    chunks = reorder_chunks(chunks)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
