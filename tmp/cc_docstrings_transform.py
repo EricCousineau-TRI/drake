@@ -382,7 +382,7 @@ def test():
         print(str(e))
 
 
-def transform(filename):
+def transform(filename, dry_run):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
@@ -390,6 +390,8 @@ def transform(filename):
     new_lines = []
     for chunk in chunks:
         new_lines += reformat_chunk(chunk)
+    if dry_run:
+        return
     with open(filename, "w") as f:
         f.write("\n".join(new_lines))
         f.write("\n")
@@ -399,6 +401,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", type=str, nargs="*")
     parser.add_argument("--all", action="store_true")
+    parser.add_argument("-n", "--dry_run", action="store_true")
     args = parser.parse_args()
 
     filenames = args.filenames
@@ -418,13 +421,13 @@ def main():
                 filenames.remove(filename)
 
     if filenames == ["<test>"]:
+        assert not args.dry_run
         test()
         return
 
     for filename in filenames:
-        print(f"Transform: {filename}")
         try:
-            transform(filename)
+            transform(filename, dry_run=args.dry_run)
         except UserError as e:
             print(indent(str(e), prefix="  "))
 
