@@ -25,7 +25,7 @@ def parse_line_tokens(text):
         # Text must already be stripped..
         assert text[0] != " ", repr(text)
         assert text[-1] != " "
-        if text.startswith("///"):
+        if text.startswith("///") and not text.startswith("////"):
             start_token = Token.TRIPLE_SLASH
         elif text.startswith("//"):
             start_token = Token.DOUBLE_SLASH
@@ -500,21 +500,21 @@ class Regex:
         index = 0
         while index < len(xs):
             start_index = index
-            groups = []
+            match = []
             for part in self._parts:
                 if index == len(xs):
-                    groups = None
+                    match = None
                     break
                 group = part.consume(xs, index)
                 if group is not None:
                     index += len(group)
-                    groups.append(group)
+                    match.append(group)
                 else:
-                    groups = None
+                    match = None
                     break
-            if groups is not None:
+            if match is not None:
                 assert index > start_index
-                matches.append(groups)
+                matches.append(match)
             else:
                 # Matching failed. Restart.
                 index = start_index + 1
@@ -530,16 +530,35 @@ def isa(cls):
     return func
 
 
-def reorder_chunks(chunks):
+def is_meaningful_docstring(chunk):
+    if isinstance(chunk, DocstringChunk):
+        if len(chunk.lines) == 1:
+            if chunk.lines[0].text.strip().startswith("@"):
+                return False
+        return True
+    return False
+
+
+def is_generic_but_not_macro(chunk):
+    if isinstance(chunk, GenericChunk):
+        if not chunk.lines[0].text.startswith("#"):
+            return True
+    return False
+
+
+def scan_chunks(chunks):
     mkdoc_issue = Regex([
-        Regex.Single(isa(DocstringChunk)),
+        Regex.Single(is_meaningful_docstring),
         Regex.Any(isa(WhitespaceChunk)),
         Regex.Single(isa(CommentChunk)),
-        Regex.Single(isa(GenericChunk)),
+        Regex.Single(is_generic_but_not_macro),
     ])
-    for groups in mkdoc_issue.find_all(chunks):
-        print(groups[0][0])
-        print(groups[2][0])
+    for match in mkdoc_issue.find_all(chunks):
+        for i, group in enumerate(match):
+            if i == 2:
+                print("ERROR: Docstring should neighbor symbol.")
+            for item in group:
+                print(item)
         print("---")
     return chunks
 
@@ -548,7 +567,7 @@ def transform(filename, dry_run):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
-    chunks = reorder_chunks(chunks)
+    chunks = scan_chunks(chunks)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
