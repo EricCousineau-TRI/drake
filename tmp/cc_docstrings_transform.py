@@ -250,7 +250,8 @@ def format_docstring(docstring):
     indent = docstring.lines[0].indent
     text = docstring.get_docstring_text()
     # Can't have nested comments :(
-    text = text.replace("*/", "* /")
+    # Replace with magical D-style stuff.
+    text = text.replace("*/", "+/").replace("/*", "/+")
     text_lines = text.split("\n")
     first_line = text_lines[0]
 
@@ -354,7 +355,7 @@ def test():
     maybe = ["/// Hello /* world */"]
     docstring, = parse_chunks("test", maybe)
     new_lines = reformat_chunk(docstring)
-    assert new_lines == ["/** Hello /* world * / */"]
+    assert new_lines == ["/** Hello /+ world +/ */"]
     print("\n".join(new_lines))
 
     yar = dedent("""\
