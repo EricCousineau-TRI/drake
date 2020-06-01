@@ -523,13 +523,8 @@ class Regex:
         return matches
 
 
-def isa(cls):
-
-    def func(x):
-        return isinstance(x, cls)
-
-    func.__qualname__ = func.__name__ = f"isa[{cls.__name__}]"
-    return func
+def is_whitespace(chunk):
+    return isinstance(chunk, WhitespaceChunk)
 
 
 def is_meaningful_docstring(chunk):
@@ -564,22 +559,25 @@ def print_chunks(chunks):
 def reorder_chunks(chunks):
     mkdoc_issue = Regex([
         Regex.Single(is_meaningful_docstring),
-        Regex.Any(isa(WhitespaceChunk)),
+        Regex.Any(is_whitespace),
         Regex.Single(is_comment_but_not_nolint),
         Regex.Single(is_generic_but_not_macro),
     ])
     matches = mkdoc_issue.find_all(chunks)
     for match in matches:
-        docs, ws, comment, generic = match
-        original = docs + ws + comment + generic
+        (doc,), ws, (comment,), (generic,) = match
+        original = [doc] + ws + [comment, generic]
         start = chunks.index(original[0])
         for x in original:
             chunks.remove(x)
-        new = comment + ws + docs + generic
-        for i, x in enumerate(new):
-            chunks.insert(start + i, x)
         print("<<<")
         print_chunks(original)
+
+        comment.lines = [
+            x for x in comment.lines if x.text.strip() != ""]
+        new = [comment] + ws + [doc, generic]
+        for i, x in enumerate(new):
+            chunks.insert(start + i, x)
         print(">>>")
         print_chunks(new)
         print()
