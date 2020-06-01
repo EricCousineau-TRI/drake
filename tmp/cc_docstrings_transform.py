@@ -7,6 +7,8 @@ from os.path import abspath, dirname, join, basename
 from textwrap import dedent, indent
 from subprocess import run, STDOUT, PIPE
 
+import numpy as np
+
 
 class Token:
     NOTHING = ""
@@ -410,7 +412,7 @@ def test():
     for docstring in chunks:
         if not isinstance(docstring, DocstringChunk):
             continue
-        text = "\n".join(reformat_chunk(docstring))
+        text = "\n".join(format_docstring(docstring))
         print(text)
         texts.append(text)
         print("---")
@@ -546,20 +548,41 @@ def is_generic_but_not_macro(chunk):
     return False
 
 
-def scan_chunks(chunks):
+def is_comment_but_not_nolint(chunk):
+    if isinstance(chunk, CommentChunk):
+        if chunk.lines[-1].text.strip().startswith("NOLINTNEXTLINE"):
+            return False
+        return True
+    return False
+
+
+def print_chunks(chunks):
+    for chunk in chunks:
+        print(chunk)
+
+
+def reorder_chunks(chunks):
     mkdoc_issue = Regex([
         Regex.Single(is_meaningful_docstring),
         Regex.Any(isa(WhitespaceChunk)),
-        Regex.Single(isa(CommentChunk)),
+        Regex.Single(is_comment_but_not_nolint),
         Regex.Single(is_generic_but_not_macro),
     ])
-    for match in mkdoc_issue.find_all(chunks):
-        for i, group in enumerate(match):
-            if i == 2:
-                print("ERROR: Docstring should neighbor symbol.")
-            for item in group:
-                print(item)
-        print("---")
+    matches = mkdoc_issue.find_all(chunks)
+    for match in matches:
+        docs, ws, comment, generic = match
+        original = docs + ws + comment + generic
+        start = chunks.index(original[0])
+        for x in original:
+            chunks.remove(x)
+        new = comment + ws + docs + generic
+        for i, x in enumerate(new):
+            chunks.insert(start + i, x)
+        print("<<<")
+        print_chunks(original)
+        print(">>>")
+        print_chunks(new)
+        print()
     return chunks
 
 
@@ -567,7 +590,7 @@ def transform(filename, dry_run):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
-    chunks = scan_chunks(chunks)
+    chunks = reorder_chunks(chunks)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
