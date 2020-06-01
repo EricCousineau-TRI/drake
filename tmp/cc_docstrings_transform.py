@@ -431,6 +431,9 @@ def main():
     for filename in filenames:
         try:
             transform(filename, dry_run=args.dry_run)
+            if not args.dry_run:
+                # Run it once more (for "idempotent" check...).
+                transform(filename)
         except UserError as e:
             print(indent(str(e), prefix="  "))
 
