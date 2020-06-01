@@ -419,9 +419,7 @@ def main():
         filenames = result.stdout.strip().split("\n")
         filenames.sort()
         for filename in list(filenames):
-            if "/attic/" in filename:
-                filenames.remove(filename)
-            if "/third_party/" in filename:
+            if filename.startswith(("./attic", "./third_party", "./tools")):
                 filenames.remove(filename)
 
     if filenames == ["<test>"]:
