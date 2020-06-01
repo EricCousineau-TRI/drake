@@ -125,24 +125,28 @@ class Chunk:
             f"{self.lines[0].num + 1}-{self.lines[-1].num + 1}>")
 
 
+def chunk_cls_list():
+    # N.B. Does not contain `GenericChunk`.
+    return (
+        TripleSlashChunk,
+        DoubleStarChunk,
+        DoubleSlashChunk,
+        SingleStarChunk,
+        WhitespaceChunk,
+    )
+
+
 class GenericChunk(Chunk):
     def add_line(self, line):
-        # TODO(eric.cousineau): How to fix this greedy parsing?
-        other_chunk_tokens = (
-            Token.SLASH_DOUBLE_STAR,
-            Token.TRIPLE_SLASH,
-            Token.SLASH_SINGLE_STAR,
-            Token.DOUBLE_SLASH,
-        )
-        if line.start_token in other_chunk_tokens:
-            return False
-        else:
-            return super().add_line(line)
+        for cls in chunk_cls_list():
+            if cls().add_line(line):
+                return False
+        return super().add_line(line)
 
 
 class WhitespaceChunk(Chunk):
     def add_line(self, line):
-        if line.text.strip() == "":
+        if line.raw_line.strip() == "":
             return super().add_line(line)
         else:
             return False
@@ -277,18 +281,11 @@ class DoubleStarChunk(DocstringChunk):
 
 
 def new_chunk(line):
-    if line.start_token == Token.TRIPLE_SLASH:
-        chunk = TripleSlashChunk()
-    elif line.start_token == Token.SLASH_DOUBLE_STAR:
-        chunk = DoubleStarChunk()
-    elif line.start_token == Token.SLASH_SINGLE_STAR:
-        chunk = SingleStarChunk()
-    elif line.start_token == Token.DOUBLE_SLASH:
-        chunk = DoubleSlashChunk()
-    elif line.text.strip() == "":
-        chunk = WhitespaceChunk()
-    else:
-        chunk = GenericChunk()
+    for cls in chunk_cls_list():
+        chunk = cls()
+        if chunk.add_line(line):
+            return chunk
+    chunk = GenericChunk()
     assert chunk.add_line(line), line
     return chunk
 
@@ -408,7 +405,6 @@ def test():
     for docstring in chunks:
         if not isinstance(docstring, DocstringChunk):
             continue
-        # print(docstring)
         text = "\n".join(reformat_chunk(docstring))
         print(text)
         texts.append(text)
