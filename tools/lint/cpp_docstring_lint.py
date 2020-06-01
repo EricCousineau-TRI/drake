@@ -6,6 +6,7 @@ import os
 from os.path import abspath, dirname, join, basename
 from textwrap import dedent, indent
 from subprocess import run, STDOUT, PIPE
+import sys
 
 import numpy as np
 
@@ -575,12 +576,25 @@ def is_comment_but_not_nolint(chunk):
     return False
 
 
+class LintErrors:
+    class Item:
+        def __init__(self, text, lines):
+            self.text = text
+            self.lines = lines
+
+    def __init__(self):
+        self.items = []
+
+    def add(self, text, lines):
+        self.items.append(self.Item(text, lines))
+
+
 def print_chunks(chunks):
     for chunk in chunks:
         print(chunk)
 
 
-def reorder_chunks(chunks, lint):
+def reorder_chunks(chunks, lint_errors):
     mkdoc_issue = Regex([
         Regex.Single(is_meaningful_docstring),
         Regex.Any(is_whitespace),
@@ -590,11 +604,12 @@ def reorder_chunks(chunks, lint):
     matches = mkdoc_issue.find_all(chunks)
     for match in matches:
         (doc,), ws, (comment,), (generic,) = match
-        if lint:
-            print("ERROR: Docstring must be placed next to symbol for ")
-            print("ERROR: for mkdoc.py.")
-            error_lines = [doc.lines[-1], comment.lines[0]]
-            print(format_lines(error_lines))
+        if lint_errors is not None:
+            lint_errors.add(
+                "ERROR: Docstring must be placed directly next to symbol for "
+                "mkdoc.py",
+                lines=[doc.lines[-1], comment.lines[0], generic.lines[0]],
+            )
         else:
             original = [doc] + ws + [comment, generic]
             start = chunks.index(original[0])
@@ -620,30 +635,52 @@ def parse_single_chunk(new_lines, filename, start_num):
     return chunk
 
 
-def lint_chunk(chunk, new_lines):
+def lint_chunk(lint_errors, chunk, new_lines):
+    if lint_errors is None:
+        return
     first_line = chunk.lines[0]
     # Reparse to ensure that our new chunk is still valid.
     new_chunk = parse_single_chunk(
         new_lines, first_line.filename, first_line.num)
     # Compare.
     if chunk.to_text_lines() != new_chunk.to_text_lines():
-        print("ERROR: Docstring formatting is incorrect")
-        print(format_lines(chunk.lines[:2]))
+        lint_errors.add(
+            "ERROR: Docstring formatting is incorrect",
+            lines=chunk.lines[:2],
+        )
 
 
 def transform(filename, lint):
     with open(filename, "r") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     chunks = parse_chunks(filename, raw_lines)
-    chunks = reorder_chunks(chunks, lint)
+    if lint:
+        lint_errors = LintErrors()
+    else:
+        lint_errors = None
+    chunks = reorder_chunks(chunks, lint_errors)
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
         new_lines_i = reformat_chunk(chunk)
-        if lint:
-            lint_chunk(chunk, new_lines_i)
+        lint_chunk(lint_errors, chunk, new_lines_i)
         new_lines += new_lines_i
-    if not lint:
+    if lint:
+        errors = lint_errors.items
+        if len(errors) == 0:
+            return True
+        errors = sorted(errors, key=lambda x: (x.lines[0].num, x.text))
+        for i, error in enumerate(errors):
+            if i == 3:
+                remaining = len(errors) - 3
+                print(f"ERROR: There are {remaining} more errors for: {filename}")
+                print()
+                break
+            print(error.text)
+            print(format_lines(error.lines))
+            print()
+        return False
+    else:
         with open(filename, "w") as f:
             f.write("\n".join(new_lines))
             f.write("\n")
@@ -653,7 +690,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", type=str, nargs="*")
     parser.add_argument("--all", action="store_true")
-    parser.add_argument("--lint", action="store_true")
+    parser.add_argument("--fix", action="store_true")
     args = parser.parse_args()
 
     filenames = args.filenames
@@ -675,8 +712,13 @@ def main():
         test()
         return
 
+    good = True
     for filename in filenames:
-        transform(filename, lint=args.lint)
+        if not transform(filename, lint=not args.fix):
+            good = False
+    if not good:
+        print("Linting failed!")
+        sys.exit(1)
 
 
 assert  __name__ == "__main__"
