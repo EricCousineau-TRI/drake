@@ -341,20 +341,21 @@ def format_docstring(docstring):
     text_lines = text.split("\n")
     first_line = text_lines[0]
 
-    def maybe_wrap(prefix, text, suffix):
-        if len(prefix) > 0 and text.startswith("@"):
+    def maybe_wrap(prefix, text, suffix, single_line=False):
+        # TODO(eric.cousineau): Yuck :(
+        if not single_line and len(prefix) > 0 and text.startswith("@"):
             lines = [
-                f"{indent}{prefix.rstrip()}",
-                f"{indent}{spacing}{text}{suffix}",
+                f"{indent}{prefix}".rstrip(),
+                f"{indent}{spacing}{text}{suffix}".rstrip(),
             ]
         else:
-            lines = [f"{indent}{prefix}{text}{suffix}"]
+            lines = [f"{indent}{prefix}{text}{suffix}".rstrip()]
         too_long = len(lines[-1]) > MAX_LEN
         should_extend = ("@endcode" in text or "</pre>" in text)
         if too_long or should_extend:
             lines = lines[:-1] + [
-                f"{indent}{text}",
-                f"{indent}{suffix}",
+                f"{indent}{spacing}{text}".rstrip(),
+                f"{indent}{suffix}".rstrip(),
             ]
         return lines
 
@@ -362,14 +363,14 @@ def format_docstring(docstring):
         if "https://" in first_line:
             # Weird behavior with bogus lint?
             return [f"{indent}/// {first_line}"]
-        new_lines = maybe_wrap("/** ", first_line, " */")
+        new_lines = maybe_wrap("/** ", first_line, " */", single_line=True)
     else:
         new_lines = maybe_wrap("/** ", first_line, "")
         for line in text_lines[1:-1]:
             new_line = f"{indent}{spacing}{line}".rstrip()
             new_lines.append(new_line)
         last_line = text_lines[-1]
-        new_lines += maybe_wrap("", f"{spacing}{last_line}", " */")
+        new_lines += maybe_wrap(f"{spacing}{last_line}", " */")
     return new_lines
 
 
