@@ -60,6 +60,12 @@ class Docline:
         if self.end_type == Type.COMMENT_END:
             self.text = self.text[:-len(self.end_type)].rstrip("*")
 
+    def reset_indent(self, indent):
+        assert self.raw_line.startswith(indent)
+        self.text = self.raw_line[len(indent):]
+        if self.end_type == Type.COMMENT_END:
+            self.text = self.text[:-len(self.end_type)].rstrip("*")
+
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.filename}:{self.num + 1}>"
 
@@ -84,13 +90,30 @@ class Chunk:
     def __str__(self):
         return "\n".join(str(x) for x in self.lines)
 
+    def __len__(self):
+        return len(self.lines)
+
     def __repr__(self):
         return (
             f"<{self.__class__} {self.lines[0].filename}:"
             f"{self.lines[0].num + 1}-{self.lines[-1].num + 1}>")
 
+    def finish_or_die(self):
+        raise NotImplemented
 
-class Docstring(Chunk):
+
+class GenericChunk(Chunk):
+    def add_line(self, line):
+        if line.start_type in Type.PRIMARY_TYPES:
+            return False
+        else:
+            return super().add_line(line)
+
+    def finish_or_die(self):
+        pass
+
+
+class DocstringChunk(Chunk):
     def __init__(self):
         self.primary_type = None
         self.secondary_type = None
@@ -98,10 +121,13 @@ class Docstring(Chunk):
         super().__init__()
 
     def add_line(self, line):
-        assert not self._finished, line
+        if self._finished:
+            return False
         is_first_line = False
 
         if self.primary_type is None:
+            if line.start_type not in Type.PRIMARY_TYPES:
+                return False
             is_first_line = True
             self.primary_type = line.start_type
 
@@ -122,21 +148,19 @@ class Docstring(Chunk):
                 elif line.start_type == self.secondary_type:
                     # Require secondary type.
                     do_add_line = True
+                if do_add_line and line.start_type == Type.NOTHING:
+                    # Readjust indentation to match first line.
+                    line.reset_indent(self.lines[0].indent)
             if line.end_type == Type.COMMENT_END:
                 do_add_line = True
                 self._finished = True
-        else:
-            assert False, self.primary_type
         if do_add_line:
             return super().add_line(line)
         else:
             return False
 
-    def is_finished(self):
-        return self._finished
-
     def finish_or_die(self):
-        if self.is_finished():
+        if self._finished:
             return
         if self.primary_type == Type.DOUBLE_STAR:
             assert self._finished, f"Needs termination:\n{self}"
@@ -144,11 +168,46 @@ class Docstring(Chunk):
             self._finished = True
 
 
+def parse_chunks(filename, raw_lines):
+
+    def finish_chunk(chunk):
+        chunk.finish_or_die()
+        if len(chunk) > 0:
+            chunks.append(chunk)
+
+    def next_chunk(chunk):
+        if isinstance(chunk, GenericChunk):
+            return DocstringChunk()
+        else:
+            return GenericChunk()
+
+    chunks = []
+    active_chunk = GenericChunk()
+    for num, raw_line in enumerate(raw_lines):
+        line = Docline(filename, num, raw_line)
+        possible_chunks = [
+            lambda: active_chunk,
+            lambda: next_chunk(active_chunk),
+        ]
+        for chunk_func in possible_chunks:
+            chunk = chunk_func()
+            if chunk.add_line(line):
+                active_chunk = chunk
+                break
+            else:
+                finish_chunk(chunk)
+        else:
+            assert False
+    finish_chunk(active_chunk)
+    return chunks
+
+
 def reformat_docstring(docstring):
 
     def sanitize(text):
         # Can't have nested comments :(
-        return text.replace("*/", "* /")
+        text = text.replace("*/", "* /")
+        return text.rstrip()
 
     lines = docstring.lines
     first_line = lines[0]
@@ -162,57 +221,14 @@ def reformat_docstring(docstring):
     else:
         new_lines = [f"{indent}/** {first_line_text}\n"]
         for line in lines[1:-1]:
-            new_line = f"{indent}{sanitize(line.text)}".rstrip()
-            new_lines.append(f"{new_line}\n")
+            text = sanitize(line.text)
+            if text:
+                new_lines.append(f"{indent}{text}\n")
+            else:
+                new_lines.append("\n")
         last_line = lines[-1]
         new_lines.append(f"{indent}{sanitize(last_line.text)}  */\n")
     return new_lines
-
-
-def parse_chunks(filename, raw_lines):
-    chunks = []
-    active_chunk = None
-    active_docstring = None
-    for num, raw_line in enumerate(raw_lines):
-        line = Docline(filename, num, raw_line)
-
-        if active_docstring is None:
-            is_docstring_line = False
-            if line.start_type in Type.PRIMARY_TYPES:
-                active_docstring = Docstring()
-                assert active_docstring.add_line(line), line
-                is_docstring_line = True
-        else:
-            is_docstring_line = active_docstring.add_line(line)
-
-        if is_docstring_line:
-            complete_docstring = active_docstring.is_finished()
-            complete_chunk = (active_chunk is not None)
-        else:
-            complete_docstring = (active_docstring is not None)
-            complete_chunk = False
-            if active_chunk is None:
-                active_chunk = Chunk()
-            active_chunk.add_line(line)
-
-        if complete_docstring:
-            active_docstring.finish_or_die()
-            chunks.append(active_docstring)
-            active_docstring = None
-        if complete_chunk:
-            chunks.append(active_chunk)
-            active_chunk = None
-        # else:
-        #     # If we didn't complete either, we should have one active element.
-        #     assert active_chunk is not None or active_docstring is not None
-
-    # All docstrings should be finished.
-    if active_docstring is not None:
-        docstring.finish_or_die()
-        chunks.append(active_docstring)
-    if active_chunk is not None:
-        chunks.append(active_chunk)
-    return chunks
 
 
 def main():
@@ -227,7 +243,7 @@ def main():
     # Replace docstrings with "re-rendered" version.
     new_lines = []
     for chunk in chunks:
-        if isinstance(chunk, Docstring):
+        if isinstance(chunk, DocstringChunk):
             new_lines += reformat_docstring(chunk)
         else:
             new_lines += [x.raw_line + "\n" for x in chunk.lines]
