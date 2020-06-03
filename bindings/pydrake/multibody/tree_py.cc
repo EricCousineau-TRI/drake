@@ -69,6 +69,10 @@ void BindMultibodyElementMixin(PyClass* pcls) {
   cls  // BR
       .def("index", &Class::index)
       .def("model_instance", &Class::model_instance)
+      .def("__lt__",
+          [](const Class& self, const Class& other) {
+            return self.index() < other.index();
+          })
       .def("__repr__", [](const Class& self) {
         py::str cls_name = py::cast(&self).get_type().attr("__name__");
         const int index = self.index();
