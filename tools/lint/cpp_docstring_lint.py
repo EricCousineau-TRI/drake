@@ -749,12 +749,12 @@ def check_or_apply_lint(filename, check_lint):
         if lint_errors is not None:
             lint_multiline_token(lint_errors, token, new_lines_i)
         new_lines += new_lines_i
-    raw_errors = []
     if check_lint:
         errors = lint_errors.items
         if len(errors) == 0:
-            return True
+            return []
         errors = sorted(errors, key=lambda x: (x.lines[0].num, x.text))
+        raw_errors = []
         for i, error in enumerate(errors):
             if i == 3:
                 remaining = len(errors) - 3
@@ -765,12 +765,16 @@ def check_or_apply_lint(filename, check_lint):
             raw_errors.append(
                 f"{error.text}\n"
                 f"{format_lines(error.lines)}\n")
+        if raw_errors:
+            raw_errors.append(
+                f"note: to fix, please run:\n"
+                f"   ./tools/lint/cpp_docstring_lint.py --fix {filename}")
         return raw_errors
     else:
         with open(filename, "w") as f:
             f.write("\n".join(new_lines))
             f.write("\n")
-        return raw_errors
+        return []
 
 
 def main():
