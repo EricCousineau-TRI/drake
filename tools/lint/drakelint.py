@@ -49,6 +49,10 @@ def _check_includes(filename):
     return 0
 
 
+def _check_cpp_docstrings(filename):
+    
+
+
 def _check_shebang(filename, disallow_executable):
     """Return 0 if the filename's executable bit is consistent with the
     presence of a shebang line and the shebang line is in the whitelist of

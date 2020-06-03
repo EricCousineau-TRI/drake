@@ -749,6 +749,7 @@ def check_or_apply_lint(filename, check_lint):
         if lint_errors is not None:
             lint_multiline_token(lint_errors, token, new_lines_i)
         new_lines += new_lines_i
+    raw_errors = []
     if check_lint:
         errors = lint_errors.items
         if len(errors) == 0:
@@ -757,19 +758,19 @@ def check_or_apply_lint(filename, check_lint):
         for i, error in enumerate(errors):
             if i == 3:
                 remaining = len(errors) - 3
-                print(f"ERROR: There are {remaining} more errors for: "
-                      f"{filename}")
-                print()
+                raw_errors.append(
+                    f"ERROR: There are {remaining} more errors for: "
+                    f"{filename}")
                 break
-            print(error.text)
-            print(format_lines(error.lines))
-            print()
-        return False
+            raw_errors.append(
+                f"{error.text}\n"
+                f"{format_lines(error.lines)}\n")
+        return raw_errors
     else:
         with open(filename, "w") as f:
             f.write("\n".join(new_lines))
             f.write("\n")
-        return True
+        return raw_errors
 
 
 def main():
@@ -800,8 +801,9 @@ def main():
 
     bad_filenames = []
     for filename in filenames:
-        good = check_or_apply_lint(filename, check_lint=not args.fix)
-        if not good:
+        errors = check_or_apply_lint(filename, check_lint=not args.fix)
+        if errors:
+            print("\n".join(errors))
             bad_filenames.append(filename)
     if bad_filenames:
         if len(bad_filenames) > 5:
