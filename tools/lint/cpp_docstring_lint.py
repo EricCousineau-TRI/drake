@@ -621,8 +621,9 @@ def reorder_multiline_tokens(tokens, lint_errors):
         (doc,), ws, (comment,), (generic,) = match.groups()
         if lint_errors is not None:
             lint_errors.add(
-                "ERROR: Docstring must be placed directly next to symbol for "
-                "mkdoc.py",
+                text=(
+                    "ERROR: Docstring must be placed directly next to symbol "
+                    "for mkdoc.py"),
                 lines=[doc.lines[-1], comment.lines[0], generic.lines[0]],
             )
         else:
@@ -685,7 +686,7 @@ class LintErrors:
         def __str__(self):
             s = f"{self.text}\n{format_lines(self.lines)}\n"
             if self.to_lines is not None:
-                s += f"  should be:\n{format_lines(self.to_lines)}\n"
+                s += f"  should look like:\n{format_lines(self.to_lines)}\n"
             return s
 
     def __init__(self):
@@ -730,8 +731,8 @@ def lint_multiline_token(lint_errors, token, new_lines, verbose):
             error_lines = token.lines
             to_lines = new_token.lines
         else:
-            error_lines = token.lines[:2]
-            to_lines = None
+            error_lines = token.lines[:3]
+            to_lines = new_token.lines[:3]
         lint_errors.add(
             text="ERROR: Docstring needs reformatting",
             lines=error_lines,
@@ -746,7 +747,7 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
     is needed.
     Otherwise, this will mutate the file in place to fix all lint errors.
     """
-    with open(filename, "r") as f:
+    with open(filename, "r", encoding="utf8") as f:
         raw_lines = [x.rstrip() for x in f.readlines()]
     tokens = multiline_tokenize(filename, raw_lines)
     if check_lint:
@@ -783,7 +784,7 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
                 f"   bazel-bin/tools/lint/cpp_docstring_lint --all")
         return raw_errors
     else:
-        with open(filename, "w") as f:
+        with open(filename, "w", encoding="utf8") as f:
             f.write("\n".join(new_lines))
             f.write("\n")
         return []

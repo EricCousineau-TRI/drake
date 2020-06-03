@@ -51,12 +51,14 @@ def _check_includes(filename):
 
 
 def _check_cpp_docstrings(filename):
-    errors = check_or_apply_lint.check_or_apply_lint(filename, check_lint=True)
+    errors = cpp_docstring_lint.check_or_apply_lint(filename, check_lint=True)
     if errors:
-        print("\n".join(errors[:-3]))
+        print()
+        print("\n".join(errors))
         print("note: if that program does not exist, "
               "you might need to compile it first: "
               "bazel build //tools/lint/...")
+        print()
         return 1
     return 0
 
@@ -118,6 +120,7 @@ def main():
             total_errors += _check_shebang(filename, disallow_executable)
         if not filename.endswith(".py"):
             total_errors += _check_includes(filename)
+        if filename.endswith(".h"):
             total_errors += _check_cpp_docstrings(filename)
     if total_errors == 0:
         sys.exit(0)
