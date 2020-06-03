@@ -1,59 +1,9 @@
+"""Tests basic docstring reformatting."""
+
 from textwrap import dedent
 import unittest
 
 import drake.tools.lint.cpp_docstring_lint as mut
-
-
-def test():
-    block = dedent("""\
-
-    """.rstrip())
-    tokens = multiline_tokenize("test", block.split("\n"))
-    texts = []
-    for docstring in tokens:
-        if not isinstance(docstring, DocstringMultilineToken):
-            continue
-        text = "\n".join(reformat_docstring(docstring))
-        print(text)
-        texts.append(text)
-        print("---")
-    assert len(texts) == 5, len(texts)
-    for text in texts[1:]:
-        assert text == texts[0]
-
-    maybe = ["/// Hello /* world */"]
-    docstring, = multiline_tokenize("test", maybe)
-    new_lines = reformat_multiline_token(docstring)
-    assert new_lines == ["/** Hello /+ world +/ */"]
-    print("\n".join(new_lines))
-
-    yar = dedent("""\
-        /**
-         * Something
-         *    with code
-         *
-         * Don't you see?
-         */
-    """.rstrip())
-    docstring, = multiline_tokenize("test", yar.split("\n"))
-    new_lines = reformat_multiline_token(docstring)
-    # Enusre this works...
-    text = "\n".join(new_lines)
-    print(text)
-
-    ragged = dedent("""\
-        /// abc
-        /// def
-        ///ghe
-    """.rstrip())
-    token, = multiline_tokenize("test", ragged.split("\n"))
-    # Ragged indent.
-    try:
-        print(token.get_docstring_text())
-        assert False
-    except UserFormattingError as e:
-        assert "ragged indentation" in str(e)
-        print(str(e))
 
 
 def make_tokens(s, name="file"):
@@ -141,12 +91,15 @@ class TestCppDocstringLint(unittest.TestCase):
                  */
             """)
         with self.assertRaises(mut.UserFormattingError) as cm:
-            make_tokens("""\
-                /** ragged indentation
-                  shown here
+            token, = make_tokens("""\
+                /**
+                  ragged indentation
+                shown here
                 by this line
                  */
             """)
+            # TODO(eric.cousineau): Make this a parsing error?
+            token.get_docstring_text()
 
     def test_reformat_docstring(self):
         """Shows that all docstrings should "turn" into roughly the same
@@ -186,6 +139,7 @@ class TestCppDocstringLint(unittest.TestCase):
              *  jkl
              **/
         """)
+        self.assertEqual(len(tokens), 5)
 
         # Reformatted.
         expected_text = dedent("""\
@@ -201,6 +155,11 @@ class TestCppDocstringLint(unittest.TestCase):
         for token in tokens:
             text = "\n".join(mut.reformat_docstring(token))
             self.assertEqual(expected_text, text, str(token))
+
+        token, = make_tokens("/// This is code /* with a nested comment */")
+        expected_text = "/** This is code /+ with a nested comment +/ */"
+        actual_text, = mut.reformat_docstring(token)
+        self.assertEqual(expected_text, actual_text)
 
     def test_check_or_apply_lint(self):
         tokens_in = make_tokens("""\
