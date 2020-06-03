@@ -435,96 +435,8 @@ def reformat_multiline_token(token):
         return token.to_raw_lines()
 
 
-def test():
-    block = dedent("""\
-        /** abc
-
-         def
-           ghi
-
-         jkl */
-
-        /**     abc
-
-         def
-           ghi
-
-         jkl */
-
-        /** abc
-
-            def
-              ghi
-
-            jkl
-                **/
-
-        /// abc
-        ///
-        /// def
-        ///   ghi
-        ///
-        /// jkl
-
-        /**
-         *  abc
-         *
-         *  def
-         *    ghi
-         *
-         *  jkl
-         **/
-    """.rstrip())
-    tokens = multiline_tokenize("test", block.split("\n"))
-    texts = []
-    for docstring in tokens:
-        if not isinstance(docstring, DocstringMultilineToken):
-            continue
-        text = "\n".join(reformat_docstring(docstring))
-        print(text)
-        texts.append(text)
-        print("---")
-    assert len(texts) == 5, len(texts)
-    for text in texts[1:]:
-        assert text == texts[0]
-
-    maybe = ["/// Hello /* world */"]
-    docstring, = multiline_tokenize("test", maybe)
-    new_lines = reformat_multiline_token(docstring)
-    assert new_lines == ["/** Hello /+ world +/ */"]
-    print("\n".join(new_lines))
-
-    yar = dedent("""\
-        /**
-         * Something
-         *    with code
-         *
-         * Don't you see?
-         */
-    """.rstrip())
-    docstring, = multiline_tokenize("test", yar.split("\n"))
-    new_lines = reformat_multiline_token(docstring)
-    # Enusre this works...
-    text = "\n".join(new_lines)
-    print(text)
-
-    ragged = dedent("""\
-        /// abc
-        /// def
-        ///ghe
-    """.rstrip())
-    token, = multiline_tokenize("test", ragged.split("\n"))
-    # Ragged indent.
-    try:
-        print(token.get_docstring_text())
-        assert False
-    except UserFormattingError as e:
-        assert "ragged indentation" in str(e)
-        print(str(e))
-
-
-class TokenRegex:
-    """Simple pattern matcher for a sequence of tokens."""
+class AbstractRegex:
+    """Simple pattern matcher for a sequence of objects (of any time)."""
 
     class PatternGroup:
         """Base class for a part within given sequence."""
@@ -579,7 +491,7 @@ class TokenRegex:
         self._pattern_groups = list(parts)
 
     def __repr__(self):
-        return f"<TokenRegex {self._pattern_groups}>"
+        return f"<AbstractRegex {self._pattern_groups}>"
 
     def find_all(self, xs):
         """Finds all mathches and returns List[Match]."""
@@ -610,11 +522,11 @@ class TokenRegex:
 
 def reorder_multiline_tokens(tokens, lint_errors):
     """Reorders tokens to a given order (or reports lint errors if linting)."""
-    mkdoc_issue = TokenRegex([
-        TokenRegex.Single(is_meaningful_docstring_token),
-        TokenRegex.Any(is_whitespace_token),
-        TokenRegex.Single(is_comment_token_but_not_nolint),
-        TokenRegex.Single(is_generic_token_but_not_macro),
+    mkdoc_issue = AbstractRegex([
+        AbstractRegex.Single(is_meaningful_docstring_token),
+        AbstractRegex.Any(is_whitespace_token),
+        AbstractRegex.Single(is_comment_token_but_not_nolint),
+        AbstractRegex.Single(is_generic_token_but_not_macro),
     ])
     matches = mkdoc_issue.find_all(tokens)
     for match in matches:

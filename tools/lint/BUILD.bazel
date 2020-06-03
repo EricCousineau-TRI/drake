@@ -139,6 +139,11 @@ drake_py_unittest(
     deps = [":formatter"],
 )
 
+drake_py_unittest(
+    name = "cpp_docstring_lint_test",
+    deps = ["cpp_docstring_lint"],
+)
+
 sh_test(
     name = "clang_format_includes_test",
     size = "small",
