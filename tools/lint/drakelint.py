@@ -54,6 +54,9 @@ def _check_cpp_docstrings(filename):
     errors = check_or_apply_lint.check_or_apply_lint(filename, check_lint=True)
     if errors:
         print("\n".join(errors[:-3]))
+        print("note: if that program does not exist, "
+              "you might need to compile it first: "
+              "bazel build //tools/lint/...")
         return 1
     return 0
 

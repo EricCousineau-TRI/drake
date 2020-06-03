@@ -18,7 +18,7 @@ from textwrap import dedent
 from subprocess import run, PIPE
 import sys
 
-import numpy as np
+from drake.tools.lint.util import find_all_sources
 
 
 def parse_line_tokens(text):
@@ -679,15 +679,22 @@ def is_comment_token_but_not_nolint(token):
 class LintErrors:
     """Records errors encountered during linting."""
     class Item:
-        def __init__(self, text, lines):
+        def __init__(self, text, lines, to_lines=None):
             self.text = text
             self.lines = lines
+            self.to_lines = to_lines
+
+        def __str__(self):
+            s = f"{self.text}\n{format_lines(self.lines)}\n"
+            if self.to_lines is not None:
+                s += f"  should be:\n{format_lines(self.to_lines)}"
+            return s
 
     def __init__(self):
         self.items = []
 
-    def add(self, text, lines):
-        self.items.append(self.Item(text, lines))
+    def add(self, **kwargs):
+        self.items.append(self.Item(**kwargs))
 
 
 def print_multiline_tokens(tokens):
@@ -711,7 +718,7 @@ def parse_single_multiline_token(raw_lines, filename, start_num):
     return token
 
 
-def lint_multiline_token(lint_errors, token, new_lines):
+def lint_multiline_token(lint_errors, token, new_lines, verbose):
     """Detects if there are any changes between `token` and the re-processed
     lines from `new_lines."""
     assert lint_errors is not None
@@ -721,13 +728,20 @@ def lint_multiline_token(lint_errors, token, new_lines):
         new_lines, first_line.filename, first_line.num)
     # Compare.
     if token.to_raw_lines() != new_token.to_raw_lines():
+        if verbose:
+            error_lines = token.lines
+            to_lines = new_token.lines
+        else:
+            error_lines = token.lines[:2]
+            to_lines = None
         lint_errors.add(
-            "ERROR: Docstring needs reformatting",
-            lines=token.lines[:2],
+            text="ERROR: Docstring needs reformatting",
+            lines=error_lines,
+            to_lines=to_lines,
         )
 
 
-def check_or_apply_lint(filename, check_lint):
+def check_or_apply_lint(filename, check_lint, verbose=False):
     """Operates on a single file.
 
     If check_lint is True, will simply print a set of errors if any formatting
@@ -747,7 +761,8 @@ def check_or_apply_lint(filename, check_lint):
     for token in tokens:
         new_lines_i = reformat_multiline_token(token)
         if lint_errors is not None:
-            lint_multiline_token(lint_errors, token, new_lines_i)
+            lint_multiline_token(
+                lint_errors, token, new_lines_i, verbose=verbose)
         new_lines += new_lines_i
     if check_lint:
         errors = lint_errors.items
@@ -756,19 +771,18 @@ def check_or_apply_lint(filename, check_lint):
         errors = sorted(errors, key=lambda x: (x.lines[0].num, x.text))
         raw_errors = []
         for i, error in enumerate(errors):
-            if i == 3:
+            if i == 3 and not verbose:
                 remaining = len(errors) - 3
                 raw_errors.append(
                     f"ERROR: There are {remaining} more errors for: "
                     f"{filename}")
                 break
-            raw_errors.append(
-                f"{error.text}\n"
-                f"{format_lines(error.lines)}\n")
+            raw_errors.append(str(error))
         if raw_errors:
             raw_errors.append(
-                f"note: to fix, please run:\n"
-                f"   ./tools/lint/cpp_docstring_lint.py --fix {filename}")
+                f"note: to fix, please run one of the following:\n"
+                f"   bazel-bin/tools/lint/cpp_docstring_lint.py {filename}\n"
+                f"   bazel-bin/tools/lint/cpp_docstring_lint.py --all")
         return raw_errors
     else:
         with open(filename, "w") as f:
@@ -777,47 +791,59 @@ def check_or_apply_lint(filename, check_lint):
         return []
 
 
-def main():
+def main(workspace_name="drake"):
     parser = argparse.ArgumentParser()
-    parser.add_argument("filenames", type=str, nargs="*")
-    parser.add_argument("--all", action="store_true")
-    parser.add_argument("--fix", action="store_true")
+    parser.add_argument(
+        "filenames", type=str, nargs="*",
+        help="Files to lint / fix")
+    parser.add_argument(
+        "--all", action="store_true",
+        help="Use all available files from the source tree.")
+    parser.add_argument(
+        "--lint", action="store_true",
+        help="Only lint the files; do not try to fix them.")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true",
+        help="Print all linting errors")
     args = parser.parse_args()
 
     filenames = args.filenames
 
     if args.all:
-        assert len(filenames) == 0
-        source_tree = os.path.join(os.path.dirname(__file__), "../..")
-        os.chdir(source_tree)
-        result = run(
-            ["find", ".", "-name", "*.h"],
-            check=True, stdout=PIPE, encoding="utf8")
-        filenames = result.stdout.strip().split("\n")
-        filenames.sort()
-        for filename in list(filenames):
-            if filename.startswith(("./attic", "./third_party", "./tools")):
-                filenames.remove(filename)
+        assert filenames == []
+        workspace_dir, relpaths = find_all_sources(workspace_name)
+        if len(relpaths) == 0:
+            print("ERROR: '--all' could not find anything")
+            return 1
+        os.chdir(workspace_dir)
+        for relpath in sorted(relpaths):
+            if relpath.startswith(("attic/", "tools/")):
+                continue
+            if not relpath.endswith(".h"):
+                continue
+            filenames.append(relpath)
+        if not args.lint:
+            print(
+                f"This will reformat {len(filenames)} files within "
+                f"{workspace_dir}")
+            if input("Are you sure [y/N]? ") not in ["y", "Y"]:
+                print("... canceled")
+                sys.exit(1)
 
     if filenames == ["<test>"]:
         test()
         return
 
-    bad_filenames = []
+    good = True
     for filename in filenames:
-        errors = check_or_apply_lint(filename, check_lint=not args.fix)
+        errors = check_or_apply_lint(
+            filename, check_lint=args.lint, verbose=args.verbose)
         if errors:
-            print("\n".join(errors))
-            bad_filenames.append(filename)
-    if bad_filenames:
-        if len(bad_filenames) > 5:
-            suggested_args = "--all"
-        else:
-            suggested_args = ' '.join(bad_filenames)
-        print(f"To fix errors, please run:")
-        print(f"   ./tools/lint/cpp_docstring_lint.py --fix {suggested_args}")
+            print("\n\n".join(errors))
+            good = False
+    if not good:
         sys.exit(1)
 
 
-assert  __name__ == "__main__"
-main()
+if  __name__ == "__main__":
+    main()
