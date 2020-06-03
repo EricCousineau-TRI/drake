@@ -108,12 +108,20 @@ def format_lines(lines, abbrev=False):
     return "\n".join(text_lines)
 
 
+class UserFormattingError(RuntimeError):
+    """Indicates a user formatting error."""
+    pass
+
+
 class MultilineToken:
+    """Base class for indicating a multiline token."""
     def __init__(self):
         self.lines = []
 
     def add_line(self, line):
-        assert isinstance(line, FileLine)
+        """Attempts to add a line. If the line cannot be handled by this token
+        type, then False is returned."""
+        assert isinstance(line, FileLine), line
         if len(self.lines) > 0:
             if line.num != self.lines[-1].num + 1:
                 print(self.lines[-1])
@@ -122,10 +130,13 @@ class MultilineToken:
         self.lines.append(line)
         return True
 
-    def to_text_lines(self):
+    def to_raw_lines(self):
+        """Convert to raw lines."""
         return [line.raw_line for line in self.lines]
 
     def assert_finished(self):
+        """Can be used to indicate that the given token has not yet finished
+        parsing."""
         pass
 
     def __str__(self):
@@ -172,11 +183,6 @@ class WhitespaceMultilineToken(MultilineToken):
             return super().add_line(line)
         else:
             return False
-
-
-class UserFormattingError(RuntimeError):
-    """Indicates a user formatting error."""
-    pass
 
 
 def dedent_lines(lines, token, require_nonragged):
@@ -426,7 +432,7 @@ def reformat_multiline_token(token):
             assert False, "Bug in indempotent check"
         return new_lines
     else:
-        return token.to_text_lines()
+        return token.to_raw_lines()
 
 
 def test():
@@ -712,7 +718,7 @@ def lint_multiline_token(lint_errors, token, new_lines):
     new_token = parse_single_multiline_token(
         new_lines, first_line.filename, first_line.num)
     # Compare.
-    if token.to_text_lines() != new_token.to_text_lines():
+    if token.to_raw_lines() != new_token.to_raw_lines():
         lint_errors.add(
             "ERROR: Docstring formatting is incorrect",
             lines=token.lines[:2],
