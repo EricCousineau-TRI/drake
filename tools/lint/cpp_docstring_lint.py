@@ -523,7 +523,8 @@ class AbstractRegex:
 
 
 def reorder_multiline_tokens(tokens, lint_errors):
-    """Reorders tokens to a given order (or reports lint errors if linting)."""
+    """Reorders tokens to a given order (or reports lint errors if linting).
+    Used to report errors that make mkdoc.py choke."""
     mkdoc_issue = AbstractRegex([
         AbstractRegex.Single(is_meaningful_docstring_token),
         AbstractRegex.Any(is_whitespace_token),

@@ -13,6 +13,7 @@ def make_tokens(s, name="file"):
 
 class TestCppDocstringLint(unittest.TestCase):
     def test_abstract_regex(self):
+        """Tests basic pattern matching. Used in reorder_multiline_tokens"""
         pattern = mut.AbstractRegex([
             mut.AbstractRegex.Single(lambda c: c == "a"),
             mut.AbstractRegex.Any(lambda c: c == "b"),
@@ -102,8 +103,21 @@ class TestCppDocstringLint(unittest.TestCase):
             token.get_docstring_text()
 
     def test_reformat_docstring(self):
-        """Shows that all docstrings should "turn" into roughly the same
-        formatting."""
+        """Shows different docstrings that get reformatting to the same
+        string."""
+
+        # Reformatted.
+        expected_text = dedent("""\
+            /**
+            abc
+
+            def
+              ghi
+
+            jkl */
+        """.rstrip())
+
+        # EXample inputs.
         tokens = make_tokens("""\
             /** abc
 
@@ -140,17 +154,6 @@ class TestCppDocstringLint(unittest.TestCase):
              **/
         """)
         self.assertEqual(len(tokens), 5)
-
-        # Reformatted.
-        expected_text = dedent("""\
-            /**
-            abc
-
-            def
-              ghi
-
-            jkl */
-        """.rstrip())
 
         for token in tokens:
             text = "\n".join(mut.reformat_docstring(token))
