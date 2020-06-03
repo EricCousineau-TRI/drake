@@ -66,7 +66,13 @@ def _check_cpp_docstrings(filename):
                 # Exaple:
                 # With drake@7ae3c238b:
                 # bazel test //solvers:py/minimum_value_constraint_drakelint
-                print(f"WARNING: Encoding error: {e}\n")
+                if error.error_lines:
+                    print(error.text)
+                    line = error.error_lines[0]
+                    print(
+                        f"WARNING: 'bazel test' encoding error for "
+                        f"{line.filename}:{line.num}:\n"
+                        f"  {e}\n")
         print("note: if that program does not exist, "
               "you might need to compile it first: "
               "bazel build //tools/lint/...")

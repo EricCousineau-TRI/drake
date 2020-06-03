@@ -620,12 +620,13 @@ def reorder_multiline_tokens(tokens, lint_errors):
     for match in matches:
         (doc,), ws, (comment,), (generic,) = match.groups()
         if lint_errors is not None:
-            lint_errors.add(
+            lint_errors.append(LintError(
                 text=(
                     "ERROR: Docstring must be placed directly next to symbol "
                     "for mkdoc.py"),
-                lines=[doc.lines[-1], comment.lines[0], generic.lines[0]],
-            )
+                error_lines=[
+                    doc.lines[-1], comment.lines[0], generic.lines[0]],
+            ))
         else:
             original = [doc] + ws + [comment, generic]
             start = tokens.index(original[0])
@@ -675,25 +676,26 @@ def is_comment_token_but_not_nolint(token):
     return False
 
 
-class LintErrors:
-    """Records errors encountered during linting."""
-    class Item:
-        def __init__(self, text, lines, to_lines=None):
-            self.text = text
-            self.lines = lines
-            self.to_lines = to_lines
+class LintError:
+    def __init__(self, text, error_lines=None, fix_lines=None):
+        self.text = text
+        self.error_lines = error_lines
+        self.fix_lines = fix_lines
 
-        def __str__(self):
-            s = f"{self.text}\n{format_lines(self.lines)}\n"
-            if self.to_lines is not None:
-                s += f"  should look like:\n{format_lines(self.to_lines)}\n"
-            return s
+    def __str__(self):
+        s = f"{self.text}\n"
+        if self.error_lines is not None:
+            s += f"{format_lines(self.error_lines)}\n"
+        if self.fix_lines is not None:
+            s += f"  should look like:\n{format_lines(self.fix_lines)}\n"
+        return s
 
-    def __init__(self):
-        self.items = []
-
-    def add(self, **kwargs):
-        self.items.append(self.Item(**kwargs))
+    def sorting_key(self):
+        if self.error_lines is not None:
+            line_num = self.error_lines[0].num
+        else:
+            line_num = float('inf')
+        return (line_num, self.text)
 
 
 def print_multiline_tokens(tokens):
@@ -729,25 +731,26 @@ def lint_multiline_token(lint_errors, token, new_lines, verbose):
     if token.to_raw_lines() != new_token.to_raw_lines():
         if verbose:
             error_lines = token.lines
-            to_lines = new_token.lines
+            fix_lines = new_token.lines
         else:
             error_lines = token.lines[:3]
-            to_lines = new_token.lines[:3]
-        lint_errors.add(
+            fix_lines = new_token.lines[:3]
+        lint_errors.append(LintError(
             text="ERROR: Docstring needs reformatting",
-            lines=error_lines,
-            to_lines=to_lines,
-        )
+            error_lines=error_lines,
+            fix_lines=fix_lines,
+        ))
 
 
 def is_ignored_file(relpath):
     # TODO(eric.cousineau): Figure out better heuristic for this.
     if relpath.startswith(("attic/", "tools/")):
         return True
-    if "/gen/" in relpath:
+    if relpath.startswith("gen/") or "/gen/" in relpath:
         return True
     if not relpath.endswith(".h"):
         return True
+    return False
 
 
 def check_or_apply_lint(filename, check_lint, verbose=False):
@@ -761,7 +764,7 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
         raw_lines = [x.rstrip() for x in f.readlines()]
     tokens = multiline_tokenize(filename, raw_lines)
     if check_lint:
-        lint_errors = LintErrors()
+        lint_errors = []
     else:
         lint_errors = None
     tokens = reorder_multiline_tokens(tokens, lint_errors)
@@ -774,25 +777,24 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
                 lint_errors, token, new_lines_i, verbose=verbose)
         new_lines += new_lines_i
     if check_lint:
-        errors = lint_errors.items
-        if len(errors) == 0:
+        if len(lint_errors) == 0:
             return []
-        errors = sorted(errors, key=lambda x: (x.lines[0].num, x.text))
-        raw_errors = []
-        for i, error in enumerate(errors):
+        lint_errors = sorted(lint_errors, key=LintError.sorting_key)
+        lint_errors_out = []
+        for i, lint_error in enumerate(lint_errors):
             if i == 3 and not verbose:
-                remaining = len(errors) - 3
-                raw_errors.append(
+                remaining = len(lint_errors) - 3
+                lint_errors_out.append(LintError(
                     f"ERROR: There are {remaining} more errors for: "
-                    f"{filename}")
+                    f"{filename}"))
                 break
-            raw_errors.append(str(error))
-        if raw_errors:
-            raw_errors.append(
+            lint_errors_out.append(lint_error)
+        if lint_errors_out:
+            lint_errors_out.append(LintError(
                 f"note: to fix, please run one of the following:\n"
                 f"   bazel-bin/tools/lint/cpp_docstring_lint {filename}\n"
-                f"   bazel-bin/tools/lint/cpp_docstring_lint --all")
-        return raw_errors
+                f"   bazel-bin/tools/lint/cpp_docstring_lint --all"))
+        return lint_errors_out
     else:
         with open(filename, "w", encoding="utf8") as f:
             f.write("\n".join(new_lines))
@@ -842,10 +844,10 @@ def main(workspace_name="drake"):
 
     good = True
     for filename in filenames:
-        errors = check_or_apply_lint(
+        lint_errors = check_or_apply_lint(
             filename, check_lint=args.lint, verbose=args.verbose)
         if errors:
-            print("\n".join(errors))
+            print("\n".join(str(x) for x in lint_errors))
             good = False
     if not good:
         sys.exit(1)
