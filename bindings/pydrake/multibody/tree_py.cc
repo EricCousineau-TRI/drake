@@ -43,6 +43,13 @@ This API using Isometry3 is / will be deprecated soon with the resolution of
 
 namespace {
 
+// https://stackoverflow.com/a/16000226/7829525
+template <typename T, typename = int>
+struct has_name : std::false_type { };
+
+template <typename T>
+struct has_name<T, decltype((void)T::name, 0)> : std::true_type { };
+
 // Binds `MultibodyElement` methods.
 // N.B. We do this rather than inheritance because this template is more of a
 // mixin than it is a parent class (since it is not used for its dynamic
@@ -56,7 +63,22 @@ void BindMultibodyElementMixin(PyClass* pcls) {
   auto& cls = *pcls;
   cls  // BR
       .def("index", &Class::index)
-      .def("model_instance", &Class::model_instance);
+      .def("model_instance", &Class::model_instance)
+      .def("__repr__", [](const Class& self) {
+        py::str cls_name = py::cast(&self).type().attr("__name__");
+        if constexpr (has_name<Class>::value) {
+          return py::str("<{}  name='{}' index={} model_instance={}>").format(
+              cls_name,
+              self.name(),
+              int(self.index()),
+              int(self.model_instance()));
+        } else {
+          return py::str("<{}  index={} model_instance={}>").format(
+              cls_name,
+              int(self.index()),
+              int(self.model_instance()));
+        }
+      });
 }
 
 void DoScalarIndependentDefinitions(py::module m) {
