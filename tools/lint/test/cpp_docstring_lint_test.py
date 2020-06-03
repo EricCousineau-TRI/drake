@@ -6,43 +6,7 @@ import drake.tools.lint.cpp_docstring_lint as mut
 
 def test():
     block = dedent("""\
-        /** abc
 
-         def
-           ghi
-
-         jkl */
-
-        /**     abc
-
-         def
-           ghi
-
-         jkl */
-
-        /** abc
-
-            def
-              ghi
-
-            jkl
-                **/
-
-        /// abc
-        ///
-        /// def
-        ///   ghi
-        ///
-        /// jkl
-
-        /**
-         *  abc
-         *
-         *  def
-         *    ghi
-         *
-         *  jkl
-         **/
     """.rstrip())
     tokens = multiline_tokenize("test", block.split("\n"))
     texts = []
@@ -92,10 +56,9 @@ def test():
         print(str(e))
 
 
-def make_lines(s):
+def make_tokens(s, name="file"):
     raw_lines = dedent(s.rstrip()).split("\n")
-    return raw_lines
-
+    return mut.multiline_tokenize(name, raw_lines)
 
 
 class TestCppDocstringLint(unittest.TestCase):
@@ -122,7 +85,7 @@ class TestCppDocstringLint(unittest.TestCase):
 
     def test_multiline_tokenize(self):
         # Test all available token types.
-        raw_lines = make_lines("""\
+        tokens = make_tokens("""\
             /// Hello
             /// world
 
@@ -140,7 +103,6 @@ class TestCppDocstringLint(unittest.TestCase):
 
             /* Comment */
         """)
-        tokens = mut.multiline_tokenize("file", raw_lines)
         self.assertEqual(len(tokens), 12)
         self.assertIsInstance(tokens[0], mut.TripleSlashMultilineToken)
         # Briefly test out string representation.
@@ -162,3 +124,122 @@ class TestCppDocstringLint(unittest.TestCase):
         self.assertIsInstance(tokens[9], mut.DoubleSlashMultilineToken)
         self.assertIsInstance(tokens[10], mut.WhitespaceMultilineToken)
         self.assertIsInstance(tokens[11], mut.SingleStarMultilineToken)
+
+    def test_user_errors(self):
+        with self.assertRaises(mut.UserFormattingError) as cm:
+            make_tokens("/* unclosed comment")
+        self.assertEqual(
+            str(cm.exception),
+            "Not closed:\nfile:1: /* unclosed comment")
+        with self.assertRaises(mut.UserFormattingError) as cm:
+            make_tokens("/** unclosed comment")
+        with self.assertRaises(mut.UserFormattingError) as cm:
+            make_tokens("""\
+                /** needs star
+                 *
+                 asdlfjkasldkfj
+                 */
+            """)
+        with self.assertRaises(mut.UserFormattingError) as cm:
+            make_tokens("""\
+                /** ragged indentation
+                  shown here
+                by this line
+                 */
+            """)
+
+    def test_reformat_docstring(self):
+        """Shows that all docstrings should "turn" into roughly the same
+        formatting."""
+        tokens = make_tokens("""\
+            /** abc
+
+             def
+               ghi
+
+             jkl */
+            /**     abc
+
+             def
+               ghi
+
+             jkl */
+            /** abc
+
+                def
+                  ghi
+
+                jkl
+                    **/
+            /// abc
+            ///
+            /// def
+            ///   ghi
+            ///
+            /// jkl
+            /**
+             *  abc
+             *
+             *  def
+             *    ghi
+             *
+             *  jkl
+             **/
+        """)
+
+        # Reformatted.
+        expected_text = dedent("""\
+            /**
+            abc
+
+            def
+              ghi
+
+            jkl */
+        """.rstrip())
+
+        for token in tokens:
+            text = "\n".join(mut.reformat_docstring(token))
+            self.assertEqual(expected_text, text, str(token))
+
+    def test_check_or_apply_lint(self):
+        tokens_in = make_tokens("""\
+            /// Docstring comment.
+            //@{
+            // This comment should be above docstring.
+            example_code();
+            //@}
+        """)
+        text_out = "\n".join(
+            mut.check_or_apply_lint_on_tokens(tokens_in, lint_errors=None))
+        text_expected = dedent("""\
+            // This comment should be above docstring.
+            /**
+            Docstring comment.
+            @{ */
+            example_code();
+            /** @} */
+        """.rstrip())
+        self.assertEqual(text_expected, text_out)
+
+        # Check for lint errors.
+        lint_errors = []
+        mut.check_or_apply_lint_on_tokens(
+            tokens_in, lint_errors=lint_errors, verbose=True)
+        # TODO(eric.cousineau): Make lint error show up?
+        expected_errors = dedent("""\
+            ERROR: Docstring needs reformatting
+            file:1: /// Docstring comment.
+            file:2: /// @{
+              should look like:
+            file:1: /**
+            file:2: Docstring comment.
+            file:3: @{ */
+
+            ERROR: Docstring needs reformatting
+            file:5: /// @}
+              should look like:
+            file:5: /** @} */
+        """.rstrip())
+        actual_errors = "\n".join(str(x) for x in lint_errors).rstrip()
+        self.assertEqual(expected_errors, actual_errors)

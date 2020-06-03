@@ -241,7 +241,8 @@ class SingleStarMultilineToken(CommentMultilineToken):
         return super().add_line(line)
 
     def assert_finished(self):
-        assert self._finished, f"Not closed:\n{self}"
+        if not self._finished:
+            raise UserFormattingError(f"Not closed:\n{self}")
 
 
 class DocstringMultilineToken(MultilineToken):
@@ -279,7 +280,8 @@ class DoubleStarMultilineToken(DocstringMultilineToken):
         super().__init__()
 
     def assert_finished(self):
-        assert self._finished, f"Not closed:\n{self}"
+        if not self._finished:
+            raise UserFormattingError(f"Not closed:\n{self}")
 
     def get_docstring_text(self):
         if self.lines[0].text == "":
@@ -665,7 +667,20 @@ def is_ignored_file(relpath):
     return False
 
 
-def check_or_apply_lint(filename, check_lint, verbose=False):
+def check_or_apply_lint_on_tokens(tokens, lint_errors, verbose=False):
+    tokens = reorder_multiline_tokens(tokens, lint_errors)
+    # Replace docstrings with "re-rendered" version.
+    new_lines = []
+    for token in tokens:
+        new_lines_i = reformat_multiline_token(token)
+        if lint_errors is not None:
+            lint_multiline_token(
+                lint_errors, token, new_lines_i, verbose=verbose)
+        new_lines += new_lines_i
+    return new_lines
+
+
+def check_or_apply_lint_on_file(filename, check_lint, verbose=False):
     """Operates on a single file.
 
     If check_lint is True, will simply print a set of errors if any formatting
@@ -678,16 +693,9 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
     if check_lint:
         lint_errors = []
     else:
-        lint_errors = None
-    tokens = reorder_multiline_tokens(tokens, lint_errors)
-    # Replace docstrings with "re-rendered" version.
-    new_lines = []
-    for token in tokens:
-        new_lines_i = reformat_multiline_token(token)
-        if lint_errors is not None:
-            lint_multiline_token(
-                lint_errors, token, new_lines_i, verbose=verbose)
-        new_lines += new_lines_i
+        lint_errors = none
+    new_lines = check_or_apply_lint_on_tokens(
+        tokens, lint_errors, verbose=False)
     if check_lint:
         if len(lint_errors) == 0:
             return []
@@ -756,7 +764,7 @@ def main(workspace_name="drake"):
 
     good = True
     for filename in filenames:
-        lint_errors = check_or_apply_lint(
+        lint_errors = check_or_apply_lint_on_file(
             filename, check_lint=args.lint, verbose=args.verbose)
         if errors:
             print("\n".join(str(x) for x in lint_errors))

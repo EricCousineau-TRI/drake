@@ -53,7 +53,7 @@ def _check_includes(filename):
 def _check_cpp_docstrings(filename):
     if cpp_docstring_lint.is_ignored_file(filename):
         return 0
-    errors = cpp_docstring_lint.check_or_apply_lint(filename, check_lint=True)
+    errors = cpp_docstring_lint.check_or_apply_lint_on_file(filename, check_lint=True)
     if errors:
         print()
         # Chokes on solvers/minimum_value_constraint.h ?
