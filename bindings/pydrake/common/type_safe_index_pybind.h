@@ -30,7 +30,7 @@ auto BindTypeSafeIndex(
       .def("is_valid", &Class::is_valid,
           pydrake_doc.drake.TypeSafeIndex.is_valid.doc)
       .def("__repr__", [name](const Class& self) {
-        return py::str("{}({})").format(name, int(self));
+        return py::str("{}({})").format(name, static_cast<int>(self));
       });
   return cls;
 }

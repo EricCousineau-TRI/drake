@@ -42,6 +42,7 @@ from pydrake.multibody.tree import (
 )
 from pydrake.multibody.math import (
     SpatialForce_,
+    SpatialMomentum_,
     SpatialVelocity_,
     SpatialAcceleration_,
 )
@@ -86,6 +87,7 @@ from pydrake.geometry import (
 from pydrake.math import (
     RigidTransform_,
     RollPitchYaw_,
+    RotationMatrix_,
 )
 from pydrake.systems.analysis import Simulator_
 from pydrake.systems.framework import (
@@ -141,8 +143,11 @@ class TestPlant(unittest.TestCase):
 
     def test_type_safe_indices(self):
         self.assertEqual(world_index(), BodyIndex(0))
+        self.assertEqual(repr(world_index()), "BodyIndex(0)")
         self.assertEqual(world_model_instance(), ModelInstanceIndex(0))
+        self.assertEqual(repr(world_model_instance()), "ModelInstanceIndex(0)")
         self.assertEqual(default_model_instance(), ModelInstanceIndex(1))
+        self.assertTrue(ModelInstanceIndex(0) < ModelInstanceIndex(1))
 
     def assert_sane(self, x, nonzero=True):
         self.assertTrue(np.all(np.isfinite(numpy_compare.to_float(x))))
@@ -167,7 +172,6 @@ class TestPlant(unittest.TestCase):
         body_com = body.default_com()
         body_default_unit_inertia = body.default_unit_inertia()
         body_default_spatial_inertial = body.default_spatial_inertia()
-
         new_model_instance = plant.AddModelInstance("new_model_instance")
         body = plant.AddRigidBody(name="new_body_2",
                                   M_BBo_B=spatial_inertia,
@@ -221,6 +225,10 @@ class TestPlant(unittest.TestCase):
         InputPort = InputPort_[T]
         OutputPort = OutputPort_[T]
 
+        def check_repr(element, expected):
+            if T == float:
+                self.assertEqual(repr(element), expected)
+
         # TODO(eric.cousineau): Decouple this when construction can be done
         # without parsing.
         # This a subset of `multibody_plant_sdf_parser_test.cc`.
@@ -230,6 +238,7 @@ class TestPlant(unittest.TestCase):
         plant_f = MultibodyPlant_[float](time_step=0.01)
         model_instance = Parser(plant_f).AddModelFromFile(file_name)
         self.assertIsInstance(model_instance, ModelInstanceIndex)
+        check_repr(model_instance, "ModelInstanceIndex(2)")
         plant_f.Finalize()
         plant = to_type(plant_f, T)
 
@@ -267,6 +276,10 @@ class TestPlant(unittest.TestCase):
             name="ShoulderJoint", model_instance=model_instance))
         shoulder = plant.GetJointByName(name="ShoulderJoint")
         self._test_joint_api(T, shoulder)
+        check_repr(
+            shoulder,
+            "<RevoluteJoint_[float] name='ShoulderJoint' index=0 "
+            "model_instance=2>")
         np.testing.assert_array_equal(
             shoulder.position_lower_limits(), [-np.inf])
         np.testing.assert_array_equal(
@@ -275,14 +288,28 @@ class TestPlant(unittest.TestCase):
             name="ShoulderJoint", model_instance=model_instance))
         self._test_joint_actuator_api(
             T, plant.GetJointActuatorByName(name="ElbowJoint"))
-        self._test_body_api(T, plant.GetBodyByName(name="Link1"))
+
+        # Purposely get links out of order to ensure the Python wrapper classes
+        # are constructed differently.
+        link2 = plant.GetBodyByName(name="Link2")
+        link1 = plant.GetBodyByName(name="Link1")
+        self.assertTrue(link1 < link2)
+
+        self._test_body_api(T, link1)
         self.assertIs(
-            plant.GetBodyByName(name="Link1"),
+            link1,
             plant.GetBodyByName(name="Link1", model_instance=model_instance))
         self.assertEqual(len(plant.GetBodyIndices(model_instance)), 2)
+        check_repr(
+            link1,
+            "<RigidBody_[float] name='Link1' index=1 model_instance=2>")
         self._test_frame_api(T, plant.GetFrameByName(name="Link1"))
+        link1_frame = plant.GetFrameByName(name="Link1")
+        check_repr(
+            link1_frame,
+            "<BodyFrame_[float] name='Link1' index=1 model_instance=2>")
         self.assertIs(
-            plant.GetFrameByName(name="Link1"),
+            link1_frame,
             plant.GetFrameByName(name="Link1", model_instance=model_instance))
         self.assertTrue(plant.HasModelInstanceNamed(name="acrobot"))
         self.assertEqual(
@@ -300,8 +327,13 @@ class TestPlant(unittest.TestCase):
         self.assertIsInstance(plant.num_frames(), int)
         self.assertIsInstance(plant.get_body(body_index=BodyIndex(0)), Body)
         self.assertIs(shoulder, plant.get_joint(joint_index=JointIndex(0)))
-        self.assertIsInstance(plant.get_joint_actuator(
-            actuator_index=JointActuatorIndex(0)), JointActuator)
+        joint_actuator = plant.get_joint_actuator(
+            actuator_index=JointActuatorIndex(0))
+        self.assertIsInstance(joint_actuator, JointActuator)
+        check_repr(
+            joint_actuator,
+            "<JointActuator_[float] name='ElbowJoint' index=0 "
+            "model_instance=2>")
         self.assertIsInstance(
             plant.get_frame(frame_index=FrameIndex(0)), Frame)
         self.assertEqual("acrobot", plant.GetModelInstanceName(
@@ -389,6 +421,11 @@ class TestPlant(unittest.TestCase):
         RotationalInertia = RotationalInertia_[T]
         UnitInertia = UnitInertia_[T]
         SpatialInertia = SpatialInertia_[T]
+        RotationMatrix = RotationMatrix_[T]
+        SpatialAcceleration = SpatialAcceleration_[T]
+        SpatialForce = SpatialForce_[T]
+        SpatialVelocity = SpatialVelocity_[T]
+        SpatialMomentum = SpatialMomentum_[T]
         # Test unit inertia construction.
         UnitInertia()
         unit_inertia = UnitInertia(Ixx=2.0, Iyy=2.3, Izz=2.4)
@@ -400,6 +437,7 @@ class TestPlant(unittest.TestCase):
             mass=2.5, p_PScm_E=[0.1, -0.2, 0.3], G_SP_E=unit_inertia)
         numpy_compare.assert_float_equal(spatial_inertia.get_mass(), 2.5)
         self.assertIsInstance(spatial_inertia.get_com(), np.ndarray)
+        self.assertIsInstance(spatial_inertia.CalcComMoment(), np.ndarray)
         self.assertIsInstance(spatial_inertia.get_unit_inertia(), UnitInertia)
         self.assertIsInstance(
             spatial_inertia.CalcRotationalInertia(), RotationalInertia)
@@ -408,6 +446,19 @@ class TestPlant(unittest.TestCase):
         if T != Expression:
             self.assertTrue(spatial_inertia.IsPhysicallyValid())
         self.assertIsInstance(spatial_inertia.CopyToFullMatrix6(), np.ndarray)
+        self.assertIsInstance(
+            spatial_inertia.ReExpress(RotationMatrix()), SpatialInertia)
+        self.assertIsInstance(
+            spatial_inertia.Shift([1, 2, 3]), SpatialInertia)
+        spatial_inertia += spatial_inertia
+        self.assertIsInstance(
+            spatial_inertia * SpatialAcceleration(), SpatialForce)
+        self.assertIsInstance(
+            spatial_inertia * SpatialVelocity(), SpatialMomentum)
+        spatial_inertia.SetNaN()
+        # N.B. `numpy_compare.assert_equal(IsNaN(), True)` does not work.
+        if T != Expression:
+            self.assertTrue(spatial_inertia.IsNaN())
 
     @numpy_compare.check_all_types
     def test_friction_api(self, T):
@@ -432,6 +483,10 @@ class TestPlant(unittest.TestCase):
             bodyA=body_a, p_AP=[0., 0., 0.],
             bodyB=body_b, p_BQ=[0., 0., 0.],
             free_length=1., stiffness=2., damping=3.))
+        if T == float:
+            self.assertEqual(
+                repr(linear_spring),
+                "<LinearSpringDamper_[float] index=1 model_instance=1>")
         revolute_joint = plant.AddJoint(RevoluteJoint_[T](
                 name="revolve_joint", frame_on_parent=body_a.body_frame(),
                 frame_on_child=body_b.body_frame(), axis=[0, 0, 1],

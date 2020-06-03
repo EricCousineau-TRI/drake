@@ -432,6 +432,7 @@ drake_py_unittest(
     name = "value_test",
     deps = [
         ":framework_py",
+        "//bindings/pydrake/common/test_utilities",
     ],
 )
 
