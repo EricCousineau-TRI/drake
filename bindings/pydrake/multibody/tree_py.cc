@@ -48,7 +48,7 @@ template <typename T, typename = int>
 struct has_name : std::false_type { };
 
 template <typename T>
-struct has_name<T, decltype((void)T::name, 0)> : std::true_type { };
+struct has_name<T, decltype((void)&T::name, 0)> : std::true_type { };
 
 // Binds `MultibodyElement` methods.
 // N.B. We do this rather than inheritance because this template is more of a
@@ -65,7 +65,7 @@ void BindMultibodyElementMixin(PyClass* pcls) {
       .def("index", &Class::index)
       .def("model_instance", &Class::model_instance)
       .def("__repr__", [](const Class& self) {
-        py::str cls_name = py::cast(&self).type().attr("__name__");
+        py::str cls_name = py::cast(&self).get_type().attr("__name__");
         if constexpr (has_name<Class>::value) {
           return py::str("<{}  name='{}' index={} model_instance={}>").format(
               cls_name,
@@ -73,7 +73,7 @@ void BindMultibodyElementMixin(PyClass* pcls) {
               int(self.index()),
               int(self.model_instance()));
         } else {
-          return py::str("<{}  index={} model_instance={}>").format(
+          return py::str("<{} index={} model_instance={}>").format(
               cls_name,
               int(self.index()),
               int(self.model_instance()));
