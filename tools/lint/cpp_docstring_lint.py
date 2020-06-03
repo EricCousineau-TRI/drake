@@ -740,6 +740,16 @@ def lint_multiline_token(lint_errors, token, new_lines, verbose):
         )
 
 
+def is_ignored_file(relpath):
+    # TODO(eric.cousineau): Figure out better heuristic for this.
+    if relpath.startswith(("attic/", "tools/")):
+        return True
+    if "/gen/" in relpath:
+        return True
+    if not relpath.endswith(".h"):
+        return True
+
+
 def check_or_apply_lint(filename, check_lint, verbose=False):
     """Operates on a single file.
 
@@ -816,11 +826,8 @@ def main(workspace_name="drake"):
             return 1
         os.chdir(workspace_dir)
         for relpath in sorted(relpaths):
-            if relpath.startswith(("attic/", "tools/")):
-                continue
-            if not relpath.endswith(".h"):
-                continue
-            filenames.append(relpath)
+            if not is_ignored_file(relpath):
+                filenames.append(relpath)
         if not args.lint:
             print(
                 f"This will reformat {len(filenames)} files within "
