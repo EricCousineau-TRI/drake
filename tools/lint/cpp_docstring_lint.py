@@ -88,7 +88,7 @@ class FileLine:
     def format(self, num_width=None):
         """Shows file and line number with given fixed numbering for line
         number."""
-        if num_width == None:
+        if num_width is None:
             num_width = len(str(self.num))
         return f"{self.filename}:{self.num + 1:<{num_width}}: {self.raw_line}"
 
@@ -396,7 +396,7 @@ def reformat_docstring(docstring):
             return [f"{indent}/// {first_line}"]
         new_lines = maybe_wrap(f"/** {first_line}", " */")
     else:
-        new_lines = [f"{indent}/**"] # {first_line}"]
+        new_lines = [f"{indent}/**"]
         for line in text_lines[:-1]:
             new_line = f"{indent}{spacing}{line}".rstrip()
             new_lines.append(new_line)
@@ -665,7 +665,7 @@ def is_generic_token_but_not_macro(token):
 
 
 def is_comment_token_but_not_nolint(token):
-    """Predicate for a comment token that is not a "nolint" directive.""" 
+    """Predicate for a comment token that is not a "nolint" directive."""
     if isinstance(token, CommentMultilineToken):
         # TODO(eric.cousineau): Figure out how to make cpplint play nicely with
         # mkdoc.py?
@@ -844,5 +844,5 @@ def main(workspace_name="drake"):
         sys.exit(1)
 
 
-if  __name__ == "__main__":
+if __name__ == "__main__":
     main()
