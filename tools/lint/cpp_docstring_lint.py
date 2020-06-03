@@ -57,7 +57,7 @@ class FileLine:
             f"Raw line should not have newline: {repr(raw_line)}")
         self.raw_line = raw_line
         without_indent = self.raw_line.lstrip()
-        self.indent = self.raw_len[:-len(without_indent)]
+        self.indent = self.raw_line[:-len(without_indent)]
         self.start_token, self.end_token = parse_line_tokens(without_indent)
         self._set_text(prefix=f"{self.indent}{self.start_token}")
 
@@ -309,7 +309,7 @@ class DoubleStarMultilineToken(DocstringMultilineToken):
                     self.secondary_type = "*"
                 else:
                     self.secondary_type = ""
-            if self.secondary_type == ""
+            if self.secondary_type == "":
                 do_add_line = True
                 # Reset indentation to match first line.
                 line.reset_indent(self.lines[0].indent)
@@ -787,7 +787,6 @@ def main():
                 filenames.remove(filename)
 
     if filenames == ["<test>"]:
-        assert not args.dry_run
         test()
         return
 
