@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 Implements a simple parser which:
 
@@ -687,7 +685,7 @@ class LintErrors:
         def __str__(self):
             s = f"{self.text}\n{format_lines(self.lines)}\n"
             if self.to_lines is not None:
-                s += f"  should be:\n{format_lines(self.to_lines)}"
+                s += f"  should be:\n{format_lines(self.to_lines)}\n"
             return s
 
     def __init__(self):
@@ -781,8 +779,8 @@ def check_or_apply_lint(filename, check_lint, verbose=False):
         if raw_errors:
             raw_errors.append(
                 f"note: to fix, please run one of the following:\n"
-                f"   bazel-bin/tools/lint/cpp_docstring_lint.py {filename}\n"
-                f"   bazel-bin/tools/lint/cpp_docstring_lint.py --all")
+                f"   bazel-bin/tools/lint/cpp_docstring_lint {filename}\n"
+                f"   bazel-bin/tools/lint/cpp_docstring_lint --all")
         return raw_errors
     else:
         with open(filename, "w") as f:
@@ -839,7 +837,7 @@ def main(workspace_name="drake"):
         errors = check_or_apply_lint(
             filename, check_lint=args.lint, verbose=args.verbose)
         if errors:
-            print("\n\n".join(errors))
+            print("\n".join(errors))
             good = False
     if not good:
         sys.exit(1)
