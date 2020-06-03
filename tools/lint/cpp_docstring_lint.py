@@ -232,7 +232,9 @@ class SingleStarMultilineToken(CommentMultilineToken):
         super().__init__()
 
     def add_line(self, line):
-        if len(self.lines) == 0 and line.start_token != "/*":
+        if len(self.lines) == 0 and (
+                line.start_token != "/*" or line.raw_line.endswith("\\")):
+            # Don't even try.
             return False
         if self._finished:
             return False
@@ -587,7 +589,7 @@ class TokenRegex:
         index = 0
         while index < len(xs):
             start_index = index
-            match = Match()
+            match = self.Match()
             for pattern_group in self._pattern_groups:
                 if index == len(xs):
                     match = None
@@ -720,7 +722,7 @@ def lint_multiline_token(lint_errors, token, new_lines):
     # Compare.
     if token.to_raw_lines() != new_token.to_raw_lines():
         lint_errors.add(
-            "ERROR: Docstring formatting is incorrect",
+            "ERROR: Docstring needs reformatting",
             lines=token.lines[:2],
         )
 
