@@ -2,6 +2,7 @@ import os
 import sys
 
 from drake.tools.lint.formatter import IncludeFormatter
+from drake.tools.lint import cpp_docstring_lint
 
 
 def _check_invalid_line_endings(filename):
@@ -50,7 +51,11 @@ def _check_includes(filename):
 
 
 def _check_cpp_docstrings(filename):
-    
+    errors = check_or_apply_lint.check_or_apply_lint(filename, check_lint=True)
+    if errors:
+        print("\n".join(errors[:-3]))
+        return 1
+    return 0
 
 
 def _check_shebang(filename, disallow_executable):
@@ -110,7 +115,7 @@ def main():
             total_errors += _check_shebang(filename, disallow_executable)
         if not filename.endswith(".py"):
             total_errors += _check_includes(filename)
-
+            total_errors += _check_cpp_docstrings(filename)
     if total_errors == 0:
         sys.exit(0)
     else:
