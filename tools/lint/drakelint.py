@@ -57,7 +57,16 @@ def _check_cpp_docstrings(filename):
     if errors:
         print()
         # Chokes on solvers/minimum_value_constraint.h ?
-        print("\n".join(errors))
+        for error in errors:
+            try:
+                print(error)
+            except UnicodeEncodeError as e:
+                # TODO(eric.cousineau): This is only triggered under
+                # `bazel test` due to redirection.
+                # Exaple:
+                # With drake@7ae3c238b:
+                # bazel test //solvers:py/minimum_value_constraint_drakelint
+                print(f"WARNING: Encoding error: {e}\n")
         print("note: if that program does not exist, "
               "you might need to compile it first: "
               "bazel build //tools/lint/...")
