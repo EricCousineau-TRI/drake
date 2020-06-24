@@ -81,16 +81,22 @@ Drake requires a compiler running in C++17 mode.
 +----------------------------------+-------+-------+---------------------+-------------------+--------+
 | Ubuntu 18.04 LTS (Bionic Beaver) | 3.0   | 3.10  | | Clang 6.0         | OpenJDK 11        | 3.6    |
 |                                  |       |       | | GCC 7.5 (default) |                   |        |
-+----------------------------------+       +-------+---------------------+-------------------+--------+
-| macOS Mojave (10.14)             |       | 3.17  | | Apple LLVM 11.0.0 | | AdoptOpenJDK 14 | 3.8    |
++----------------------------------+       +-------+---------------------+                   +--------+
+| Ubuntu 20.04 LTS (Focal Fossa)   |       | 3.16  | GCC 9.3             |                   | 3.8    |
+|                                  |       |       |                     |                   |        |
++----------------------------------+       +-------+---------------------+-------------------+        |
+| macOS Mojave (10.14)             |       | 3.17  | | Apple LLVM 11.0.0 | | AdoptOpenJDK 14 |        |
 |                                  |       |       | | (Xcode 11.3)      | | (HotSpot JVM)   |        |
 +----------------------------------+       |       +---------------------+                   |        |
 | macOS Catalina (10.15)           |       |       | | Apple LLVM 11.0.3 |                   |        |
-|                                  |       |       | | (Xcode 11.4)      |                   |        |
+|                                  |       |       | | (Xcode 11.5)      |                   |        |
 +----------------------------------+-------+-------+---------------------+-------------------+--------+
 
 CPython is the only Python implementation supported. On Ubuntu, amd64
-(i.e., x86_64) is the only supported architecture.
+(i.e., x86_64) is the only supported architecture. On macOS, x86_64 is the only
+supported architecture and running Drake under Rosetta 2 emulation on arm64 is
+not supported. Plans for any future arm64 support on macOS and/or Ubuntu are
+discussed in `issue #13514 <https://github.com/RobotLocomotion/drake/issues/13514>`_.
 
 .. _configuration-management-non-determinism:
 
@@ -119,8 +125,8 @@ to :ref:`ask for help <getting_help>`.
 Binary Packages
 ---------------
 
-The binary releases of Drake are built with GCC 7.5 on Ubuntu Bionic, and Apple
-LLVM 11.0.0 on macOS Mojave.
+The binary releases of Drake are built with GCC 7.5 on Ubuntu 18.04 (Bionic),
+GCC 9.3 on Ubuntu 20.04 (Focal), and Apple LLVM 11.0.0 on macOS Mojave.
 
 The links for these packages are listed in :ref:`binary-installation`.
 

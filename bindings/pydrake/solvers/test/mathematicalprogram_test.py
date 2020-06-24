@@ -19,6 +19,7 @@ import numpy as np
 import pydrake
 from pydrake.common import kDrakeAssertIsArmed
 from pydrake.autodiffutils import AutoDiffXd
+from pydrake.common.test_utilities.deprecation import catch_drake_warnings
 from pydrake.common.test_utilities import numpy_compare
 from pydrake.forwarddiff import jacobian
 from pydrake.math import ge
@@ -129,6 +130,10 @@ class TestMathematicalProgram(unittest.TestCase):
         m = np.array([sym.Expression(qp.x[0]), sym.Expression(qp.x[1])])
         self.assertTrue(result.GetSolution(m)[1, 0].EqualTo(
             result.GetSolution(qp.x[1])))
+
+        x_val_new = np.array([1, 2])
+        result.set_x_val(x_val_new)
+        np.testing.assert_array_equal(x_val_new, result.get_x_val())
 
 # TODO(jwnimmer-tri) MOSEK is also able to solve mixed integer programs;
     # perhaps we should test both of them?
@@ -838,9 +843,20 @@ class TestMathematicalProgram(unittest.TestCase):
         prog = mp.MathematicalProgram()
         x = prog.NewContinuousVariables(1)
         result = mp.Solve(prog)
-        infeasible = mp.GetInfeasibleConstraints(prog=prog, result=result,
-                                                 tol=1e-4)
+        with catch_drake_warnings(expected_count=1):
+            infeasible = mp.GetInfeasibleConstraints(prog=prog, result=result,
+                                                     tol=1e-4)
+            self.assertEqual(len(infeasible), 0)
+
+        infeasible = result.GetInfeasibleConstraints(prog)
         self.assertEqual(len(infeasible), 0)
+
+        infeasible = result.GetInfeasibleConstraints(prog, tol=1e-4)
+        self.assertEqual(len(infeasible), 0)
+
+        infeasible_names = result.GetInfeasibleConstraintNames(
+                prog=prog, tol=1e-4)
+        self.assertEqual(len(infeasible_names), 0)
 
     def test_add_indeterminates_and_decision_variables(self):
         prog = mp.MathematicalProgram()
