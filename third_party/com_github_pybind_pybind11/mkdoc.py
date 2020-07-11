@@ -666,42 +666,38 @@ def do_stuff(ns):
     test_container = ns.class_('mkdoc_test::Class')
     print(test_container)
 
+import argparse
+from os.path import isfile
 
 def main():
-    parameters = ['-x', 'c++', '-D__MKDOC_PY__']
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-quiet", action="store_true")
+    parser.add_argument("-output", type=str, required=True)
+    parser.add_argument("-output_xml", type=str, default=None)
+    parser.add_argument("-std", type=str, default="c++11")
+    parser.add_argument("-ignore-dirs-for-coverage", type=str, default="")
+    parser.add_argument("-root-name", type=str, default="mkdoc_doc")
+    parser.add_argument("-exclude-hdr-patterns", type=str, default="")
+    parser.add_argument("-castxml-bin", type=str, required=True)
+    parser.add_argument("filenames", type=str, nargs="+")
+    args, argv = parser.parse_known_args()
+
+    parameters = ['-x', 'c++', '-D__MKDOC_PY__'] + argv
     # add_library_paths(parameters)
-    filenames = []
+    filenames = args.filenames
 
-    quiet = False
-    std = '-std=c++11'
-    root_name = 'mkdoc_doc'
-    ignore_patterns = []
-    output_filename = None
-    output_filename_xml = None
-
-    # TODO(m-chaturvedi): Consider using argparse.
-    for item in sys.argv[1:]:
-        if item == '-quiet':
-            quiet = True
-        elif item.startswith('-output='):
-            output_filename = item[len('-output='):]
-        elif item.startswith('-output_xml='):
-            output_filename_xml = item[len('-output_xml='):]
-        elif item.startswith('-std='):
-            std = item
-        elif item.startswith('-ignore-dirs-for-coverage='):
-            ignore_dir_str = item[len('-ignore-dirs-for-coverage='):]
-            ignore_dirs_for_coverage = None
-            if ignore_dir_str:
-                ignore_dirs_for_coverage = tuple(ignore_dir_str.split(','))
-        elif item.startswith('-root-name='):
-            root_name = item[len('-root-name='):]
-        elif item.startswith('-exclude-hdr-patterns='):
-            ignore_patterns.append(item[len('-exclude-hdr-patterns='):])
-        elif item.startswith('-'):
-            parameters.append(item)
-        else:
-            filenames.append(item)
+    castxml_bin = args.castxml_bin
+    print("\n\n\n\n")
+    print(os.getcwd())
+    print(castxml_bin)
+    assert isfile(castxml_bin), castxml_bin
+    quiet = args.quiet
+    std = f'-std={args.std}'
+    root_name = args.root_name
+    ignore_patterns = args.exclude_hdr_patterns.split(",")
+    output_filename = args.output
+    output_filename_xml = args.output_xml
+    ignore_dirs_for_coverage = tuple(args.ignore_dirs_for_coverage.split(","))
 
     parameters.append(std)
 
@@ -771,6 +767,7 @@ def main():
     # usage with Bazel.
     tmpdir = output_filename + ".tmp_artifacts"
     os.mkdir(tmpdir)
+
     glue_filename = os.path.join(tmpdir, "mkdoc_glue.h")
     with open(glue_filename, 'w') as glue_f:
         for include_file in sorted(include_files):
@@ -782,14 +779,12 @@ def main():
         if not quiet:
             eprint("Parse headers...")
 
-        # Find out the xml generator (gccxml or castxml)
-        generator_path, generator_name = pygccxml.utils.find_xml_generator()
         # Configure the xml generator
         import shlex
         cflags = " ".join(shlex.quote(x) for x in parameters)
         castxml_config = pygccxml.parser.xml_generator_configuration_t(
-            xml_generator_path=generator_path,
-            xml_generator=generator_name,
+            xml_generator_path=castxml_bin,
+            xml_generator="castxml",
             cflags=cflags,
             # include_paths=[self.opts.source_dir] + rsp_includes,
         )
@@ -801,7 +796,7 @@ def main():
             castxml_config,
             compilation_mode=pygccxml.parser.COMPILATION_MODE.ALL_AT_ONCE)
 
-        ns = declarations.get_global_namespace(decls).namespace("drake")
+        ns = pygccxml.declarations.get_global_namespace(decls).namespace("drake")
         do_stuff(ns)
 
         exit(1)

@@ -42,6 +42,7 @@ py_binary(
         "generate_pybind_coverage.py",
         "pybind_coverage_libclang_parser.py",
         "pybind_coverage_xml_parser.py",
+        "@castxml//:castxml_bin",
     ],
     visibility = ["//visibility:public"],
     deps = [
