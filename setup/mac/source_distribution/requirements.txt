@@ -1,4 +1,3 @@
 boto3
 jupyter
 pandas
-python3-pygccxml

@@ -63,6 +63,7 @@ load("@drake//tools/workspace/pybind11:repository.bzl", "pybind11_repository")
 load("@drake//tools/workspace/pycodestyle:repository.bzl", "pycodestyle_repository")  # noqa
 load("@drake//tools/workspace/pycps:repository.bzl", "pycps_repository")
 load("@drake//tools/workspace/pygame_py:repository.bzl", "pygame_py_repository")  # noqa
+load("@drake//tools/workspace/pygccxml_py:repository.bzl", "pygccxml_py_repository")
 load("@drake//tools/workspace/python:repository.bzl", "python_repository")
 load("@drake//tools/workspace/qdldl:repository.bzl", "qdldl_repository")
 load("@drake//tools/workspace/ros_xacro:repository.bzl", "ros_xacro_repository")  # noqa
@@ -220,6 +221,8 @@ def add_default_repositories(excludes = [], mirrors = DEFAULT_MIRRORS):
         pycps_repository(name = "pycps", mirrors = mirrors)
     if "pygame_py" not in excludes:
         pygame_py_repository(name = "pygame_py", mirrors = mirrors)
+    if "pygccxml_py" not in excludes:
+        pygccxml_py_repository(name = "pygccxml_py", mirrors = mirrors)
     if "python" not in excludes:
         python_repository(name = "python")
     if "qdldl" not in excludes:
