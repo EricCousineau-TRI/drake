@@ -22,7 +22,7 @@ from clang.cindex import AccessSpecifier, CursorKind, TypeKind
 
 from drake.tools.workspace.pybind11.mkdoc_comment import process_comment
 
-from drake.tools.workspace.pybind11.libclang_setup import add_library_paths
+# from drake.tools.workspace.pybind11.libclang_setup import add_library_paths
 
 
 CLASS_KINDS = [
@@ -639,10 +639,37 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
+import pygccxml
+import logging
+
+def do_stuff(ns):
+    print('"ns" declarations: \n')
+    pygccxml.declarations.print_declarations(ns)
+    # # Print all base and derived class names
+    # for class_ in ns.classes():
+    #     print('class "%s" hierarchy information:' % class_.name)
+    #     print('\tbase classes   : ', repr([
+    #         base.related_class.name for base in class_.bases]))
+    #     print('\tderived classes: ', repr([
+    #         derive.related_class.name for derive in class_.derived]))
+    #     print('\n')
+
+    # # Pygccxml has very powerfull query api:
+
+    # # Select multiple declarations
+    # run_functions = ns.member_functions('run')
+    # print('the namespace contains %d "run" member functions' % len(run_functions))
+    # print('they are: ')
+    # for f in run_functions:
+    #     print('\t' + declarations.full_name(f))
+
+    test_container = ns.class_('mkdoc_test::Class')
+    print(test_container)
+
 
 def main():
     parameters = ['-x', 'c++', '-D__MKDOC_PY__']
-    add_library_paths(parameters)
+    # add_library_paths(parameters)
     filenames = []
 
     quiet = False
@@ -754,24 +781,49 @@ def main():
         glue_f.flush()
         if not quiet:
             eprint("Parse headers...")
-        index = cindex.Index(
-            cindex.conf.lib.clang_createIndex(False, True))
-        translation_unit = index.parse(
-            glue_filename, parameters,
-            options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-        if not translation_unit:
-            raise RuntimeError(
-                "Parsing headers using the clang library failed")
-        severities = [
-            diagnostic.severity for diagnostic in translation_unit.diagnostics
-            if diagnostic.severity >= cindex.Diagnostic.Error
-        ]
-        if severities:
-            raise RuntimeError(
-                ("Parsing headers using the clang library failed with {} "
-                 "error(s) and {} fatal error(s)").format(
-                     severities.count(cindex.Diagnostic.Error),
-                     severities.count(cindex.Diagnostic.Fatal)))
+
+        # Find out the xml generator (gccxml or castxml)
+        generator_path, generator_name = pygccxml.utils.find_xml_generator()
+        # Configure the xml generator
+        import shlex
+        cflags = " ".join(shlex.quote(x) for x in parameters)
+        castxml_config = pygccxml.parser.xml_generator_configuration_t(
+            xml_generator_path=generator_path,
+            xml_generator=generator_name,
+            cflags=cflags,
+            # include_paths=[self.opts.source_dir] + rsp_includes,
+        )
+
+        # Run CastXML and parse back the resulting XML into a Python Object.
+        pygccxml.utils.loggers.cxx_parser.setLevel(logging.CRITICAL)
+        decls, = pygccxml.parser.parse(
+            [glue_filename],
+            castxml_config,
+            compilation_mode=pygccxml.parser.COMPILATION_MODE.ALL_AT_ONCE)
+
+        ns = declarations.get_global_namespace(decls).namespace("drake")
+        do_stuff(ns)
+
+        exit(1)
+
+        # index = cindex.Index(
+        #     cindex.conf.lib.clang_createIndex(False, True))
+        # translation_unit = index.parse(
+        #     glue_filename, parameters,
+        #     options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        # if not translation_unit:
+        #     raise RuntimeError(
+        #         "Parsing headers using the clang library failed")
+        # severities = [
+        #     diagnostic.severity for diagnostic in translation_unit.diagnostics
+        #     if diagnostic.severity >= cindex.Diagnostic.Error
+        # ]
+        # if severities:
+        #     raise RuntimeError(
+        #         ("Parsing headers using the clang library failed with {} "
+        #          "error(s) and {} fatal error(s)").format(
+        #              severities.count(cindex.Diagnostic.Error),
+        #              severities.count(cindex.Diagnostic.Fatal)))
     shutil.rmtree(tmpdir)
     # Extract symbols.
     if not quiet:
@@ -802,6 +854,7 @@ If you are on Ubuntu, please ensure you have en_US.UTF-8 locales generated:
 #pragma GCC diagnostic pop
 #endif
 ''')
+    exit(1)
     if f_xml is not None:
         f_xml.write(prettify(tree_parser["tree_parser_xpath"][0]))
 
