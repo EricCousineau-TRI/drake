@@ -21,6 +21,9 @@ fi
 
 python=${PWD}/venv/bin/python
 
+${python} ./naive_warning.py | tee /tmp/output.txt
+./filt.py /tmp/output.txt ./naive_warning.output
+
 cat > ../tools/py_toolchain/interpreter_paths.bzl <<EOF
 LINUX_INTERPRETER_PATH = "${python}"
 LINUX_DBG_INTERPRETER_PATH = "borked"
