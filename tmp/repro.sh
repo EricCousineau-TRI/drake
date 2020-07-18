@@ -21,13 +21,13 @@ fi
 
 python=${PWD}/venv/bin/python
 
-cat > ../hack.bazelrc <<EOF
-build --python_path=${python}
-build --action_env=DRAKE_PYTHON_BIN_PATH=${python}
+cat > ../tools/py_toolchain/interpreter_paths.bzl <<EOF
+LINUX_INTERPRETER_PATH = "${python}"
+LINUX_DBG_INTERPRETER_PATH = "borked"
+MACOS_INTERPRETER_PATH = "borked"
 EOF
 
-
-bazel build --announce_rc //tmp:repro_issue12073
+bazel build //tmp:repro_issue12073
 bin=../bazel-bin/tmp/repro_issue12073
 export PYTHONUNBUFFERED=1
 

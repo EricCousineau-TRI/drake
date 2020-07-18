@@ -1,4 +1,5 @@
 load("//tools/skylark:pybind.bzl", "pybind_py_library")
+load("//tools/skylark:py.bzl", "py_binary")
 load(":cc.bzl", "cc_shared_library")
 
 # cc_library(  # This will NOT segfault

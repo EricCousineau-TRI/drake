@@ -51,7 +51,6 @@ openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/libcuda.so.1", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libnvrtc-007d19c9.so.9.0", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 3
-openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/libnvidia-fatbinaryloader.so.430.26", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/_C.cpython-36m-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libshm.so", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libtorch_python.so", O_RDONLY|O_CLOEXEC) = 3
