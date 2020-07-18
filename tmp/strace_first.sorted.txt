@@ -10,8 +10,8 @@ openat(AT_FDCWD, "${venv}/lib/python3.6/lib-dynload/_ssl.cpython-36m-x86_64-linu
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/_C.cpython-36m-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libc10.so", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libc10_cuda.so", O_RDONLY|O_CLOEXEC) = 3
-openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libcudart-1581fefa.so.10.0", O_RDONLY|O_CLOEXEC) = 3
-openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libgomp-4f651535.so.1", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libcudart-1b201d85.so.10.1", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libgomp-7c85b1e2.so.1", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libnvToolsExt-3965bdd0.so.1", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libshm.so", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "${venv}/lib/python3.6/site-packages/torch/lib/libtorch.so", O_RDONLY|O_CLOEXEC) = 3

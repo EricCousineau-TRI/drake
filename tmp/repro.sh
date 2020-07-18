@@ -16,7 +16,7 @@ cd $(dirname $0)
 
 if [[ ! -d ./venv ]]; then
     python3 -m virtualenv -p python3 ./venv --system-site-packages
-    ./venv/bin/pip install torch==1.2.0
+    ./venv/bin/pip install torch==1.3.0
 fi
 
 python=${PWD}/venv/bin/python
