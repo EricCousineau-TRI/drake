@@ -120,7 +120,7 @@ def _check_for_rtld_global_usages():
     # This symbol was introduced in v1.5.0 (pytorch@ddff4efa2).
     # N.B. Per investigation in #13707, it seems like torch==1.4.0 also plays
     # better with pydrake. However, we will keep our warning conservative.
-    using_rtld_global = getattr(torch, "USE_RTLD_GLOBAL_WITH_LIBTORCH")
+    using_rtld_global = getattr(torch, "USE_RTLD_GLOBAL_WITH_LIBTORCH", True)
     if not using_rtld_global:
         return False
     init_file = getattr(torch, "__file__")
