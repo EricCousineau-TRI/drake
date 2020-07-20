@@ -247,4 +247,14 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_library(
+    name = "uninstalled_shared_library_hdrs",
+    hdrs = [
+        "render_engine_ospray.h",
+        "render_engine_vtk.h",
+        "render_engine_vtk_base.h",
+    ],
+    visibility = ["//tools/install/libdrake:__pkg__"],
+)
+
 add_lint_tests()
