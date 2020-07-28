@@ -1,3 +1,4 @@
+<?xml version='1.0'?>
 <sdf version='1.7'>
   <model name='test_robot'>
     <!-- This sdf file defines a simple test robot with multiple links so that
@@ -142,9 +143,9 @@
 
     <!-- For now at least, We care only that Drake's custom tag doesn't break
          parsing the rest of the elements in this file. -->
-    <collision_filter_group name="filter_group1">
-      <member link="link1"/>
-      <member link="link2"/>
+    <collision_filter_group name='filter_group1'>
+      <member link='link1'/>
+      <member link='link2'/>
     </collision_filter_group>
   </model>
 </sdf>

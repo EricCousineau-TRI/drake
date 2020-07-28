@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version='1.0'?>
 <sdf version='1.6'>
-<model name="004_sugar_box">
+<model name='004_sugar_box'>
   <!--
     Axes:
       +X - Left, when facing front (smaller dimension)
@@ -15,7 +15,7 @@
     with the YCB dataset. The sugar box is treated as a constant density box,
     which matches the collision shape.
    -->
-  <link name="base_link_sugar">
+  <link name='base_link_sugar'>
     <inertial>
       <mass>0.514000</mass>
       <inertia>
@@ -29,7 +29,7 @@
     </inertial>
 
     <visual name='base_link_sugar'>
-      <pose frame=''>-0.018  0.088  0.0039 -0.77 -1.52 2.36</pose>
+      <pose>-0.018  0.088  0.0039 -0.77 -1.52 2.36</pose>
       <geometry>
         <mesh>
           <uri>../meshes/004_sugar_box_textured.obj</uri>
@@ -49,7 +49,6 @@
       case a deviation of 0.0005 m from the visual surface).
      -->
     <collision name='box_collision'>
-      <pose>0 0 0 0 0 0</pose>
       <geometry>
         <box> 
           <size>0.086700 0.170300 0.039100</size>

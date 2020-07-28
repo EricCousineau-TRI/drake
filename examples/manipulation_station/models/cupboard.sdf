@@ -1,8 +1,8 @@
-<sdf version='1.6'>
+<?xml version='1.0'?>
+<sdf version='1.7'>
   <model name='cupboard'>
 
   <link name='cupboard_body'>
-  <pose> 0 0 0 0 0 0</pose>
 
   <visual name='right_wall'>
     <pose> 0 0.292 0 0 0 0</pose>
@@ -43,7 +43,6 @@
   </link>
 
   <link name='top_and_bottom'>
-  <pose> 0 0 0 0 0 0</pose>
 
   <visual name='bottom'>
     <pose> 0 0 -0.3995 0 0 0</pose>
@@ -169,7 +168,6 @@
   </visual>
 
   <visual name='slab'>
-    <pose> 0 0 0 0 0 0</pose>
     <geometry>
       <box>
        <size>0.016 0.279 0.815</size>
@@ -192,7 +190,6 @@
   </collision>
 
   <collision name='slab'>
-    <pose> 0 0 0 0 0 0</pose>
     <geometry>
       <box>
        <size>0.016 0.279 0.815</size>
@@ -243,7 +240,6 @@
   </visual>
 
   <visual name='slab'>
-    <pose> 0 0 0 0 0 0</pose>
     <geometry>
       <box>
        <size>0.016 0.279 0.815</size>
@@ -266,7 +262,6 @@
   </collision>
 
   <collision name='slab'>
-    <pose> 0 0 0 0 0 0</pose>
     <geometry>
       <box>
        <size>0.016 0.279 0.815</size>

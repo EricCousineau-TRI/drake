@@ -1,5 +1,4 @@
-<?xml version="1.0" ?>
-
+<?xml version='1.0'?>
 <!--
 Defines an SDF model with various types of joint limits used for testing the
 joint actuator parser. The only focus is the <effort> tag. Other values,
@@ -8,7 +7,7 @@ This is an accompanying file to detail_sdf_parser_test.cc and therefore they
 must be kept in sync with each other.
 -->
 
-<sdf version='1.6'>
+<sdf version='1.7'>
   <model name='joint_actuator_parsing_test'>
     <link name='link1'>
       <inertial>
