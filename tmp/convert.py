@@ -79,6 +79,10 @@ reps = [
         from_=r" *<pose/>\n",
         to_="",
     ),
+    Replace(
+        from_=r" +\n",
+        to_="\n",
+    )
 ]
 
 
