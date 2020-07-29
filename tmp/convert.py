@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 import os
-from os.path import dirname, abspath
-from subprocess import run, PIPE
+from os.path import basename, dirname, abspath
+from subprocess import run, PIPE, STDOUT
 
 def ign_sdf(cmd, sdf_file, **kwargs):
-    ign_sdf = "bazel-bin/tools/workspace/sdformat/ign_sdf"
+    ign_sdf = abspath("bazel-bin/tools/workspace/sdformat/ign_sdf")
     return run(
         [ign_sdf, f"--{cmd}", sdf_file],
         stdout=PIPE,
         encoding="utf8",
+        **kwargs
     )
 
 # First, check all models.
@@ -26,7 +27,18 @@ def main():
     for file in list(files):
         if file.startswith("./attic/"):
             files.remove(file)
-    print(files)
+    
+    for file in files:
+        result = ign_sdf(
+            "check",
+            basename(file),
+            cwd=dirname(file),
+            stderr=STDOUT,
+        )
+        print(file)
+        print(result.returncode)
+        print(result.stdout)
+        print("---")
 
 
 assert __name__ == "__main__"
