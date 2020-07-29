@@ -114,11 +114,10 @@ def main():
     for file in files:
         print(file)
         # check(file)
-        # convert(file)
+        convert(file)
         perl_pie(file)
         print("---")
 
 
 assert __name__ == "__main__"
 main()
-
