@@ -64,8 +64,8 @@ reps = [
         to_="",
     ),
     Replace(
-        from_=r"'(.*?)'",
-        to_=r""" "\1" """.strip(),
+        from_=r""" "(.*?)" """.strip(),
+        to_=r""" '\1' """.strip(),
     ),
     Replace(
         from_=" -0 ",
