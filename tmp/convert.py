@@ -102,6 +102,7 @@ def gut_check(file):
     version, = re.findall(r""" <sdf .*?version=['"](.*?)['"] """.strip(), text)
     if version == "1.7":
         assert "use_parent_model_frame" not in text
+        assert "frame=" not in text
 
 
 # First, check all models.
