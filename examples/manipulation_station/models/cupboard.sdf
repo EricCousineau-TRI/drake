@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
-<sdf version="1.6">
+<sdf version="1.7">
   <model name="cupboard">
     <link name="cupboard_body">
-      <pose> 0 0 0 0 0 0</pose>
       <visual name="right_wall">
-        <pose> 0 0.292 0 0 0 0</pose>
+        <pose>0 0.292 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.016 0.783</size>
@@ -12,7 +11,7 @@
         </geometry>
       </visual>
       <visual name="left_wall">
-        <pose> 0 -0.292 0 0 0 0</pose>
+        <pose>0 -0.292 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.016 0.783</size>
@@ -20,7 +19,7 @@
         </geometry>
       </visual>
       <collision name="right_wall">
-        <pose> 0 0.292 0 0 0 0</pose>
+        <pose>0 0.292 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.016 0.783</size>
@@ -28,7 +27,7 @@
         </geometry>
       </collision>
       <collision name="left_wall">
-        <pose> 0 -0.292 0 0 0 0</pose>
+        <pose>0 -0.292 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.016 0.783</size>
@@ -37,9 +36,8 @@
       </collision>
     </link>
     <link name="top_and_bottom">
-      <pose> 0 0 0 0 0 0</pose>
       <visual name="bottom">
-        <pose> 0 0 -0.3995 0 0 0</pose>
+        <pose>0 0 -0.3995 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -47,7 +45,7 @@
         </geometry>
       </visual>
       <visual name="top">
-        <pose> 0 0 0.3995 0 0 0</pose>
+        <pose>0 0 0.3995 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -55,7 +53,7 @@
         </geometry>
       </visual>
       <visual name="shelf_lower">
-        <pose> 0 0 -0.13115 0 0 0</pose>
+        <pose>0 0 -0.13115 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -63,7 +61,7 @@
         </geometry>
       </visual>
       <visual name="shelf_upper">
-        <pose> 0 0 0.13115 0 0 0</pose>
+        <pose>0 0 0.13115 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -71,7 +69,7 @@
         </geometry>
       </visual>
       <collision name="bottom">
-        <pose> 0 0 -0.3995 0 0 0</pose>
+        <pose>0 0 -0.3995 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -79,7 +77,7 @@
         </geometry>
       </collision>
       <collision name="top">
-        <pose> 0 0 0.3995 0 0 0</pose>
+        <pose>0 0 0.3995 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -87,7 +85,7 @@
         </geometry>
       </collision>
       <collision name="shelf_lower">
-        <pose> 0 0 -0.13115 0 0 0</pose>
+        <pose>0 0 -0.13115 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -95,7 +93,7 @@
         </geometry>
       </collision>
       <collision name="shelf_upper">
-        <pose> 0 0 0.13115 0 0 0</pose>
+        <pose>0 0 0.13115 0 0 0</pose>
         <geometry>
           <box>
             <size>0.3 0.6 0.016</size>
@@ -107,7 +105,6 @@
     <joint name="top_and_bottom_cupboard_body" type="fixed">
       <child>top_and_bottom</child>
       <parent>cupboard_body</parent>
-      <pose>0 0 0 0 0 0 </pose>
     </joint>
     <!-- joint between cupboard_body and left_door -->
     <joint name="left_door_hinge" type="revolute">
@@ -147,7 +144,6 @@
         </geometry>
       </visual>
       <visual name="slab">
-        <pose> 0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.016 0.279 0.815</size>
@@ -167,7 +163,6 @@
         </geometry>
       </collision>
       <collision name="slab">
-        <pose> 0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.016 0.279 0.815</size>
@@ -213,7 +208,6 @@
         </geometry>
       </visual>
       <visual name="slab">
-        <pose> 0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.016 0.279 0.815</size>
@@ -233,7 +227,6 @@
         </geometry>
       </collision>
       <collision name="slab">
-        <pose> 0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.016 0.279 0.815</size>
