@@ -52,7 +52,7 @@ class Replace:
 
 reps = [
     Replace(
-        from_=r"""" <sdf (.*?)version=('.*?'|".*?") """.strip(),
+        from_=r""" <sdf (.*?)version=('.*?'|".*?") """.strip(),
         to_=r""" <sdf \1version="1.7" """.strip(),
     ),
     Replace(
@@ -64,8 +64,8 @@ reps = [
         to_="",
     ),
     Replace(
-        from_="'",
-        to_="\"",
+        from_=r"'(.*?)'",
+        to_=r""" "\1" """.strip(),
     ),
     Replace(
         from_=" -0 ",
