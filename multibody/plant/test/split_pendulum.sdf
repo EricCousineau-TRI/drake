@@ -1,3 +1,4 @@
+<?xml version='1.0'?>
 <sdf version='1.6'>
   <model name='SplitPendulum'>
     <!-- This is the companion SDF file for the unit test SplitPendulum in

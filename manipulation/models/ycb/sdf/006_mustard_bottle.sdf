@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version='1.0'?>
 <sdf version='1.6'>
-<model name="006_mustard_bottle">
+<model name='006_mustard_bottle'>
   <!--
     Axes:
       +X - Left, when facing front (smaller dimension)
@@ -16,7 +16,7 @@
     box from the base of the bottle to the bottom of the cap, which matches the
     collision shape.
   -->
-  <link name="base_link_mustard">
+  <link name='base_link_mustard'>
     <inertial>
       <mass>0.603000</mass>
       <inertia>
@@ -29,7 +29,7 @@
       </inertia>
     </inertial>
     <visual name='base_link_mustard'>
-      <pose frame=''>0.0049 0.092 0.027 1.57 -0.40 0.0</pose>
+      <pose>0.0049 0.092 0.027 1.57 -0.40 0.0</pose>
       <geometry>
         <mesh>
           <uri>../meshes/006_mustard_bottle_textured.obj</uri>

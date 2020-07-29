@@ -1,3 +1,4 @@
+<?xml version='1.0'?>
 <sdf version='1.7'>
   <model name='four_bar'>
     <!--
@@ -75,7 +76,6 @@
     <link name='A'>
       <!-- The frame A measured in the world frame, X_WA is the identity. This 
       link is also called 'Crank' in the diagram in README.md -->
-      <pose>0 0 0 0 0 0</pose>
       <inertial>
         <!-- Acm (A's center of mass) is located at the midpoint of the 4 meter long link. -->
         <pose>2 0 0 0 0 0</pose>
@@ -122,7 +122,7 @@
       <!-- The frame B measured in A, X_AB, is a translation along the Ax
       axis, and a small translation along the Ay (revolute) axis for visual
       purposes. This link is also called 'Coupler' in the diagram in README.md -->
-      <pose relative_to="A">4 0.1 0 0 0 0</pose>
+      <pose relative_to='A'>4 0.1 0 0 0 0</pose>
       <inertial>
         <!-- Bcm (B's center of mass) is located at the midpoint of the 4 meter long link. -->
         <pose>2 0 0 0 0 0</pose>
@@ -164,7 +164,7 @@
       <!-- A visual representing the 'Coupler-Point' P -->
       <visual name='CouplerPoint'>
         <!-- Translation down Bx by 2 and down Bz by -2 -->
-        <pose relative_to="B">2 0 -2 0 0 0</pose>
+        <pose relative_to='B'>2 0 -2 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.1</radius>
@@ -293,9 +293,9 @@
       done so the LinearBushingRollPitchYaw ForceElement freely rotates around
       its z axis (Yaw) to avoid gimbal lock on the y axis (Pitch).
     -->
-    <frame name="Bc_bushing" attached_to="B">
+    <frame name='Bc_bushing' attached_to='B'>
       <!-- This frame is rotated relative from link B, around Bx, by -90° = -π/2 radians ≈ -1.57079632679 -->
-      <pose relative_to="B">4 0 0 -1.57079632679 0 0</pose>
+      <pose relative_to='B'>4 0 0 -1.57079632679 0 0</pose>
     </frame>
 
     <!-- 
@@ -304,9 +304,9 @@
       done so the LinearBushingRollPitchYaw ForceElement freely rotates around
       its z axis (Yaw) to avoid gimbal lock on the y axis (Pitch).
     -->
-    <frame name="Cb_bushing" attached_to="C">
+    <frame name='Cb_bushing' attached_to='C'>
       <!-- This frame is rotated relative from link C, around Cx, by -90° = -π/2 radians ≈ -1.57079632679 -->
-      <pose relative_to="C">4 0 0 -1.57079632679 0 0</pose>
+      <pose relative_to='C'>4 0 0 -1.57079632679 0 0</pose>
     </frame>
 
   </model>

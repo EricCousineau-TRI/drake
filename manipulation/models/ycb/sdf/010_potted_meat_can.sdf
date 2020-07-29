@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version='1.0'?>
 <sdf version='1.6'>
-<model name="010_potted_meat_can">
+<model name='010_potted_meat_can'>
   <!--
     Axes:
       +X - Left, when facing front (larger dimension)
@@ -15,7 +15,7 @@
     with the YCB dataset. The pottted meat can is treated as a constant density
     box, which matches the collision shape.
   -->
-  <link name="base_link_meat">
+  <link name='base_link_meat'>
     <inertial>
       <mass>0.370000</mass>
       <inertia>
@@ -29,7 +29,7 @@
     </inertial>
 
     <visual name='base_link_meat'>
-      <pose frame=''>0.034 0.039 0.025 1.57 0.052 0.0</pose>
+      <pose>0.034 0.039 0.025 1.57 0.052 0.0</pose>
       <geometry>
         <mesh>
           <uri>../meshes/010_potted_meat_can_textured.obj</uri>
@@ -49,7 +49,6 @@
       case a deviation of 0.0005 m from the visual surface).
      -->
     <collision name='box_collision'>
-      <pose>0 0 0 0 0 0</pose>
       <geometry>
         <box> 
           <size>0.095600 0.077500 0.051600</size>

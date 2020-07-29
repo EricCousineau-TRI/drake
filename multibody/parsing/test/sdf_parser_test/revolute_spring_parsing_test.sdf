@@ -1,5 +1,4 @@
-<?xml version="1.0" ?>
-
+<?xml version='1.0'?>
 <!--
 Defines an SDF model with revolute joints for testing the revolute spring
 parser. The only focus is that the parser reads in the values from the

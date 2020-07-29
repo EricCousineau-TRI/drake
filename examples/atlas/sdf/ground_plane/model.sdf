@@ -1,8 +1,8 @@
+<?xml version='1.0'?>
 <sdf version='1.7'>
-<?xml version="1.0" ?>
-  <model name="ground_plane">
-    <link name="link">
-      <collision name="collision">
+  <model name='ground_plane'>
+    <link name='link'>
+      <collision name='collision'>
     <static>1</static>
         <geometry>
           <plane>
@@ -19,7 +19,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name="visual">
+      <visual name='visual'>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>

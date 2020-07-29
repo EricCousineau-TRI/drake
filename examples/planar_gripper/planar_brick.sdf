@@ -1,11 +1,11 @@
-<?xml version="1.0"?>
+<?xml version='1.0'?>
 <sdf version='1.6'>
-<model name="brick">
-  <link name="brick_base">
+<model name='brick'>
+  <link name='brick_base'>
   </link>
-  <link name="brick_dummy_link1">
+  <link name='brick_dummy_link1'>
     <inertial>
-      <pose frame=''>0 0 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0 </pose>
       <mass>1e-10</mass>
       <inertia>
         <ixx>1e-10</ixx>
@@ -17,7 +17,7 @@
       </inertia>
     </inertial>
   </link>
-  <joint name="brick_translate_y_joint" type="prismatic">
+  <joint name='brick_translate_y_joint' type='prismatic'>
     <child> brick_dummy_link1 </child>
     <parent> brick_base </parent>
     <axis>
@@ -28,9 +28,9 @@
       </limit>
     </axis>
   </joint>
-  <link name="brick_dummy_link2">
+  <link name='brick_dummy_link2'>
     <inertial>
-      <pose frame=''>0 0 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0 </pose>
       <mass>1e-10</mass>
       <inertia>
         <ixx>1e-10</ixx>
@@ -42,7 +42,7 @@
       </inertia>
     </inertial>
   </link>
-  <joint name="brick_translate_z_joint" type="prismatic">
+  <joint name='brick_translate_z_joint' type='prismatic'>
     <child> brick_dummy_link2 </child>
     <parent> brick_dummy_link1 </parent>
     <axis>
@@ -53,9 +53,9 @@
       </limit>
     </axis>
   </joint>
-  <link name="brick_link">
+  <link name='brick_link'>
     <inertial>
-      <pose frame=''>0 0 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0 </pose>
       <mass>0.028</mass>
         <inertia>
           <ixx>1.17e-5</ixx>
@@ -67,7 +67,7 @@
         </inertia>
     </inertial>
     <visual name='brick_visual_1'>
-      <pose frame=''>0 0 0.025 0 0 0</pose>
+      <pose>0 0 0.025 0 0 0</pose>
       <geometry>
         <box>
           <size>0.07 0.1 0.05</size>
@@ -78,7 +78,7 @@
       </material>
     </visual>
     <visual name='brick_visual_2'>
-      <pose frame=''>0 0 -0.025 0 0 0</pose>
+      <pose>0 0 -0.025 0 0 0</pose>
       <geometry>
         <box>
           <size>0.07 0.1 0.05</size>
@@ -89,7 +89,6 @@
       </material>
     </visual>
     <collision name='box_collision'>
-      <pose>0 0 0 0 0 0</pose>
       <geometry>
         <box>
           <size>0.07 0.1 0.1</size>
@@ -129,7 +128,7 @@
       </geometry>
     </collision>
    </link>
-   <joint name="brick_revolute_x_joint" type="revolute">
+   <joint name='brick_revolute_x_joint' type='revolute'>
      <child> brick_link </child>
      <parent> brick_dummy_link2 </parent>
      <axis>

@@ -1,5 +1,4 @@
-<?xml version="1.0" ?>
-
+<?xml version='1.0'?>
 <!--
 Defines an SDF model with various types of joint limits used for testing the
 joint actuator parser. The only focus is the <effort> tag. Other values,
