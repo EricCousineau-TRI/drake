@@ -1,4 +1,4 @@
-<sdf version="1.7">
+<sdf version='1.6'>
   <model name='cupboard'>
 
   <link name='cupboard_body'>

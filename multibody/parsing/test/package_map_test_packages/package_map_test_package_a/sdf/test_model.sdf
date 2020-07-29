@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<sdf version="1.7">
+<sdf version="1.6">
   <model name="test_model">
     <link name="test_link">
-      <pose>0 0 0 0 0 0</pose>
+      <pose frame="">0 0 0 0 0 0</pose>
       <inertial>
-        <pose>0 0 0 0 0 0</pose>
+        <pose frame="">0 0 0 0 0 0</pose>
         <mass>1</mass>
         <inertia>
           <ixx>0</ixx>
