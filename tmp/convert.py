@@ -96,6 +96,14 @@ def perl_pie(file):
         f.write(text.strip() + "\n")
 
 
+def gut_check(file):
+    with open(file, encoding="utf8") as f:
+        text = f.read().strip()
+    version, = re.findall(r""" <sdf .*?version=['"](.*?)['"] """.strip(), text)
+    if version == "1.7":
+        assert "use_parent_model_frame" not in text
+
+
 # First, check all models.
 def main():
     os.chdir(dirname(abspath(__file__)) + "/..")
@@ -113,9 +121,10 @@ def main():
 
     for file in files:
         print(file)
+        gut_check(file)
         # check(file)
-        convert(file)
-        perl_pie(file)
+        # convert(file)
+        # perl_pie(file)
         print("---")
 
 
