@@ -51,10 +51,10 @@ class Replace:
 
 
 reps = [
-    Replace(
-        from_=r""" <sdf (.*?)version=('.*?'|".*?") """.strip(),
-        to_=r""" <sdf \1version="1.7" """.strip(),
-    ),
+    # Replace(
+    #     from_=r""" <sdf (.*?)version=('.*?'|".*?") """.strip(),
+    #     to_=r""" <sdf \1version="1.7" """.strip(),
+    # ),
     Replace(
         from_=r"pose frame=(''|\"\")",
         to_="pose",
@@ -79,10 +79,10 @@ reps = [
         from_=r" *<pose/>\n",
         to_="",
     ),
-    Replace(
-        from_=r" +\n",
-        to_="\n",
-    )
+    # Replace(
+    #     from_=r" +\n",
+    #     to_="\n",
+    # )
 ]
 
 
@@ -92,7 +92,7 @@ def perl_pie(file):
     for rep in reps:
         text = rep(text)
     with open(file, "w", encoding="utf8") as f:
-        f.write('<?xml version="1.0"?>\n')
+        f.write('<?xml version=\'1.0\'?>\n')
         f.write(text.strip() + "\n")
 
 
