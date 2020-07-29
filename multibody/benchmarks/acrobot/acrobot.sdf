@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<sdf version='1.6'>
+<sdf version='1.7'>
   <model name='acrobot'>
     <!-- This sdf file produces a model with the default parameters documented
          in AcrobotParameters in make_acrobot_plant.h.

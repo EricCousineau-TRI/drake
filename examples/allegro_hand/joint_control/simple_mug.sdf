@@ -34,11 +34,11 @@
       </collision>
       <collision name='mug_handle_collision'>
         <pose>0.055 0 0.05 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>0.03 0.02 0.08</size>
-            </box>
-          </geometry>
+        <geometry>
+          <box>
+            <size>0.03 0.02 0.08</size>
+          </box>
+        </geometry>
       </collision>
 
       <visual name='main_body_visual'>

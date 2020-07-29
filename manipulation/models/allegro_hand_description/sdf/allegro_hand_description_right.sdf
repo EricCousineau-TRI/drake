@@ -212,7 +212,7 @@
             <size>0.0196 0.0275 0.0267</size>
           </box>
         </geometry>
-	    </collision>
+      </collision>
       <collision name='link_3_tip_collision_1'>
         <pose>0 0 0.0267 0 0 0</pose>
         <geometry>
@@ -412,7 +412,7 @@
             <size>0.0196 0.0275 0.0423</size>
           </box>
         </geometry>
-	   </collision>
+      </collision>
       <collision name='link_15_tip_collision_1'>
         <pose>0 0 0.0423 0 0 0</pose>
         <geometry>

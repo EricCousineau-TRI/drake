@@ -3,7 +3,6 @@
   <model name='ground_plane'>
     <link name='link'>
       <collision name='collision'>
-    <static>1</static>
         <geometry>
           <plane>
             <normal>0 0 1</normal>
@@ -18,9 +17,10 @@
             </ode>
           </friction>
         </surface>
+        <static>1</static>
       </collision>
       <visual name='visual'>
-        <cast_shadows>false</cast_shadows>
+        <cast_shadows>0</cast_shadows>
         <geometry>
           <plane>
             <normal>0 0 1</normal>

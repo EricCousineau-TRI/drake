@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<sdf version='1.6'>
+<sdf version='1.7'>
   <model name='Schunk_Gripper'>
     <!--To enable faster simulation, the collision geometry in this model
          consists of multiple spheres. These are arranged in a line along each
@@ -99,7 +99,7 @@
       </collision>
     </link>
     <frame name='body_frame'>
-      <pose frame='body'/>
+      <pose relative_to='body'/>
     </frame>
     <link name='left_finger'>
       <pose>-0.008 0.029 0 0 0 0</pose>
