@@ -41,6 +41,10 @@ def convert(file):
         print(result.stderr)
 
 
+def xmllint(file):
+    run(["xmllint", file, "--format", "-o", file], check=True)
+
+
 class Replace:
     def __init__(self, from_, to_):
         self.from_ = re.compile(from_)
@@ -58,10 +62,6 @@ reps = [
     Replace(
         from_=r"pose frame=(''|\"\")",
         to_="pose",
-    ),
-    Replace(
-        from_=r"<\?xml.*?\?>\n",
-        to_="",
     ),
     Replace(
         from_=r""" "(.*?)" """.strip(),
@@ -92,8 +92,7 @@ def perl_pie(file):
     for rep in reps:
         text = rep(text)
     with open(file, "w", encoding="utf8") as f:
-        f.write('<?xml version=\'1.0\'?>\n')
-        f.write(text.strip() + "\n")
+        f.write(text)
 
 
 def gut_check(file):
@@ -125,7 +124,9 @@ def main():
         # gut_check(file)
         # check(file)
         convert(file)
+        xmllint(file)
         perl_pie(file)
+        xmllint(file)
         print("---")
 
 
