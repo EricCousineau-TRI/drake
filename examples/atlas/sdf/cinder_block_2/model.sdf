@@ -1,7 +1,7 @@
-<?xml version='1.0'?>
-<sdf version='1.7'>
-  <model name='cinder_block_2'>
-    <link name='link'>
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <model name="cinder_block_2">
+    <link name="link">
       <inertial>
         <pose>0 0 0.07 0 0 0</pose>
         <!-- volume about 0.0085 m^3, density 2000 kg/m^3 -->
@@ -16,11 +16,11 @@
           <izz>0.073708</izz>
         </inertia>
       </inertial>
-      <visual name='visual'>
+      <visual name="visual">
         <geometry>
-	  <box>
-		<size>0.396875 0.19368008 0.146</size>
-	  </box>
+          <box>
+            <size>0.396875 0.19368008 0.146</size>
+          </box>
           <!--
           <mesh>
             <uri>model://cinder_block_2/meshes/cinder_block.dae</uri>
@@ -28,7 +28,8 @@
           -->
         </geometry>
       </visual>
-      <collision name='collision_box'>
+      <collision name="collision_box">
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.396875 0.19368008 0.146</size>
@@ -50,7 +51,7 @@
         </surface>
       </collision>
       <!--
-      <collision name='top'>
+      <collision name="top">
         <pose>0 0 0.130175 0 0 0</pose>
         <geometry>
           <box>
@@ -72,7 +73,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='bottom'>
+      <collision name="bottom">
         <pose>0 0 0.0127 0 0 0</pose>
         <geometry>
           <box>
@@ -94,7 +95,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='left'>
+      <collision name="left">
         <pose>0 -0.1857375 0.0714375 0 0 0</pose>
         <geometry>
           <box>
@@ -116,7 +117,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='right'>
+      <collision name="right">
         <pose>0 0.1857375 0.0714375 0 0 0</pose>
         <geometry>
           <box>
@@ -138,7 +139,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='middle'>
+      <collision name="middle">
         <pose>0 0 0.0714375 0 0 0</pose>
         <geometry>
           <box>

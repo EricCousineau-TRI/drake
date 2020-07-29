@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<sdf version="1.7">
+<sdf version="1.4">
  
   <% 
     # Generate a trapezoidal step shape of cinderblocks
