@@ -122,10 +122,10 @@ def main():
 
     for file in files:
         print(file)
-        gut_check(file)
+        # gut_check(file)
         # check(file)
-        # convert(file)
-        # perl_pie(file)
+        convert(file)
+        perl_pie(file)
         print("---")
 
 
