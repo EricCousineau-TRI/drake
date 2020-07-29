@@ -52,8 +52,8 @@ class Replace:
 
 reps = [
     Replace(
-        from_=r"<sdf (.*?)version=('.*?'|\".*?\")",
-        to_=r"<sdf \1version=\"1.7\""
+        from_=r"""" <sdf (.*?)version=('.*?'|".*?") """.strip(),
+        to_=r""" <sdf \1version="1.7" """.strip(),
     ),
     Replace(
         from_=r"pose frame=(''|\"\")",
@@ -74,7 +74,11 @@ reps = [
     Replace(
         from_=r"<pose(.*?)>\s*0\s+0\s+0\s+0\s+0\s+0</pose>",
         to_=r"<pose\1/>",
-    )
+    ),
+    Replace(
+        from_=r"\s*<pose/>\n",
+        to_="",
+    ),
 ]
 
 
