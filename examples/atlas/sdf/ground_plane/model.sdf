@@ -1,9 +1,9 @@
+<sdf version='1.7'>
 <?xml version="1.0" ?>
-<sdf version="1.5">
   <model name="ground_plane">
-    <static>true</static>
     <link name="link">
       <collision name="collision">
+    <static>1</static>
         <geometry>
           <plane>
             <normal>0 0 1</normal>

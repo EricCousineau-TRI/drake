@@ -296,7 +296,6 @@
       <pose frame=''>0 0 0 0 -0 0</pose>
       <axis>
         <xyz>1 0 0</xyz>
-        <use_parent_model_frame>0</use_parent_model_frame>
         <!-- Drake attaches an actuator to all and only joints with a nonzero
              effort limit. -->
         <limit>
@@ -332,7 +331,6 @@
       <pose frame=''>0 0 0 0 -0 0</pose>
       <axis>
         <xyz>1 0 0</xyz>
-        <use_parent_model_frame>0</use_parent_model_frame>
         <!-- Drake attaches an actuator to all and only joints with a nonzero
              effort limit. -->
         <limit>

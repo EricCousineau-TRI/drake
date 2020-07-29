@@ -1,4 +1,4 @@
-<sdf version='1.6'>
+<sdf version='1.7'>
   <model name='simple_mug'>
     <link name='main_body'>
       <pose frame=''>0 0 0 0 -0 0</pose>

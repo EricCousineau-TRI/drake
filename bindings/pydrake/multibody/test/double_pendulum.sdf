@@ -4,7 +4,7 @@
 <!-- Provided SDF model originally taken from
      https://bitbucket.org/osrf/sdformat/src/deca28cd6cd5/test/integration/model/double_pendulum.sdf
      has undergone modifications -->
-<sdf version='1.6'>
+<sdf version='1.7'>
   <model name='double_pendulum_with_base'>
     <link name='base'>
       <inertial>
@@ -170,7 +170,7 @@
       <parent>upper_link</parent>
       <child>lower_link</child>
       <axis>
-        <xyz>1.0 0 0</xyz>
+        <xyz expressed_in='__model__'>1 0 0</xyz>
         <use_parent_model_frame>true</use_parent_model_frame>
         <limit>
           <effort>0.0</effort>
