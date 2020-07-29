@@ -76,7 +76,7 @@ reps = [
         to_=r"<pose\1/>",
     ),
     Replace(
-        from_=r"\s*<pose/>\n",
+        from_=r" *<pose/>\n",
         to_="",
     ),
 ]
