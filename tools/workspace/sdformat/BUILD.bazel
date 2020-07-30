@@ -12,7 +12,11 @@ exports_files(
 drake_cc_binary(
     name = "ign_sdf",
     srcs = ["ign_sdf_main.cc"],
-    deps = ["@sdformat//:ign_sdf_cmdline"],
+    deps = [
+        "//common:essential",
+        "@gflags",
+        "@sdformat//:ign_sdf_cmdline",
+    ],
 )
 
 drake_py_unittest(

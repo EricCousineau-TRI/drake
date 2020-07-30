@@ -27,7 +27,11 @@ EXAMPLE_INPUT = """\
 </sdf>
 """
 
-EXAMPLE_OUTPUT = """\
+# The following expected output may need to be changed as we upgrade
+# libsdformat. Changes necessary for the test to pass should be blindly
+# accepted.
+
+EXPECTED_OUTPUT = """\
 <sdf version='1.7'>
   <model name='simple_test'>
     <link name='L1'/>
@@ -78,4 +82,4 @@ class TestIgnSdf(unittest.TestCase):
 
     def test_print(self):
         stdout = self.ign_sdf(["--print", self.input_file])
-        self.assertEqual(EXAMPLE_OUTPUT, stdout)
+        self.assertEqual(EXPECTED_OUTPUT, stdout)
