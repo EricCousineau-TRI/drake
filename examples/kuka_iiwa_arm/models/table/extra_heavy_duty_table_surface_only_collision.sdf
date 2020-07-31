@@ -9,10 +9,8 @@
     checks needed.
     -->
     <link name="link">
-      <pose frame="">0 0 0 0 -0 0</pose>
       <inertial>
         <mass>53.5</mass>
-        <pose frame="">0 0 0 0 -0 0</pose>
         <!--
         The spatial inertia values given below were derived based on the
         equation for a cuboid:

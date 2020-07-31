@@ -4,7 +4,7 @@
     <link name="base_link">
       <inertial>
         <!-- The COM offset from the defined origin (m) -->
-        <pose frame="">7.9737e-03 6.8264e-03 5.1174e-03 0 0 0</pose>
+        <pose>7.9737e-03 6.8264e-03 5.1174e-03 0 0 0</pose>
         <mass>52.78e-3</mass>
         <inertia>
           <ixx>5.20e-06</ixx>
@@ -120,7 +120,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_1">
-        <pose frame="">-0.070 0.007 0.005 0 0 0</pose>
+        <pose>-0.070 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -128,7 +128,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_2">
-        <pose frame="">-0.060 0.007 0.005 0 0 0</pose>
+        <pose>-0.060 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -136,7 +136,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_3">
-        <pose frame="">-0.050 0.007 0.005 0 0 0</pose>
+        <pose>-0.050 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -144,7 +144,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_4">
-        <pose frame="">-0.040 0.007 0.005 0 0 0</pose>
+        <pose>-0.040 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -152,7 +152,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_5">
-        <pose frame="">-0.030 0.007 0.005 0 0 0</pose>
+        <pose>-0.030 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -160,7 +160,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_6">
-        <pose frame="">-0.020 0.007 0.005 0 0 0</pose>
+        <pose>-0.020 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -168,7 +168,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_7">
-        <pose frame="">-0.010 0.007 0.005 0 0 0</pose>
+        <pose>-0.010 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -176,7 +176,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_8">
-        <pose frame="">-0 0.007 0.005 0 0 0</pose>
+        <pose>-0 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -184,7 +184,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_9">
-        <pose frame="">0.010 0.007 0.005 0 0 0</pose>
+        <pose>0.010 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
@@ -192,7 +192,7 @@
         </geometry>
       </collision>
       <collision name="handle_sphere_col_10">
-        <pose frame="">0.020 0.007 0.005 0 0 0</pose>
+        <pose>0.020 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
