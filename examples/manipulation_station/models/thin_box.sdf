@@ -1,5 +1,5 @@
-<?xml version="1.0"?>
-<sdf version="1.7">
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.6">
   <model name="thin_box">
     <link name="base_link">
       <inertial>
@@ -75,6 +75,7 @@
         <pose>-0.0885 0.012 0.00225 0 0 0</pose>
         <geometry>
           <sphere>
+            <radius>2e-3</radius>
           </sphere>
         </geometry>
       </collision>
@@ -112,7 +113,7 @@
       </collision>
       <!-- Add collision spheres along the handle-->
       <collision name="handle_sphere_col_0">
-        <pose>-0.08 0.007 0.005 0 0 0</pose>
+        <pose>-0.080 0.007 0.005 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>2e-3</radius>
