@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.7">
+<sdf version="1.6">
   <model name="iiwa7">
     <link name="iiwa_link_0">
       <inertial>
@@ -135,7 +135,7 @@
       <child>iiwa_link_2</child>
       <parent>iiwa_link_1</parent>
       <axis>
-        <xyz expressed_in="__model__">-0 1 0</xyz>
+        <xyz>-0 1 0</xyz>
         <limit>
           <lower>-2.0944</lower>
           <upper>2.0944</upper>
@@ -143,11 +143,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <link name="iiwa_link_3">
@@ -191,7 +192,7 @@
       <child>iiwa_link_3</child>
       <parent>iiwa_link_2</parent>
       <axis>
-        <xyz expressed_in="__model__">0 0 1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-2.96706</lower>
           <upper>2.96706</upper>
@@ -199,11 +200,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <link name="iiwa_link_4">
@@ -247,7 +249,7 @@
       <child>iiwa_link_4</child>
       <parent>iiwa_link_3</parent>
       <axis>
-        <xyz expressed_in="__model__">0 -1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-2.0944</lower>
           <upper>2.0944</upper>
@@ -255,11 +257,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <link name="iiwa_link_5">
@@ -303,7 +306,7 @@
       <child>iiwa_link_5</child>
       <parent>iiwa_link_4</parent>
       <axis>
-        <xyz expressed_in="__model__">0 0 1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-2.96706</lower>
           <upper>2.96706</upper>
@@ -311,11 +314,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <link name="iiwa_link_6">
@@ -359,7 +363,7 @@
       <child>iiwa_link_6</child>
       <parent>iiwa_link_5</parent>
       <axis>
-        <xyz expressed_in="__model__">-0 1 -0</xyz>
+        <xyz>-0 1 -0</xyz>
         <limit>
           <lower>-2.0944</lower>
           <upper>2.0944</upper>
@@ -367,11 +371,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <link name="iiwa_link_7">
@@ -415,7 +420,7 @@
       <child>iiwa_link_7</child>
       <parent>iiwa_link_6</parent>
       <axis>
-        <xyz expressed_in="__model__">0 0 1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-3.05433</lower>
           <upper>3.05433</upper>
@@ -423,11 +428,12 @@
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.0</damping>
           <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
     <static>0</static>
