@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# This should be run via `cat ./tmp/run_benchmark.sh | bash`.
-# See: https://stackoverflow.com/a/63234198/7829525
+# See README.
 
 set -eux -o pipefail
 
