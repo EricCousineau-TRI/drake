@@ -159,9 +159,7 @@
       <axis>
         <xyz expressed_in="__model__">1 0 0</xyz>
         <limit>
-          <effort>0</effort>
-          <lower>-1e+16</lower>
-          <upper>1e+16</upper>
+          <effort>0.0</effort>
         </limit>
       </axis>
     </joint>
@@ -171,9 +169,7 @@
       <axis>
         <xyz expressed_in="__model__">1 0 0</xyz>
         <limit>
-          <effort>0</effort>
-          <lower>-1e+16</lower>
-          <upper>1e+16</upper>
+          <effort>0.0</effort>
         </limit>
       </axis>
     </joint>
