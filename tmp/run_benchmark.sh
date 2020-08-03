@@ -11,6 +11,9 @@ if [[ -n $(git status --porcelain) ]]; then
 fi
 
 cur=$(git rev-parse --abbrev-ref HEAD)
+if [[ ${cur} == HEAD ]]; then
+    cur=$(git rev-parse HEAD)
+fi
 git fetch --force upstream \
     master \
     refs/reviewable/pr13752/r1:tmp1 \
