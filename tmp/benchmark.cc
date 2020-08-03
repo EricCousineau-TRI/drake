@@ -12,7 +12,7 @@ int main() {
   auto x = math::initializeAutoDiff(Eigen::VectorXd::Random(20));
   AutoDiffVecXd y;
   auto start = std::chrono::steady_clock::now();
-  for (int i = 0; i < 100000; ++i) {
+  for (int i = 0; i < 1000000; ++i) {
     cost.Eval(x, &y);
   }
   auto end = std::chrono::steady_clock::now();

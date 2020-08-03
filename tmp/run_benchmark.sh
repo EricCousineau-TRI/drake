@@ -5,7 +5,13 @@
 
 set -eux -o pipefail
 
-cur=$(git rev-parse --short HEAD)
+# Fail if dirty.
+if [[ -n $(git status --porcelain) ]]; then
+    echo "Dirty!"
+    exit 1
+fi
+
+cur=$(git rev-parse --abbrev-ref HEAD)
 git fetch --force upstream \
     master \
     refs/reviewable/pr13752/r1:tmp1 \
@@ -19,3 +25,5 @@ for ref in ${refs_to_check}; do
     git checkout ${cur} -- tmp
     bazel run //tmp:benchmark
 done
+
+git checkout -f ${cur}
