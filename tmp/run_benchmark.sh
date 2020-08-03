@@ -18,7 +18,7 @@ git fetch --force upstream \
     master \
     refs/reviewable/pr13752/r1:tmp1 \
     refs/reviewable/pr13752/r2:tmp2
-master=$(git merge-base upstream/master tmp1)
+master=$(git merge-base upstream/master tmp2)
 
 refs_to_check="${master} tmp1 tmp2"
 
