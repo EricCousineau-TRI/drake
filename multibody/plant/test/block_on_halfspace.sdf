@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
+<sdf version="1.7">
   <!-- Note: This is the accompaning SDF file for the unit test
        hydrostatic_traction_test.cc and therefore these two files must be kept
        in sync.
 
        This file defines the model for a box on a flat plane.
   -->
-<sdf version="1.7">
   <model name="block_on_halfspace">
     <link name="ground">
       <pose>0 0 -1 0 0 0</pose>
