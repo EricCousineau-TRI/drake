@@ -1,0 +1,13 @@
+load(
+    "//tools/skylark:drake_cc.bzl",
+    "drake_cc_binary",
+)
+
+drake_cc_binary(
+    name = "repro_min_cc",
+    srcs = ["repro_min.cc"],
+    deps = [
+        "//geometry/render:render_engine_vtk",
+        "@gflags",
+    ],
+)
