@@ -31,13 +31,11 @@ int main(int argc, char* argv[]) {
 
   std::unique_ptr<RenderEngine> renderer;
   if (FLAGS_use_primer) {
+    drake::log()->info("Priming...");
     renderer = MakeRenderEngineVtk(RenderEngineVtkParams());
-    // CameraProperties camera_prop(
-    //     640, 480, M_PI / 4, "doesn't matter");
-    // ImageRgba8U image(camera_prop.width, camera_prop.height);
-    // drake::log()->info("Priming...");
-    // renderer->RenderColorImage(camera_prop, false, &image);
-    // unused(renderer);
+    CameraProperties camera_prop(4, 3, M_PI / 4, "");
+    ImageRgba8U image(camera_prop.width, camera_prop.height);
+    renderer->RenderColorImage(camera_prop, false, &image);
   }
 
   for (int i = 0; i < FLAGS_count; ++i) {
