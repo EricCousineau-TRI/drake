@@ -46,6 +46,7 @@ LinearBushingRollPitchYaw<T>::LinearBushingRollPitchYaw(
   DRAKE_THROW_UNLESS(torque_damping_constants.minCoeff() >= 0);
   DRAKE_THROW_UNLESS(force_stiffness_constants.minCoeff() >= 0);
   DRAKE_THROW_UNLESS(force_damping_constants.minCoeff() >= 0);
+  drake::log()->info("My internal tree: {}", reinterpret_cast<uint64_t>(&this->get_parent_tree()));
 }
 
 template <typename T>
