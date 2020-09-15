@@ -458,6 +458,44 @@ class TestPlant(unittest.TestCase):
         CoulombFriction = CoulombFriction_[T]
         CoulombFriction(static_friction=0.7, dynamic_friction=0.6)
 
+    def test_dig_in(self):
+        T = float
+        MultibodyPlant = MultibodyPlant_[T]
+        LinearBushingRollPitchYaw = LinearBushingRollPitchYaw_[T]
+        SpatialInertia = SpatialInertia_[float]
+        UnitInertia = UnitInertia_[float]
+        SpatialForce = SpatialForce_[T]
+
+        plant = MultibodyPlant(0.0)
+        spatial_inertia = SpatialInertia(
+            mass=1,
+            p_PScm_E=[0, 0, 0],
+            G_SP_E=UnitInertia(1, 1, 1),
+        )
+        body_a = plant.AddRigidBody(name="body_a",
+                                    M_BBo_B=spatial_inertia)
+        body_b = plant.AddRigidBody(name="body_b",
+                                    M_BBo_B=spatial_inertia)
+        bushing = LinearBushingRollPitchYaw(
+            frameA=body_a.body_frame(),
+            frameC=body_b.body_frame(),
+            torque_stiffness_constants=[1, 1, 1],
+            torque_damping_constants=[1, 1, 1],
+            force_stiffness_constants=[1, 1, 1],
+            force_damping_constants=[1, 1, 1],
+        )
+        plant.Finalize()
+        context = plant.CreateDefaultContext()
+
+        # Test LinearBushingRollPitchYaw accessors.
+        self.assertIs(bushing.link0(), body_a)
+        self.assertIsInstance(
+            bushing.CalcBushingSpatialForceOnFrameA(context=context),
+            SpatialForce)
+        self.assertIsInstance(
+            bushing.CalcBushingSpatialForceOnFrameC(context=context),
+            SpatialForce)
+
     @numpy_compare.check_all_types
     def test_multibody_force_element(self, T):
         MultibodyPlant = MultibodyPlant_[T]

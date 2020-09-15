@@ -161,6 +161,7 @@ drake_cc_library(
     # Hide this library outside of this package; users should depend on
     # "//multibody/tree" broadly, not just ":multibody_tree_core".
     visibility = ["//visibility:private"],
+    copts = ["-g"],
     deps = [
         ":multibody_element",
         ":multibody_tree_caches",
