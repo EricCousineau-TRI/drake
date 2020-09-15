@@ -341,6 +341,13 @@ drake_py_unittest(
     ],
 )
 
+drake_py_unittest(
+    name = "all_each_import_test",
+    timeout = "moderate",
+    tags = ["cpu:4"],
+    deps = [":all_py"],
+)
+
 drake_py_library(
     name = "algebra_test_util_py",
     testonly = 1,
