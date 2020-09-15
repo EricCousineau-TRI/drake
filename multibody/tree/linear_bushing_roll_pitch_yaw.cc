@@ -52,6 +52,7 @@ LinearBushingRollPitchYaw<T>::LinearBushingRollPitchYaw(
 template <typename T>
 SpatialForce<T> LinearBushingRollPitchYaw<T>::CalcBushingSpatialForceOnFrameA(
     const systems::Context<T>& context) const {
+  drake::log()->info("My internal tree: {}", reinterpret_cast<uint64_t>(&this->get_parent_tree()));
   // Reminder: The set of all forces applied by the bushing to frame A are
   // replaced by the set's resultant force −𝐟 applied to point Ap of frame A
   // together with a torque −𝐭 equal to the moment of the set about point Ap.
