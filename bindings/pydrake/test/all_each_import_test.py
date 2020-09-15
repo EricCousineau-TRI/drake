@@ -25,3 +25,7 @@ class Test(unittest.TestCase):
 
         with mp.Pool(4) as pool:
             pool.map(check_module, names)
+
+
+if __name__ == "__main__":
+    unittest.main()

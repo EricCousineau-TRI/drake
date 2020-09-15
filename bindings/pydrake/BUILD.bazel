@@ -10,6 +10,7 @@ load(
     "@drake//tools/skylark:drake_py.bzl",
     "drake_py_binary",
     "drake_py_library",
+    "drake_py_test",
     "drake_py_unittest",
 )
 load(
@@ -341,9 +342,12 @@ drake_py_unittest(
     ],
 )
 
-drake_py_unittest(
+# N.B. For our use of `multiprocessing`, we must forgo drake_py_unittest's
+# wrapping as it messes with pickling on Mac.
+drake_py_test(
     name = "all_each_import_test",
     timeout = "moderate",
+    allow_import_unittest = True,
     tags = ["cpu:4"],
     deps = [":all_py"],
 )
