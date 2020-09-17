@@ -7,11 +7,15 @@ This is gui code; to test changes, please manually run
 """
 
 import asyncio
+from contextlib import contextmanager
+import functools
+from packaging import version
 import sys
 from warnings import warn
 
 from IPython import get_ipython
-
+from IPython.display import clear_output, display
+import ipywidgets as widgets
 
 # Note: The implementation below was inspired by
 # https://github.com/Kirill888/jupyter-ui-poll , though I suspect it can be
@@ -72,3 +76,50 @@ def process_ipywidget_events(num_events_to_process=1):
                  "unresponsive, you may need to restart the UI itself.\n"
                  "To avoid this behavior, avoid requesting execution of "
                  "future cells before or during execution of this cell.")
+
+
+def _maybe_show_inline_matplotlib_plots():
+    if version.parse(widgets.__version__) >= version.parse("7.0.0"):
+        widgets.widgets.interaction.show_inline_matplotlib_plots()
+
+
+@contextmanager
+def interactive_update(out):
+    """
+    Provides a context that will clear an Output widget beforehand, focus on it,
+    and then ensure that matplotlib plots are updated appropriately (for
+    ipywidgets>=7.0.0).
+
+    Arguments:
+        out (Output): The Output widget to which output should be directed.
+
+    Note:
+        This is a more generalized form of ``interactive_output``:
+        https://github.com/jupyter-widgets/ipywidgets/blob/7.5.1/ipywidgets/widgets/interaction.py#L65-L85
+    """  # noqa
+    assert isinstance(out, widgets.Output), out
+    with out:
+        clear_output(wait=True)
+        yield
+        _maybe_show_inline_matplotlib_plots()
+
+
+def decorate_interactive_update(out):
+    """
+    Decorates a function to be executed within a `interactive_update` context.
+
+    Arguments:
+        out (Output): The Output widget to which output should be directed.
+    """
+    assert isinstance(out, widgets.Output), out
+
+    def decorator(f):
+
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            with interactive_update(out):
+                return f(*args, **kwargs)
+
+        return wrapped
+
+    return decorator
