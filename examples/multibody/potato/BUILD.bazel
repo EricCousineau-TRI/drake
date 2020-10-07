@@ -1,0 +1,40 @@
+# -*- python -*-
+# This file contains rules for Bazel; see drake/doc/bazel.rst.
+
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@drake//tools/skylark:drake_cc.bzl",
+    "drake_cc_binary",
+)
+load("//tools/lint:lint.bzl", "add_lint_tests")
+
+filegroup(
+    name = "models",
+    srcs = glob([
+        "**/*.sdf",
+        "**/*.obj",
+        "**/*.mtl",
+        "**/*.png",
+    ]),
+)
+
+drake_cc_binary(
+    name = "hydro_potato",
+    srcs = ["hydro_potato.cc"],
+    data = [":models"],
+    deps = [
+        "//common:find_resource",
+        "//geometry:geometry_visualization",
+        "//geometry:scene_graph",
+        "//math:geometric_transform",
+        "//multibody/parsing",
+        "//multibody/plant",
+        "//multibody/plant:contact_results_to_lcm",
+        "//systems/analysis:simulator",
+        "//systems/framework:diagram",
+        "@gflags",
+    ],
+)
+
+add_lint_tests()
