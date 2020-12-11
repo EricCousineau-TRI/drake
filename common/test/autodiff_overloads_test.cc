@@ -16,6 +16,31 @@ namespace drake {
 namespace common {
 namespace {
 
+template <typename A, typename B>
+void TypeEqual() {
+  static_assert(std::is_same_v<A, B>, "Mismatch");
+}
+
+GTEST_TEST(Yuhhhhh, Boiiiiiii) {
+  // See what happens when doing arithmetic between operations
+  // VectorX<double> and VectorX<AutoDiffXd>.
+  VectorXd a(1);
+  a << 2.0;
+  VectorX<AutoDiffXd> b_ad(1);
+  b_ad << 1.0;
+
+  // Ensure that casting takes place well.
+  using Expr = decltype((a * b_ad).eval());
+  TypeEqual<const VectorX<AutoDiffXd>, Expr>();
+
+  EXPECT_TRUE(CompareMatrices(a + b_ad, Vector1d(3.0)));
+  EXPECT_TRUE(CompareMatrices(a - b_ad, Vector1d(1.0)));
+  EXPECT_TRUE(CompareMatrices(a * b_ad, Vector1d(2.0)));
+  EXPECT_TRUE(CompareMatrices(
+    (a.array() / b_ad.array()).matrix(),
+    Vector1d(0.5)));
+}
+
 // Test nominal behavior of `AutoDiff`, checking implicit and explicit casting.
 GTEST_TEST(AutodiffOverloadsTest, Casting) {
   VectorXd dx(3);
