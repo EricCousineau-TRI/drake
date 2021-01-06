@@ -397,7 +397,7 @@ def _parse_rst(state, rst_text):
     node = nodes.section()
     node.document = state.document
     result = ViewList()
-    for line in rst_text.splitlines():
+    for line in rst_text.splitlines(keepends=True):
         result.append(line, '<parsed>')
     nested_parse_with_titles(state, result, node)
     return node

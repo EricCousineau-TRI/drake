@@ -7,16 +7,16 @@ import sys
 
 import pydrake.all
 # TODO(eric.cousineau): Make an optional `.all` module.
-from pydrake.examples import (
-    acrobot,
-    compass_gait,
-    manipulation_station,
-    pendulum,
-    quadrotor,
-    rimless_wheel,
-    van_der_pol,
-)
-from pydrake.examples.multibody import cart_pole_passive_simulation
+# from pydrake.examples import (
+#     acrobot,
+#     compass_gait,
+#     manipulation_station,
+#     pendulum,
+#     quadrotor,
+#     rimless_wheel,
+#     van_der_pol,
+# )
+# from pydrake.examples.multibody import cart_pole_passive_simulation
 # TODO(eric.cousineau): Indicate these as deprecated.
 from pydrake.common import (
     cpp_param,
@@ -32,6 +32,8 @@ def get_submodules(name):
     out = []
     for s_name in sys.modules.keys():
         if s_name in EXCLUDE:
+            continue
+        if s_name not in ("pydrake", "pydrake.multibody", "pydrake.multibody.plant"):
             continue
         if not s_name.startswith(prefix):
             continue
@@ -99,6 +101,7 @@ def write_doc_modules(output_dir, verbose=False):
         raise RuntimeError(
             "Please provide an absolute path: {}".format(output_dir))
     index_file = join(output_dir, "index.rst")
+    print(f"Intermediate: {index_file}")
     write_module(index_file, "pydrake", verbose)
 
 

@@ -61,7 +61,7 @@ def gen_main(input_dir, strict, src_func=None):
         warning_args = ["-W", "-N", "-q"]
     else:
         warning_args = [
-            "-N", "-Q",  # Be very quiet.
+            # "-N", "-Q",  # Be very quiet.
             "-T",  # Traceback (for plugin)
         ]
     os.environ["LANG"] = "en_US.UTF-8"
@@ -110,13 +110,18 @@ def preview_main(gen_script, default_port):
     parser.add_argument(
         "--port", type=int, default=default_port, metavar='PORT',
         help="Port for serving doc pages with a HTTP server.")
+    parser.add_argument(
+        "--debug", action="store_true")
     args = parser.parse_args()
     # Choose an arbitrary location for generating documentation.
     out_dir = abspath("sphinx-tmp")
     if isdir(out_dir):
         rmtree(out_dir)
     # Generate.
-    check_call([sys.executable, gen_script, "--out_dir", out_dir])
+    gen_args = ["--out_dir", out_dir]
+    if args.debug:
+        gen_args += ["--debug"]
+    check_call([sys.executable, gen_script] + gen_args)
     print("Sphinx preview docs are available at:")
     file_url = "file://{}".format(join(out_dir, "index.html"))
     browser_url = file_url

@@ -26,22 +26,22 @@ To see example usages, please see `doc/python_bindings.rst`.
 
 
 # Normal symbols.
-from . import getDrakePath
-from .autodiffutils import *
-from .forwarddiff import *
-from .lcm import *
-from .math import *
-from .perception import *
-from .polynomial import *
-from .symbolic import *
-from .trajectories import *
+# from . import getDrakePath
+# from .autodiffutils import *
+# from .forwarddiff import *
+# from .lcm import *
+# from .math import *
+# from .perception import *
+# from .polynomial import *
+# from .symbolic import *
+# from .trajectories import *
 
 # Submodules.
-from .common.all import *
-from .geometry.all import *
-# - `examples` does not offer public Drake library symbols.
-from .manipulation.all import *
+# from .common.all import *
+# from .geometry.all import *
+# # - `examples` does not offer public Drake library symbols.
+# from .manipulation.all import *
 from .multibody.all import *
-from .solvers.all import *
-from .systems.all import *
-from .visualization.all import *
+# from .solvers.all import *
+# from .systems.all import *
+# from .visualization.all import *
