@@ -362,15 +362,20 @@ struct IgnoredStruct {
 
 }
 
-/// My system.
+/// My simple system.
 ///
 /// @system
-/// name: Alchemist
+/// name: Wooh
 /// input_ports:
-/// - lead
+/// - u
 /// output_ports:
-/// - gold
+/// - y
 /// @endsystem
-class MySystem {};
+/**
+ Intermedaite
+ comment
+*/
+/// Yeah.
+class MySimpleSystem {};
 
 }  // namespace namespace_1

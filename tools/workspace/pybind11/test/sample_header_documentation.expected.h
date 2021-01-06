@@ -1,6 +1,6 @@
 #pragma once
 
-// <GENERIC MARKER SCRUBBED FOR REVIEWABLE>
+// GENERATED FILE DO NOT EDIT
 // This file contains docstrings for the Python bindings that were
 // automatically extracted by mkdoc.py.
 
@@ -293,20 +293,20 @@ egestas egestas fringilla phasellus faucibus.)""";
   } drake;
   // Symbol: namespace_1
   struct /* namespace_1 */ {
-    // Symbol: namespace_1::MySystem
-    struct /* MySystem */ {
-      // Source: drake/tools/workspace/pybind11/test/sample_header.h:374
+    // Symbol: namespace_1::MySimpleSystem
+    struct /* MySimpleSystem */ {
+      // Source: drake/tools/workspace/pybind11/test/sample_header.h:379
       const char* doc =
-R"""(My system.
+R"""(My simple system.
 
 .. pydrake_system::
 
-    name: Alchemist
-    input_ports:
-    - lead
-    output_ports:
-    - gold)""";
-    } MySystem;
+name: Wooh input_ports: - u output_ports: - y
+
+Intermedaite comment
+
+Yeah.)""";
+    } MySimpleSystem;
     // Symbol: namespace_1::namespace_2
     struct /* namespace_2 */ {
       // Symbol: namespace_1::namespace_2::DummyClass

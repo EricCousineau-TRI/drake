@@ -50,7 +50,8 @@ def system_yaml_to_rst_directive(system_yaml):
     """
     Converts a raw yaml description of a system into a corresponding reST directive.
     """
-    return f".. pydrake_system::\n{indent(system_yaml, '    ')}"
+    content = indent(system_yaml.strip(), '    ')
+    return f".. pydrake_system::\n\n{content}"
 
 
 def _strip_cpp_comment_cruft(comment):
