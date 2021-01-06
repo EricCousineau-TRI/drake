@@ -16,11 +16,15 @@ import re
 import warnings
 from typing import Any, Tuple
 
+from docutils.parsers.rst import Directive
+from docutils.statemachine import ViewList
 from sphinx import version_info as sphinx_version
 from sphinx.locale import _
 import sphinx.domains.python as pydoc
 from sphinx.ext import autodoc
+from sphinx.util.nodes import nested_parse_with_titles
 
+from drake.doc.system_doxygen import system_yaml_to_html
 from pydrake.common.cpp_template import TemplateBase
 from pydrake.common.deprecation import DrakeDeprecationWarning
 
@@ -363,6 +367,39 @@ def autodoc_member_order_function(app, documenter):
     return fullname.lower()
 
 
+class PydrakeSystemDirective(Directive):
+    """
+    Translates `pydrake_system` directives to `raw` directives.
+
+    See also:
+    - https://www.sphinx-doc.org/en/1.6.7/extdev/tutorial.html#the-directive-classes
+    - Example: https://github.com/sphinx-contrib/autoprogram/blob/0.1.5/sphinxcontrib/autoprogram.py
+    """
+
+    has_content = True
+
+    def run(self):
+        system_yaml = '\n'.join(self.content)
+        node = _parse_rst(self.state, _system_yaml_to_raw_rst(system_yaml))
+        return node.children
+
+
+def _system_yaml_to_raw_rst(system_yaml):
+    system_html = system_yaml_to_html(system_yaml)
+    return f".. raw:: html\n{indent(system_html, '    ')}"
+
+
+def _parse_rst(state, rst_text):
+    # Adapted from `autoprogram` source.
+    node = nodes.section()
+    node.document = state.document
+    result = ViewList()
+    for line in rst_text.splitlines():
+        result.append(line, '<parsed>')
+    nested_parse_with_titles(state, result, node)
+    return node
+
+
 def setup(app):
     """Installs Drake-specific extensions and patches.
     """
@@ -370,6 +407,8 @@ def setup(app):
         app.add_css_file('css/custom.css')
     else:
         app.add_stylesheet('css/custom.css')
+    # Add directive to process system doxygen.
+    app.add_directive('pydrake_system', PydrakeSystemDirective)
     # Do not warn on Drake deprecations.
     # TODO(eric.cousineau): See if there is a way to intercept this.
     warnings.simplefilter('ignore', DrakeDeprecationWarning)
