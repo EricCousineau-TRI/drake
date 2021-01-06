@@ -375,6 +375,7 @@ class PydrakeSystemDirective(Directive):
 
     See also:
     - https://www.sphinx-doc.org/en/1.6.7/extdev/tutorial.html#the-directive-classes
+    - https://docutils.sourceforge.io/docs/howto/rst-directives.html#error-handling
     - Example: https://github.com/sphinx-contrib/autoprogram/blob/0.1.5/sphinxcontrib/autoprogram.py
     """
 
@@ -382,13 +383,13 @@ class PydrakeSystemDirective(Directive):
 
     def run(self):
         system_yaml = '\n'.join(self.content)
-        node = _parse_rst(self.state, _system_yaml_to_raw_rst(system_yaml))
+        try:
+            system_html = system_yaml_to_html(system_yaml)
+        except TypeError as e:
+            raise self.severe(f"pydrake_system error: {e}")
+        raw_rst = f".. raw:: html\n{indent(system_html, '    ')}"
+        node = _parse_rst(self.state, raw_rst)
         return node.children
-
-
-def _system_yaml_to_raw_rst(system_yaml):
-    system_html = system_yaml_to_html(system_yaml)
-    return f".. raw:: html\n{indent(system_html, '    ')}"
 
 
 def _parse_rst(state, rst_text):
