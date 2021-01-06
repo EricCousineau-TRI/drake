@@ -361,4 +361,16 @@ struct IgnoredStruct {
 };
 
 }
+
+/// My system.
+///
+/// @system
+/// name: Alchemist
+/// input_ports:
+/// - lead
+/// output_ports:
+/// - gold
+/// @endsystem
+class MySystem {};
+
 }  // namespace namespace_1

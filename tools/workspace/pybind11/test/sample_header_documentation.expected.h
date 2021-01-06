@@ -293,6 +293,20 @@ egestas egestas fringilla phasellus faucibus.)""";
   } drake;
   // Symbol: namespace_1
   struct /* namespace_1 */ {
+    // Symbol: namespace_1::MySystem
+    struct /* MySystem */ {
+      // Source: drake/tools/workspace/pybind11/test/sample_header.h:374
+      const char* doc =
+R"""(My system.
+
+.. pydrake_system::
+
+    name: Alchemist
+    input_ports:
+    - lead
+    output_ports:
+    - gold)""";
+    } MySystem;
     // Symbol: namespace_1::namespace_2
     struct /* namespace_2 */ {
       // Symbol: namespace_1::namespace_2::DummyClass
