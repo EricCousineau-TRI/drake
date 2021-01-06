@@ -256,7 +256,12 @@ def process_doxygen_commands(s):
         s = re.sub(r'[@\\]%s(?:\{\.\w+\})?\s?(.*?)\s?[@\\]%s' % (start_, end_),
                    r"```\n\1\n```\n", s, flags=re.DOTALL)
 
+    s_pre = s
     s = process_doxygen_to_sphinx(s)
+    if s_pre != s:
+        print(f"before: {s_pre}")
+        print(f"after: {s}")
+        exit(1)
 
     # TODO (betsymcphail): Not tested
     s = re.sub(r'[@\\](?:end)?htmlonly\s+', r'', s)

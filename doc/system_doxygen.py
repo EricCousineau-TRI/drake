@@ -69,7 +69,6 @@ def _strip_cpp_comment_cruft(comment):
     return comment
 
 
-
 def _process_doxygen(s, transform_func):
     """
     Given a multiline string s (potentially the entire contents of a c++ file), this finds the @system / @endsystem tags and calls system_yaml_to_html() on their contents.
