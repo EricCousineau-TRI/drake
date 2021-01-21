@@ -428,13 +428,18 @@ drake_pybind_library(
     cc_deps = [
         ":deprecation_example_class",
         ":deprecation_example_class_documentation",
-        ":deprecation_pybind",
     ],
     cc_so_name = "test/deprecation_example/cc_module",
     cc_srcs = [
         "test/deprecation_example/cc_module_py.cc",
     ],
     package_info = PACKAGE_INFO,
+    py_deps = [
+        # N.B. This is normally included, but since we have an isolated
+        # example, we must ensure that we have the Python code to support
+        # `pydrake_pybind.h`.
+        "//bindings/pydrake:module_py",
+    ],
     visibility = ["//visibility:private"],
 )
 
@@ -468,7 +473,6 @@ drake_py_unittest(
     name = "deprecation_example_test",
     deps = [
         ":deprecation_example",
-        "//bindings/pydrake/common/test_utilities:deprecation_py",
     ],
 )
 
