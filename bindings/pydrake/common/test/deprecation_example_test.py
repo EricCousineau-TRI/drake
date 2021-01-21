@@ -7,6 +7,9 @@ For more details, please review the following documentation:
 - https://drake.mit.edu/code_review_checklist.html
 - https://drake.mit.edu/doxygen_cxx/group__python__bindings.html#PydrakeDeprecation
 - https://drake.mit.edu/doxygen_cxx/group__python__bindings.html#PydrakeDoc
+
+To see examples of deprecations, see:
+- https://github.com/RobotLocomotion/drake/commit/61d53483f8
 """  # noqa
 
 import unittest
