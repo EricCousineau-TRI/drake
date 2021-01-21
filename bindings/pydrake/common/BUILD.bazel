@@ -428,6 +428,7 @@ drake_pybind_library(
     cc_deps = [
         ":deprecation_example_class",
         ":deprecation_example_class_documentation",
+        ":deprecation_pybind",
     ],
     cc_so_name = "test/deprecation_example/cc_module",
     cc_srcs = [
@@ -473,6 +474,7 @@ drake_py_unittest(
     name = "deprecation_example_test",
     deps = [
         ":deprecation_example",
+        "//bindings/pydrake/common/test_utilities:deprecation_py",
     ],
 )
 

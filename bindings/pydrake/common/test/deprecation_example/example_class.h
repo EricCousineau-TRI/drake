@@ -12,27 +12,36 @@ class ExampleCppClass {
   /// Good constructor.
   ExampleCppClass() {}
 
-  /// ctor(int) will be deprecated.
+  // N.B. This spacer is to ensure that the class's documentation does not pick
+  // up the following deprecation below.
+
+  DRAKE_DEPRECATED("2038-01-19", "Do not use ExampleCppClass(int).")
   explicit ExampleCppClass(int x) { unused(x); }
 
-  /// ctor(double) will be deprecated.
+  DRAKE_DEPRECATED("2038-01-19", "Do not use ExampleCppClass(double).")
   explicit ExampleCppClass(double y) { unused(y); }
 
-  /// This will be full deprecated.
+  DRAKE_DEPRECATED("2038-01-19", "Do not use DeprecatedMethod().")
   void DeprecatedMethod() {}
 
   /// Good overload.
   void overload() {}
 
-  /// This will be deprecated.
+  DRAKE_DEPRECATED("2038-01-19", "Do not use overload(int).")
   void overload(int x) { unused(x); }
 
-  /// Not yet deprecated.
-  int deprecated_aliased_prop{};
+  /// Good property.
+  int prop{};
+
+  // N.B. It doesn't really make sense to show a DRAKE_DEPRECATED property here
+  // because that causes the whole class to be deprecated.
 };
 
-/// Simple struct.
-struct ExampleCppStruct {
+/// Serves as an example for binding (and deprecating) a simple struct. This
+/// allows the struct to be constructed with ParamInit and deprecated using
+/// the corresponding DeprecatedParamInit.
+struct DRAKE_DEPRECATED(
+    "2038-01-19", "Do not use ExampleCppStruct") ExampleCppStruct {
   int i{};
   int j{};
 };
