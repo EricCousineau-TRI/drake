@@ -511,5 +511,34 @@ GTEST_TEST(ValueTest, NonTypeTemplateParameter) {
   EXPECT_THROW(foo.SetFrom(bar_value), std::exception);
 }
 
+class NonTemplatedThing {
+public:
+  class Inner {
+  private:
+    int x_{};
+  };
+};
+
+template <typename T>
+class TemplatedThing {
+public:
+  class Inner {
+  private:
+    int x_{};
+  };
+};
+
+GTEST_TEST(ValueTest, CrayCrayNestedThings) {
+  using T1 = NonTemplatedThing;
+  using T2 = TemplatedThing<double>;
+  ASSERT_NE(internal::TypeHash<T1>::value, 0);
+  ASSERT_NE(internal::TypeHash<T2>::value, 0);
+
+  using Inner1 = NonTemplatedThing::Inner;
+  using Inner2 = TemplatedThing<double>::Inner;
+  ASSERT_NE(internal::TypeHash<Inner1>::value, 0);
+  ASSERT_NE(internal::TypeHash<Inner2>::value, 0);  // This fails - why?!
+}
+
 }  // namespace test
 }  // namespace drake
