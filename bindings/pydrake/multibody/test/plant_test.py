@@ -1576,7 +1576,8 @@ class TestPlant(unittest.TestCase):
             make_noparams_weld_joint,
         ]
 
-        def loop_body(make_joint):
+        for make_joint in make_joint_list:
+            print(make_joint)
             plant = MultibodyPlant_[T](0.0)
             child = plant.AddRigidBody("Child", SpatialInertia_[float]())
             joint = make_joint(
@@ -1724,10 +1725,6 @@ class TestPlant(unittest.TestCase):
             else:
                 raise TypeError(
                     "Joint type " + joint.name() + " not recognized.")
-
-        for make_joint in make_joint_list:
-            with self.subTest(make_joint=make_joint):
-                loop_body(make_joint)
 
     @numpy_compare.check_all_types
     def test_multibody_add_frame(self, T):
