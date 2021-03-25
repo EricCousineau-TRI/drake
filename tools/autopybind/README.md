@@ -33,3 +33,36 @@ and make a draft PR pointing to what problem you're having:
 cd drake
 ./tools/autopybind/generate_debug.sh
 ```
+
+## Steps Taken
+
+- For `RenderEngineGlParams`:
+- Pinpoint symbol, and restructure (redundant) information between file and
+  namespacing.
+- Run `generate` binary as instructed above.
+- Replace `RenderEngineGlParams` with `Class` alias (per pydrake docs)
+- Ignore styling; assume Drake's `clang-format` settings + lint will fix it
+- For `.def(py::init<Class const &>(), py::arg("arg0"))`:
+    - Change `arg0` to `other` (user-friendly name)
+- Replace `py::init<>()` with `py::init()`
+- Put `py::init<Class const &>()` after `py::init()`
+- Add in `constexpr auto& cls_doc = doc.RenderEngineGlParams`
+    - Naively insert relevant `cls_doc` (will let compiler errors tell me which
+      doc symbols I should look up)
+- Copy code, paste into relevant section (`geometry_py.cc`)
+- Reformat:
+  `/usr/bin/clang-format-9 -style=file -i bindings/pydrake/geometry_py.cc`
+- `Class const &` was not reversed.
+- Additional lint error:
+  `bindings/pydrake/geometry_py.cc:427:  Line contains only semicolon. If this should be an empty statement, use {} instead.  [whitespace/semicolon] [5]`
+    - Manually fix lint error
+- Build: `bazel build //bindings/pydrake:geometry_py`
+  - Get compiler error about `cls_doc.ctor.doc`
+  - Do documented steps to find symbols:
+    ```
+    $ bazel build //bindings/pydrake:documentation_pybind.h
+    $ $EDITOR bazel-bin/bindings/pydrake/documentation_pybind.h
+    ```
+  - Search for `RenderEngineGlParams::RenderEngineGlParams`
+  - Realize it was actually just a param struct (no ctor); remove `cls_doc.ctor.doc*`.
+  - Because it is a param struct, replace construcotrs with `ParamInit<Class>()`
