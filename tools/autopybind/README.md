@@ -66,3 +66,41 @@ cd drake
   - Search for `RenderEngineGlParams::RenderEngineGlParams`
   - Realize it was actually just a param struct (no ctor); remove `cls_doc.ctor.doc*`.
   - Because it is a param struct, replace construcotrs with `ParamInit<Class>()`
+- Because this is consumed by `MakeRenderEngineGl`, change
+  `bindings_to_generate.yaml` to only generate for this symbol.
+    - Requires me to know that it is a function, changing fields, and learning
+      more about config. I guess `functions` is the right key.
+    - Rerun `generate`
+    - I get a new error: `IndexError: list index out of range`
+    - I try scrolling up, but I see 100's of warnings about files not existing.
+      See `tmux capture-pane` output: https://gist.github.com/EricCousineau-TRI/95bb4970d1d38d552baff60fc6a97a91
+    - Two errors reported on lines 956 and 1990. They seem duplicated, but
+      unclear.
+    - I assume that `autopybind11` does not validate schema, so maybe
+      `functions` is incorrect.
+    - I visit `autopyinbd11` README, hoping that I'm using same version as what
+      Drake has.
+    - I see that `functions` is indeed correct.
+    - I go back to the file, cross reference binding file, and realize I
+      included the same file. (redundant information that hurts).
+    - I fix the file path to use `render_engine_gl_factory.h`
+    - Succeeds, I think. It runs in 6s, with tons of warnings.
+    - I look at generated files in this order (based on my guesses) in
+      `/tmp/output.txt`:
+        - `pydrake_free_functions_py.cpp`
+        - `wrapper_pydrake.cpp`
+        - `pydrake.cpp`
+        - `drake_py.cpp`
+        - `geometry_py.cpp`
+        - `render_py.cpp` - Ah, this is the one it has.
+    - I see the `Pyrender.def` usage. I copy the code.
+    - I paste it above existing definition for `MakeRenderEngineGl`
+    - I replace `Pyrender` with `m`
+    - I strip leading `::`
+    - I delete `drake::geometry::render`
+    - I delete `default_delete`
+    - I copy `doc.MakeRenderEngineGl.doc` to newly generated version.
+    - I change `RenderEngineGlParams({})` to `RenderEngineGlParams()`
+    - I delete old definition for `MakeRenderEngineGl`
+    - Reformat: `/usr/bin/clang-format-9 -style=file -i bindings/pydrake/geometry_py.cc`
+    - Build anew `bazel build //bindings/pydrake:geometry_py`

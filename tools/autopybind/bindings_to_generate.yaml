@@ -9,12 +9,12 @@ files:
       member_variables:
         - DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE
 
-  "drake/geometry/render/gl_renderer/render_engine_gl_params.h":
+  "drake/geometry/render/gl_renderer/render_engine_gl_factory.h":
     namespaces:
       drake:
         namespaces:
           geometry:
             namespaces:
               render:
-                classes:
-                  RenderEngineGlParams: {}
+                functions:
+                  MakeRenderEngineGl: {}

@@ -423,7 +423,10 @@ void def_geometry_render(py::module m) {
             "default_label", &Class::default_label, cls_doc.default_label.doc);
   }
 
-  m.def("MakeRenderEngineGl", &MakeRenderEngineGl, doc.MakeRenderEngineGl.doc);
+  m.def("MakeRenderEngineGl",
+      static_cast<std::unique_ptr<RenderEngine> (*)(RenderEngineGlParams)>(
+          &MakeRenderEngineGl),
+      py::arg("params") = RenderEngineGlParams(), doc.MakeRenderEngineGl.doc);
 
   m.def("MakeRenderEngineVtk", &MakeRenderEngineVtk, py::arg("params"),
       doc.MakeRenderEngineVtk.doc);
