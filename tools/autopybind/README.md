@@ -19,10 +19,6 @@ documentation:
 <br/>
 <https://gitlab.kitware.com/autopybind11/autopybind11>
 
-## Example Workflow
-
-TODO(eric): Add this in.
-
 ## Troubleshooting
 
 If you encounter an issue w/ our usage of `autopybind11`, please run the
@@ -34,9 +30,12 @@ cd drake
 ./tools/autopybind/generate_debug.sh
 ```
 
-## Steps Taken
+## Example Workflows
 
-- For `RenderEngineGlParams`:
+With inline pain points
+
+### For `RenderEngineGlParams`
+
 - Pinpoint symbol, and restructure (redundant) information between file and
   namespacing.
 - Run `generate` binary as instructed above.
@@ -105,3 +104,55 @@ cd drake
     - Reformat: `/usr/bin/clang-format-9 -style=file -i bindings/pydrake/geometry_py.cc`
     - Build anew `bazel build //bindings/pydrake:geometry_py`
 - It builds, now I write unittests.
+
+### For `StaticEquilibriumConstraint`
+
+- Clean output directory: `rm -rf /tmp/autopybind11/`
+- Adjust `bindings_to_generate.yaml` for only this symbol
+- Review autopybind11 README
+- Try out `ignore_namespace_structure: True` to simplify finding files
+- Review template text blocks
+  - File: <https://gitlab.kitware.com/autopybind11/autopybind11/-/merge_requests/170>
+  - Was going to customize copy ctor, but realized `copy_constructor_tramp` was
+    only for copy ctors.
+- Try running, but get an error,
+  `unrecognized arguments: --ignore_namespace_structure=True`
+- Searching `autopybind11@2982f41`, seems like this isn't actually an option?
+  (it's only in README)
+  - Figure out when it got changed: 
+    ```
+    cd autopybind11
+    git log -n 1 -Signore_namespace_structure
+    gitk e9849032e3919e2e68f9e2032b2bb3b183e5939e
+    ```
+  - It's actually `enforce_namespace_structure`
+  - Do git forensics, confirm that it's now negated
+  - Submit PR:
+    <https://gitlab.kitware.com/autopybind11/autopybind11/-/merge_requests/171>
+- Run `generate` (takes 45s), see warnings:
+  ```
+  Warning: Class Constraint  was not found in current module or any linked module
+  Warning: Class EvaluatorBase  was not found in current module or any linked module
+  Warning: Class StaticEquilibriumConstraint will not have inheritance relationship with class Constraint in binding code.
+  ```
+  - Decide to bind `Constraint`; will ignore those bindings, but I want
+    inheritance.
+  - Do sleuthing to identify correct redundant information.
+  - Assume it won't hurt if `EvaluatorBase` isn't bound.
+  - Delete output dir again
+- Run `generate` again (47s)
+  - Look directly at `StaticEquilibriumConstraint_py.cpp`
+  - Only `contact_pair_to_wrench_evaluator` is bound; `MakeBinding` is not
+    bound.
+- Review `autopybind11/README` if there's an obvious mention of `static`. It
+  isn't mentioned. Assume that I need to do
+  `classes: { my_class: { functions: { my_static_method: {}}}}`
+- Run `generate` again (52s)
+  - It still doesn't appear?
+  - See warning
+    ```
+    Warning member MakeBinding will not be bound due to unmet dependency Binding<drake::multibody::StaticEquilibriumConstraint>
+    ```
+  - Realize this warning was actually there without `my_static_method` being
+    added. Remove it. (Pain point: no validation)
+  - 

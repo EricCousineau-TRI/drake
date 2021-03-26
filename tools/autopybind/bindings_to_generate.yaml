@@ -9,12 +9,19 @@ files:
       member_variables:
         - DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE
 
-  "drake/geometry/render/gl_renderer/render_engine_gl_factory.h":
+  "drake/multibody/optimization/static_equilibrium_constraint.h":
     namespaces:
       drake:
         namespaces:
-          geometry:
-            namespaces:
-              render:
+          multibody:
+            classes:
+              StaticEquilibriumConstraint:
                 functions:
-                  MakeRenderEngineGl: {}
+                  MakeBinding: {}
+  "drake/solvers/constraint.h":
+    namespaces:
+      drake:
+        namespaces:
+          solvers:
+            classes:
+              Constraint: {}

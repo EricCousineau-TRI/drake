@@ -3,3 +3,11 @@ enable_doc_strings: false
 pass_eigen_by_ref: False
 use_eigen_return_policy: False
 use_template_wrapping_function: True
+
+# Test-driving.
+enforce_namespace_structure: True
+
+# Text block customization:
+
+# # Er, thought this was for generic copy_constructor.
+# copy_constructor_tramp: .def(py::init([]({tramp_arg_type} arg0) {{ return {trampname}(other); }}){doc})
