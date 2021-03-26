@@ -153,6 +153,7 @@ drake_pybind_library(
     cc_deps = [
         "//bindings/pydrake:documentation_pybind",
         "//bindings/pydrake/common:default_scalars_pybind",
+        "//bindings/pydrake/common:sorted_pair_pybind",
         "//bindings/pydrake/common:value_pybind",
     ],
     cc_srcs = ["optimization_py.cc"],

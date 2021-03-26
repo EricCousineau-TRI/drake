@@ -155,4 +155,29 @@ With inline pain points
     ```
   - Realize this warning was actually there without `my_static_method` being
     added. Remove it. (Pain point: no validation)
-  - 
+  - Add instantiation:
+    ```
+    Binding:
+      inst: ["drake::multibody::StaticEquilibriumConstraint"]
+    ```
+  - See: `Unable to locate class definition.`
+  - Go back and use correct headers file, copy and paste nested YAML structure
+  - Accidentally opened file, and saw that `MakeBinding` was there? (Perhaps
+    the "Unable to locate class definition" was for something else?)
+- Take generated bindings, and reformat:
+  - Replace `StaticEquilibriumConstraint` w/ `Class` typedef
+  - Delete `::drake::solvers`
+  - Get overwhelmed by noisy signatures; look at C++ header file instead
+  - Copy+paste from C++ header file, re-massage.
+  - Fix brackets and whatever.
+  - Add `constexpr auto& cls_doc` thing
+  - Start reformatting, but realized I forgot to configure `keep_alive` in
+    autopybind11 config. It's easier for me to just do it myself, so I do it
+    myself in binding code.
+  - Reformat:
+    `/usr/bin/clang-format-9 -style=file -i bindings/pydrake/multibody/optimization_py.cc`
+  - Try building, realize that `GeometryPairContactWrenchEvaluatorBinding` is internal (our API mistake)
+  - To workaround, I can decompose it in Python and return tuple. 
+  - I now need to write this as a lambda function and change everything.
+  - Er, no, maybe write `type_caster`.
+  - Er, now getting compiler errors. Giving up.

@@ -16,8 +16,6 @@ files:
           multibody:
             classes:
               StaticEquilibriumConstraint:
-                functions:
-                  MakeBinding: {}
   "drake/solvers/constraint.h":
     namespaces:
       drake:
@@ -25,3 +23,11 @@ files:
           solvers:
             classes:
               Constraint: {}
+  "drake/solvers/binding.h":
+    namespaces:
+      drake:
+        namespaces:
+          solvers:
+            classes:
+              Binding:
+                inst: ["drake::multibody::StaticEquilibriumConstraint"]
