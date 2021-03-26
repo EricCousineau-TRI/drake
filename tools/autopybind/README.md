@@ -104,3 +104,4 @@ cd drake
     - I delete old definition for `MakeRenderEngineGl`
     - Reformat: `/usr/bin/clang-format-9 -style=file -i bindings/pydrake/geometry_py.cc`
     - Build anew `bazel build //bindings/pydrake:geometry_py`
+- It builds, now I write unittests.
