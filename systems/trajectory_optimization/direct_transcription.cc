@@ -207,6 +207,7 @@ DirectTranscription::DirectTranscription(
                        fixed_timestep.value),
       discrete_time_system_(false) {
   DRAKE_DEMAND(context.has_only_continuous_state());
+  DRAKE_DEMAND(system->num_input_ports() <= 1);
   DRAKE_DEMAND(fixed_timestep.value > 0.0);
   if (context.num_input_ports() > 0) {
     DRAKE_DEMAND(num_inputs() == get_input_port_size(system, input_port_index));
