@@ -2,6 +2,10 @@ load(
     "@drake//tools/skylark:drake_cc.bzl",
     "drake_cc_binary",
 )
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
 
 drake_cc_binary(
     name = "autodiff_eq",
@@ -10,4 +14,10 @@ drake_cc_binary(
         "//common:autodiff",
         "@eigen",
     ],
+)
+
+drake_py_binary(
+    name = "autodiff_equal_to",
+    srcs = ["autodiff_equal_to.py"],
+    deps = ["//bindings/pydrake"],
 )
