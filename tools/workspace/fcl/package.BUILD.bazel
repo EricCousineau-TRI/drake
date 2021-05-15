@@ -89,7 +89,7 @@ _DRAKE_RELEVANT_SRCS = glob(
         "**/*conservative_advancement*.cpp",
         "**/*continuous_collision*.cpp",
         "**/octree/**",
-        "src/common/**",
+        # "src/common/**",
         "src/math/motion/**",
         "src/math/sampler/**",
         # We list out the few of these that we need immediately below.
