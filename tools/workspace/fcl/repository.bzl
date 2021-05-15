@@ -9,6 +9,7 @@ def fcl_repository(
         name = name,
         repository = "flexible-collision-library/fcl",
         commit = "0c25681f551ad814f9844b215ec27dc7533b9a5a",
+        local_repository_override = "/home/eacousineau/proj/tri/repo/externals/fcl",
         sha256 = "016ef1a934e3e82c736c9e881e1cbe98f8f26d285ea58bb3e46555c59f8bec5b",  # noqa
         build_file = "@drake//tools/workspace/fcl:package.BUILD.bazel",
         mirrors = mirrors,

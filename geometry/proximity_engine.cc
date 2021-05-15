@@ -642,15 +642,14 @@ class ProximityEngine<T>::Impl : public ShapeReifier {
 
     std::vector<SignedDistanceToPoint<T>> distances;
 
-    unused(threshold, X_WGs);
-    // point_distance::CallbackData<T> data{
-    //     &query_point, threshold, p_WQ, &X_WGs, &distances};
+    point_distance::CallbackData<T> data{
+        &query_point, threshold, p_WQ, &X_WGs, &distances};
 
-    // // Perform query of point vs dynamic objects.
-    // dynamic_tree_.distance(&query_point, &data, point_distance::Callback<T>);
+    // Perform query of point vs dynamic objects.
+    dynamic_tree_.distance(&query_point, &data, point_distance::Callback<T>);
 
     // Perform query of point vs anchored objects.
-    // anchored_tree_.distance(&query_point, &data, point_distance::Callback<T>);
+    anchored_tree_.distance(&query_point, &data, point_distance::Callback<T>);
 
     return distances;
   }
