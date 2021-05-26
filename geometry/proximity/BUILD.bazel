@@ -63,7 +63,7 @@ drake_cc_library(
         ":posed_half_space",
         ":surface_mesh",
         ":volume_mesh",
-        "//common",
+        "//common:essential",
         "//geometry:shape_specification",
         "//geometry:utilities",
         "//math:geometric_transform",
@@ -74,7 +74,6 @@ drake_cc_library(
     name = "collision_filter_legacy",
     hdrs = ["collision_filter_legacy.h"],
     deps = [
-        ":proximity_utilities",
         "//common:essential",
         "//common:sorted_vectors_have_intersection",
     ],
@@ -91,6 +90,7 @@ drake_cc_library(
     ],
     deps = [
         ":collision_filter_legacy",
+        ":proximity_utilities",
         "//geometry:geometry_ids",
         "@fcl",
     ],
@@ -221,6 +221,7 @@ drake_cc_library(
 
 drake_cc_library(
     name = "make_box_field",
+    srcs = ["make_box_field.cc"],
     hdrs = ["make_box_field.h"],
     deps = [
         ":distance_to_point_callback",
@@ -246,10 +247,12 @@ drake_cc_library(
 
 drake_cc_library(
     name = "make_cylinder_field",
+    srcs = ["make_cylinder_field.cc"],
     hdrs = ["make_cylinder_field.h"],
     deps = [
         ":distance_to_point_callback",
         ":mesh_field",
+        ":volume_to_surface_mesh",
         "//common:essential",
         "//common:unused",
         "//geometry:shape_specification",
@@ -337,7 +340,7 @@ drake_cc_library(
         ":tessellation_strategy",
         ":volume_mesh",
         ":volume_to_surface_mesh",
-        "//common:essential",
+        "//common:sorted_pair",
         "//geometry:shape_specification",
     ],
 )
@@ -357,7 +360,8 @@ drake_cc_library(
         ":mesh_traits",
         ":surface_mesh",
         ":volume_mesh",
-        "//common",
+        "//common:reset_on_copy",
+        "//common:sorted_pair",
     ],
 )
 
@@ -372,7 +376,7 @@ drake_cc_library(
         ":contact_surface_utility",
         ":posed_half_space",
         ":surface_mesh",
-        "//common",
+        "//common:essential",
         "//geometry:geometry_ids",
         "//geometry:utilities",
         "//geometry/query_results:contact_surface",
@@ -390,7 +394,7 @@ drake_cc_library(
         ":posed_half_space",
         ":surface_mesh",
         ":volume_mesh",
-        "//common",
+        "//common:essential",
         "//geometry/query_results:contact_surface",
         "//math:geometric_transform",
     ],
@@ -446,7 +450,7 @@ drake_cc_library(
         ":posed_half_space",
         ":surface_mesh",
         ":volume_mesh",
-        "//common",
+        "//common:essential",
         "//geometry:shape_specification",
         "//geometry:utilities",
         "//math:geometric_transform",
@@ -460,6 +464,7 @@ drake_cc_library(
     deps = [
         ":surface_mesh",
         "//common:essential",
+        "//common:filesystem",
         "@fmt",
         "@tinyobjloader",
     ],
@@ -538,7 +543,7 @@ drake_cc_library(
     hdrs = ["surface_mesh.h"],
     deps = [
         ":mesh_traits",
-        "//common",
+        "//common:type_safe_index",
         "//math:geometric_transform",
     ],
 )
@@ -559,7 +564,8 @@ drake_cc_library(
     ],
     deps = [
         ":mesh_traits",
-        "//common",
+        "//common:default_scalars",
+        "//common:type_safe_index",
         "//geometry:geometry_ids",
     ],
 )
@@ -576,7 +582,7 @@ drake_cc_library(
         ":sorted_triplet",
         ":surface_mesh",
         ":volume_mesh",
-        "//common",
+        "//common:essential",
     ],
 )
 
@@ -693,6 +699,7 @@ drake_cc_googletest(
     deps = [
         ":hydroelastic_callback",
         "//common/test_utilities",
+        "//math:autodiff",
     ],
 )
 
