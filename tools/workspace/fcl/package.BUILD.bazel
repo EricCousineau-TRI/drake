@@ -135,8 +135,6 @@ cc_library(
     deps = [
         "@ccd",
         "@eigen",
-        # # HACK
-        # "@anzu//common:profiler",
     ],
 )
 

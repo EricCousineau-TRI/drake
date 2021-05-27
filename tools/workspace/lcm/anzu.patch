@@ -1,0 +1,46 @@
+diff --git a/lcm/lcm_udpm.c b/lcm/lcm_udpm.c
+index ddc9069..3bdeda4 100644
+--- a/lcm/lcm_udpm.c
++++ b/lcm/lcm_udpm.c
+@@ -1,11 +1,15 @@
++#define _GNU_SOURCE
++
+ #include <assert.h>
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <math.h>
++#include <sched.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <time.h>
++#include <unistd.h>
+ 
+ #ifndef WIN32
+ #include <arpa/inet.h>
+@@ -40,6 +44,8 @@
+ 
+ #define SELF_TEST_CHANNEL "LCM_SELF_TEST"
+ 
++#include "tmp/anzu_sched_param.h"
++
+ /**
+  * udpm_params_t:
+  * @mc_addr:        multicast address
+@@ -539,6 +545,16 @@ static lcm_buf_t *udp_read_packet(lcm_udpm_t *lcm)
+  * LCM packets from the network and queues them locally. */
+ static void *recv_thread(void *user)
+ {
++    // Anzu Hack
++    {
++        char buffer[1024];
++        anzu_sched_param_t param;
++        pid_t pid = 0;
++        anzu_get_sched_param_from_pid(pid, &param);
++        anzu_sched_param_sprintf(buffer, &param);
++        fprintf(stderr, "  lcm_udpm.c, recv_thread, sched param: %s\n", buffer);
++    }
++
+ #ifdef G_OS_UNIX
+     // Mask out all signals on this thread.
+     sigset_t mask;
