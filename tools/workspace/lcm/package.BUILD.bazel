@@ -106,7 +106,10 @@ cc_binary(
     }),
     linkshared = 1,
     visibility = ["@drake_visualizer//:__pkg__"],
-    deps = ["@glib"],
+    deps = [
+        "@anzu//tmp:anzu_sched_param",
+        "@glib",
+    ],
 )
 
 # This is the compile-time target for liblcm.  See above for details.
