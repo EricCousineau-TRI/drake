@@ -207,6 +207,31 @@ GTEST_TEST(EigenTypesTest, EigenPtr_Assignment) {
   EXPECT_FALSE(mutable_ptr);
 }
 
+GTEST_TEST(EigenTypesTest, EigenPtr_MatrixRow) {
+  Eigen::MatrixXd X(2, 2);
+  X << 1, 2, 3, 4;
+  // auto tmp = X.row(0);  // FAIL: Eigen (on Bionic) does not work with this.
+  auto tmp = X.block(0, 0, 1, X.cols());
+  EigenPtr<Eigen::MatrixXd> x0 = &tmp;
+  *x0 *= 10;
+  std::cout << "X: " << X << "\n";
+  // WARNING: If you do not dereference, this just prints out "1", which is
+  // confusing.
+  std::cout << "x0: " << *x0 << "\n";
+}
+
+GTEST_TEST(EigenTypesTest, EigenPtr_ColVsRow) {
+  Eigen::VectorXd x(2);
+  x << 1, 2;
+
+  auto x_transpose = x.transpose();
+  EigenPtr<Eigen::RowVectorXd> x_as_row = &x_transpose;
+
+  *x_as_row *= 10;
+  std::cout << "x: " << x.transpose() << "\n";
+  std::cout << "x_row: " << *x_as_row << "\n";
+}
+
 GTEST_TEST(EigenTypesTest, FixedSizeVector) {
   Vector<double, 2> col;
   EXPECT_EQ(col.rows(), 2);
