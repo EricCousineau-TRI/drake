@@ -3,17 +3,20 @@ from drake.tmp import debug
 if __name__ == "__main__":
     debug.reexecute_if_unbuffered()
 
-from pydrake.all import RigidTransform_, MathematicalProgram, Expression
+import numpy as np
+from pydrake.all import RigidTransform_, Expression, Variable
 
 
 @debug.traced
 def main():
-    prog = MathematicalProgram()
-    p_A = prog.NewContinuousVariables(3)
+    p_A_var = np.array([Variable("x0"), Variable("x1"), Variable("x2")])
+    to_sym = np.vectorize(Expression)
+    p_A_sym = to_sym(p_A_var)
+
     X_WA = RigidTransform_[Expression]()
 
-    print(X_WA.multiply([0,0,0]))
-    print(X_WA.multiply(p_A))  # <-- this line segfaults
+    print(X_WA.multiply(p_A_sym))
+    print(X_WA.multiply(p_A_var))  # <-- this line segfaults
     print("Done")
 
 
