@@ -15,8 +15,8 @@ def main():
 
     X_WA = RigidTransform_[Expression]()
 
-    print(X_WA.multiply(p_A_sym))
-    print(X_WA.multiply(p_A_var))  # <-- this line segfaults
+    # print(X_WA.multiply(p_A_sym))  # <-- now this line segfaults
+    print(X_WA.multiply(p_A_var))
     print("Done")
 
 

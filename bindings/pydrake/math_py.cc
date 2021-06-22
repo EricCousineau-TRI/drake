@@ -103,7 +103,24 @@ void DoScalarDependentDefinitions(py::module m, T) {
         .def("SetIdentity", &Class::SetIdentity, cls_doc.SetIdentity.doc)
         // .def("IsExactlyIdentity", ...)
         // .def("IsIdentityToEpsilon", ...)
-        .def("inverse", &Class::inverse, cls_doc.inverse.doc)
+        .def("inverse", &Class::inverse, cls_doc.inverse.doc);
+    if constexpr (std::is_same_v<T, Expression>) {
+        cls  // BR
+            .def(
+                "multiply",
+                [](const Class* self, const Vector3<Variable>& p_BoQ_B) {
+                  return *self * p_BoQ_B.cast<Expression>();
+                },
+                py::arg("p_BoQ_B"), cls_doc.operator_mul.doc_1args_p_BoQ_B)
+            .def(
+                "multiply",
+                [](const Class* self, const Matrix3X<Variable>& p_BoQ_B) {
+                  return *self * p_BoQ_B.cast<Expression>();
+                },
+                py::arg("p_BoQ_B"),
+                cls_doc.operator_mul.doc_1args_constEigenMatrixBase);
+    }
+    cls  // BR
         .def(
             "multiply",
             [](const Class* self, const Class& other) { return *self * other; },
