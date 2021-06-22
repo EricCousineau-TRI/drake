@@ -1,0 +1,22 @@
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+    "drake_py_library",
+)
+
+drake_py_library(
+    name = "module_py",
+    srcs = ["__init__.py"],
+)
+
+drake_py_binary(
+    name = "repro_issue15216",
+    srcs = [
+        "repro_issue15216.py",
+        "debug.py",
+    ],
+    deps = [
+        ":module_py",
+        "//bindings/pydrake",
+    ],
+)
