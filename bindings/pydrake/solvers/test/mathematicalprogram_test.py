@@ -1,3 +1,4 @@
+import pydrake.solvers.mathematicalprogram as mut
 from pydrake.solvers import mathematicalprogram as mp
 from pydrake.solvers.gurobi import GurobiSolver
 from pydrake.solvers.snopt import SnoptSolver
@@ -453,6 +454,10 @@ class TestMathematicalProgram(unittest.TestCase):
         prog = qp.prog
         x_expected = np.array([1., 1.])
         constraints = qp.constraints
+
+        mut.i_can_haz_evaluator(constraints[0])
+        mut.i_can_haz_constraint(constraints[0])
+
         self.assertTrue(
             prog.CheckSatisfied(binding=constraints[0],
                                 prog_var_vals=x_expected,
