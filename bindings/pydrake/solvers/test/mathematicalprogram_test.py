@@ -173,7 +173,7 @@ class TestMathematicalProgram(unittest.TestCase):
         np.testing.assert_array_equal(x_val_new, result.get_x_val())
 
 # TODO(jwnimmer-tri) MOSEK is also able to solve mixed integer programs;
-    # perhaps we should test both of them?
+# perhaps we should test both of them?
     @unittest.skipUnless(GurobiSolver().available(), "Requires Gurobi")
     def test_mixed_integer_optimization(self):
         prog = mp.MathematicalProgram()
@@ -447,6 +447,26 @@ class TestMathematicalProgram(unittest.TestCase):
             prog.GetBindingVariableValues(binding1, x_val), np.array([-2]))
         np.testing.assert_allclose(
             prog.GetBindingVariableValues(binding2, x_val), np.array([1, 2]))
+
+    def test_check_satisfied(self):
+        qp = TestQP()
+        prog = qp.prog
+        x_expected = np.array([1., 1.])
+        constraints = qp.constraints
+        self.assertTrue(
+            prog.CheckSatisfied(binding=constraints[0],
+                                prog_var_vals=x_expected,
+                                tol=1e-6))
+        self.assertTrue(
+            prog.CheckSatisfied(bindings=constraints,
+                                prog_var_vals=x_expected,
+                                tol=1e-6))
+        prog.SetInitialGuess(qp.x, x_expected)
+        self.assertTrue(
+            prog.CheckSatisfiedAtInitialGuess(binding=constraints[0],
+                                              tol=1e-6))
+        self.assertTrue(
+            prog.CheckSatisfiedAtInitialGuess(bindings=constraints, tol=1e-6))
 
     def test_matrix_variables(self):
         prog = mp.MathematicalProgram()
