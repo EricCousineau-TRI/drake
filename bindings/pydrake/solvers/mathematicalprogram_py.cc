@@ -94,9 +94,11 @@ auto RegisterBinding(py::handle* scope, const string& name) {
     py::implicitly_convertible<B, Binding<EvaluatorBase>>();
   }
   if (std::is_base_of_v<Constraint, C> && !std::is_same_v<C, Constraint>) {
+    py::print("implicit Constraint:", binding_cls);
     py::implicitly_convertible<B, Binding<Constraint>>();
   }
   if (std::is_base_of_v<Cost, C> && !std::is_same_v<C, Cost>) {
+    py::print("implicit Cost", binding_cls);
     py::implicitly_convertible<B, Binding<Cost>>();
   }
   return binding_cls;
@@ -1647,6 +1649,9 @@ for every column of ``prog_var_vals``. )""")
       m, "VisualizationCallback", doc.VisualizationCallback.doc);
 
   RegisterBinding<VisualizationCallback>(&m, "VisualizationCallback");
+
+  m.def("i_can_haz_evaluator", [](const Binding<EvaluatorBase>&) {});
+  m.def("i_can_haz_constraint", [](const Binding<Constraint>&) {});
 
   // Bind the free functions in choose_best_solver.h and solve.h.
   m  // BR
