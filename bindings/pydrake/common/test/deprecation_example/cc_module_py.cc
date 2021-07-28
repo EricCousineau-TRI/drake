@@ -12,11 +12,27 @@ Please review this file and the corresponding test,
 #include "drake/bindings/pydrake/common/test/deprecation_example/example_class.h"  // NOLINT
 #include "drake/bindings/pydrake/common/test/deprecation_example/example_class_documentation.h"  // NOLINT
 #include "drake/bindings/pydrake/pydrake_pybind.h"
+#include "drake/common/drake_copyable.h"
 #include "drake/common/drake_deprecated.h"
 
 namespace drake {
 namespace pydrake {
 namespace {
+  
+struct NonCopyable {
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(NonCopyable)
+
+  NonCopyable(int) {}
+};
+
+const NonCopyable& NonCopyablePassThru(const NonCopyable& in) { return in; }
+
+void DefTesting(py::module m) {
+  // This is a brief test for #15505.
+  m.def(
+    "_deprecated_noncopyable",
+    WrapDeprecated("", &NonCopyablePassThru));
+}
 
 PYBIND11_MODULE(cc_module, m) {
   constexpr auto& doc = pydrake_doc.drake.example_class;
@@ -108,6 +124,8 @@ PYBIND11_MODULE(cc_module, m) {
     DeprecateAttribute(
         cls, "DeprecatedMethod", cls_doc.DeprecatedMethod.doc_deprecated);
   }
+
+  DefTesting(m.def_submodule("testing"));
 }
 
 }  // namespace

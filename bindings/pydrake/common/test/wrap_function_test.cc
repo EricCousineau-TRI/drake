@@ -5,6 +5,8 @@
 
 #include <gtest/gtest.h>
 
+#include "drake/common/drake_copyable.h"
+
 // @note Some of these statements violate style guide. That is intended, as
 // this should test references for use in `pybind`.
 
@@ -392,6 +394,20 @@ GTEST_TEST(WrapFunction, ChangeCallbackOnly) {
       // Arguments.
       double*, CallbackWrapped, CallbackWrapped>;
   check_expected::run(wrapped);
+}
+
+struct NonCopyable {
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(NonCopyable)
+
+  NonCopyable(int) {}
+};
+
+const NonCopyable& NonCopyablePassThru(const NonCopyable& in) { return in; }
+
+GTEST_TEST(WrapFunction, InferForNonCopyable) {
+  const NonCopyable noncopyable(int{});
+  auto info = internal::infer_function_info(&NonCopyablePassThru);
+  EXPECT_EQ(&info.func(noncopyable), &noncopyable);
 }
 
 }  // namespace pydrake
