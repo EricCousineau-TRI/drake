@@ -1,5 +1,7 @@
 #include "drake/common/drake_assert.h"
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -40,6 +42,11 @@ GTEST_TEST(DrakeAssertDeathTest, AssertSyntaxTest) {
   // These should compile.
   DRAKE_ASSERT((2 + 2) == 4);
   DRAKE_ASSERT(BoolConvertible());
+  // Test additional complex types.
+  auto nonempty_ptr = std::make_unique<int>(10);
+  DRAKE_ASSERT(nonempty_ptr);
+  std::function<void()> nonempty_function = []() {};
+  DRAKE_ASSERT(nonempty_function);
 }
 
 GTEST_TEST(DrakeAssertDeathTest, AssertFalseTest) {
