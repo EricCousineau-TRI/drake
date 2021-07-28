@@ -1,0 +1,14 @@
+load(
+    "@drake//tools/skylark:pybind.bzl",
+    "pybind_py_library",
+)
+
+pybind_py_library(
+    name = "tmp_py",
+    cc_srcs = ["tmp_py.cc"],
+    cc_deps = [
+        "//:drake_shared_library",
+        "//bindings/pydrake/common:deprecation_pybind",
+    ],
+    py_deps = ["//bindings/pydrake/common:deprecation_py"],
+)

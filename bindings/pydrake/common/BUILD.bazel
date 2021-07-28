@@ -31,6 +31,7 @@ load(
 
 package(default_visibility = [
     "//bindings/pydrake:__subpackages__",
+    "//tmp:__pkg__",
 ])
 
 # This determines how `PYTHONPATH` is configured, and how to install the
@@ -112,6 +113,7 @@ drake_py_library(
         # without also importing all of pydrake. This is only sound because
         # none of the transitive `deps` of this target use C++ code.
         "//tools/jupyter:__pkg__",
+        "//tmp:__pkg__",
     ],
 )
 
