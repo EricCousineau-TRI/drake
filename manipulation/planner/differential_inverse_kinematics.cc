@@ -124,29 +124,48 @@ DifferentialInverseKinematicsResult DoDifferentialInverseKinematics(
   solvers::MathematicalProgram prog;
   solvers::VectorXDecisionVariable v_next =
       prog.NewContinuousVariables(num_velocities, "v_next");
-  solvers::VectorDecisionVariable<1> alpha =
-      prog.NewContinuousVariables<1>("alpha");
+  // solvers::VectorDecisionVariable<1> alpha =
+  //     prog.NewContinuousVariables<1>("alpha");
 
-  const solvers::QuadraticCost* cart_cost = nullptr;
+  // const solvers::QuadraticCost* cart_cost = nullptr;
+
+  const double dt{parameters.get_timestep()};
 
   if (num_cart_constraints > 0) {
-    VectorX<double> V_dir = V.normalized();
-    double V_mag = V.norm();
+    // VectorX<double> V_dir = V.normalized();
+    // double V_mag = V.norm();
 
-    // Constrain the end effector motion to be in the direction of V,
-    // and penalize magnitude difference from V.
-    MatrixX<double> A(num_cart_constraints, num_velocities + 1);
-    A.leftCols(num_velocities) = J;
-    A.rightCols(1) = -V_dir;
-    prog.AddLinearEqualityConstraint(
-        A, VectorX<double>::Zero(num_cart_constraints), {v_next, alpha});
+    // // Constrain the end effector motion to be in the direction of V,
+    // // and penalize magnitude difference from V.
+    // MatrixX<double> A(num_cart_constraints, num_velocities);
+    // A.leftCols(num_velocities) = J;
+    // A.rightCols(1) = -V_dir;
+    // prog.AddLinearEqualityConstraint(
+    //     A, VectorX<double>::Zero(num_cart_constraints), {v_next, alpha});
+
     // TODO(russt): This should not be hard-coded.
     const double kCartesianTrackingWeight = 100;
-    cart_cost =
-        prog.AddQuadraticErrorCost(Vector1<double>(kCartesianTrackingWeight),
-                                   Vector1<double>(V_mag), alpha)
-            .evaluator()
-            .get();
+    // cart_cost =
+    //     prog.AddQuadraticErrorCost(
+    //         Vector1<double>(kCartesianTrackingWeight),
+    //                                Vector1<double>(V_mag), alpha)
+    //         .evaluator()
+    //         .get();
+
+
+    VectorX<double> dq =
+        parameters.get_nominal_joint_position() - q_current;
+
+    // Minimize |V - J*v| plz.
+    MatrixX<double> Q_cart = J.transpose() * J;
+    MatrixX<double> b_cart = -2 * J.transpose() * V;
+    // Minimize |v*dt - dq| plz.
+    MatrixX<double> Q_j = dt*dt * identity_num_positions;
+    MatrixX<double> b_j = -2 * dt * dq;
+    // Q += 0.01 * identity_num_positions;
+    MatrixX<double> Q = kCartesianTrackingWeight * Q_cart + Q_j;
+    MatrixX<double> b = kCartesianTrackingWeight * b_cart + b_j;
+    prog.AddQuadraticCost(Q, b, v_next);
 
     // Constrain the unconstrained DoFs velocity to be small, which is used
     // to fulfill the regularization cost.  We use the svd of J = UΣV', in
@@ -176,13 +195,12 @@ DifferentialInverseKinematicsResult DoDifferentialInverseKinematics(
   // TODO(russt): Generalize this
   DRAKE_DEMAND(num_positions == num_velocities);
 
-  // If redundant, add a small regularization term to q_nominal.
-  const double dt{parameters.get_timestep()};
-  if (num_cart_constraints < num_velocities) {
-    prog.AddQuadraticErrorCost(
-        identity_num_positions * dt * dt,
-        (parameters.get_nominal_joint_position() - q_current) / dt, v_next);
-  }
+  // // If redundant, add a small regularization term to q_nominal.
+  // if (num_cart_constraints < num_velocities) {
+  //   prog.AddQuadraticErrorCost(
+  //   identity_num_positions * dt * dt,
+  //        (parameters.get_nominal_joint_position() - q_current) / dt, v_next);
+  // }
 
   // Add q upper and lower joint limit.
   if (parameters.get_joint_position_limits()) {
@@ -219,20 +237,20 @@ DifferentialInverseKinematicsResult DoDifferentialInverseKinematics(
             DifferentialInverseKinematicsStatus::kNoSolutionFound};
   }
 
-  if (num_cart_constraints) {
-    VectorX<double> cost(1);
-    cart_cost->Eval(result.GetSolution(alpha), &cost);
-    const double kMaxTrackingError = 5;
-    const double kMinEndEffectorVel = 1e-2;
-    if (cost(0) > kMaxTrackingError &&
-        result.GetSolution(alpha)[0] <= kMinEndEffectorVel) {
-      // Not tracking the desired vel norm (large tracking error) and the
-      // computed vel is small.
-      log()->info("v_next = {}", result.GetSolution(v_next).transpose());
-      log()->info("alpha = {}", result.GetSolution(alpha).transpose());
-      return {std::nullopt, DifferentialInverseKinematicsStatus::kStuck};
-    }
-  }
+  // if (num_cart_constraints) {
+  //   VectorX<double> cost(1);
+  //   cart_cost->Eval(result.GetSolution(alpha), &cost);
+  //   const double kMaxTrackingError = 5;
+  //   const double kMinEndEffectorVel = 1e-2;
+  //   if (cost(0) > kMaxTrackingError &&
+  //       result.GetSolution(alpha)[0] <= kMinEndEffectorVel) {
+  //     // Not tracking the desired vel norm (large tracking error) and the
+  //     // computed vel is small.
+  //     log()->info("v_next = {}", result.GetSolution(v_next).transpose());
+  //     log()->info("alpha = {}", result.GetSolution(alpha).transpose());
+  //     return {std::nullopt, DifferentialInverseKinematicsStatus::kStuck};
+  //   }
+  // }
 
   return {result.GetSolution(v_next),
           DifferentialInverseKinematicsStatus::kSolutionFound};
