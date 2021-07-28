@@ -10,7 +10,7 @@ struct NonCopyable {
   NonCopyable() {}
 };
 
-class Container {
+class NonCopyableContainer {
  public:
   const NonCopyable& get_noncopyable() const { return noncopyable_; }
  private:
@@ -19,7 +19,7 @@ class Container {
 
 void BindStuff(py::module m) {
   auto wrapped = WrapDeprecated("Deprecated", &Container::get_noncopyable);
-  py::class_<Container>(m, "Container").def("get_noncopyable", wrapped);
+  py::class_<NonCopyableContainer>(m, "NonCopyableContainer").def("get_noncopyable", wrapped);
 }
 
 PYBIND11_MODULE(tmp, m) {

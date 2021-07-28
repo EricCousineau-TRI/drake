@@ -396,18 +396,21 @@ GTEST_TEST(WrapFunction, ChangeCallbackOnly) {
   check_expected::run(wrapped);
 }
 
-struct NonCopyable {
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(NonCopyable)
-
-  NonCopyable(int) {}
+// Testing for #15505.
+struct ArgNoCopyNoMove {
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(ArgNoCopyNoMove)
+  ArgNoCopyNoMove() {}
 };
 
-const NonCopyable& NonCopyablePassThru(const NonCopyable& in) { return in; }
+class ArgNoCopyNoMoveContainer {
+ public:
+  const ArgNoCopyNoMove& get_noncopyable() const { return noncopyable_; }
+ private:
+  ArgNoCopyNoMove noncopyable_;
+};
 
-GTEST_TEST(WrapFunction, InferForNonCopyable) {
-  const NonCopyable noncopyable(int{});
-  auto info = internal::infer_function_info(&NonCopyablePassThru);
-  EXPECT_EQ(&info.func(noncopyable), &noncopyable);
+GTEST_TEST(WrapFunction, InferForArgNoCopyNoMove) {
+  WrapIdentity(&ArgNoCopyNoMoveContainer::get_noncopyable);
 }
 
 }  // namespace pydrake
