@@ -1,0 +1,13 @@
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
+
+drake_py_binary(
+    name = "cube_sim_test",
+    data = ["cube.urdf"],
+    srcs = ["cube_sim_test.py"],
+    deps = [
+        "//bindings/pydrake",
+    ],
+)
