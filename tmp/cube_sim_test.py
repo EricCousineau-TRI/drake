@@ -16,7 +16,7 @@ def main():
     props = ProximityProperties()
     props.AddProperty("material", "point_contact_stiffness", 1.0e4)
     props.AddProperty("material", "hunt_crossley_dissipation", 0.5)
-    props.AddProperty("material", "coulomb_friction", 1e-3)
+    props.AddProperty("material", "coulomb_friction", friction)
 
     X_WG = RigidTransform()
 
