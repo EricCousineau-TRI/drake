@@ -33,6 +33,7 @@ void AddPrimitiveValueInstantiations(py::module m) {
   AddValueInstantiation<std::string>(m);            // Value[str]
   AddValueInstantiation<bool>(m);                   // Value[bool]
   AddValueInstantiation<Object, PyObjectValue>(m);  // Value[object]
+  AddValueInstantiation<double>(m);                 // Value[float]
 }
 
 }  // namespace
