@@ -524,12 +524,12 @@ class TestSymbolicExpression(unittest.TestCase):
         self.assertEqual(e_xv.shape, (2,))
         self.assertIsInstance(e_xv[0], sym.Expression)
 
-    def test_comparison_combinatorics(self):
+    def test_binary_operator_type_combinatorics(self):
         """
-        Tests basic combinatorics per #15549.
+        Tests binary operator via brute-force combinatorics per #15549.
         """
 
-        def _expand_values(value):
+        def expand_values(value):
             return (
                 # Scalar.
                 value,
@@ -544,38 +544,50 @@ class TestSymbolicExpression(unittest.TestCase):
         operators = (
             drake_math.lt,
             drake_math.le,
-            drake_math.eq,
-            drake_math.ne,
             drake_math.ge,
             drake_math.gt,
+            drake_math.eq,
+            drake_math.ne,
         )
         # Equivalent expression when operands are reversed.
         operators_reverse = {
             drake_math.lt: drake_math.gt,
             drake_math.le: drake_math.ge,
-            drake_math.eq: drake_math.eq,
-            drake_math.ne: drake_math.ne,
             drake_math.gt: drake_math.lt,
             drake_math.ge: drake_math.le,
+            drake_math.eq: drake_math.eq,
+            drake_math.ne: drake_math.ne,
         }
-        T_operands = (
+        T_operands_x = (
             # Variable.
-            _expand_values(x)
+            expand_values(x)
             # Expression.
-            + _expand_values(e_x)
+            + expand_values(e_x)
+        )
+        T_operands_y = (
+            # Variable.
+            expand_values(y)
+            # Expression.
+            + expand_values(e_y)
         )
         numeric_operands = (
             # Float.
             # - Native.
-            _expand_values(1.0)
+            expand_values(1.0)
             # - np.generic
-            + _expand_values(np.float32(1.0))
+            + expand_values(np.float64(1.0))
             # Int.
             # - Native.
-            + _expand_values(1)
+            + expand_values(1)
             # - np.generic
-            + _expand_values(np.int64(1.0))
+            + expand_values(np.int64(1.0))
         )
+
+        @np.vectorize
+        def assert_nontrivial_formula(value):
+            self.assertIsInstance(value, sym.Formula)
+            self.assertNotEqual(value, sym.Formula.True_())
+            self.assertNotEqual(value, sym.Formula.False_())
 
         def check_operands(op, lhs_operands, rhs_operands):
             operand_combinatorics_iter = itertools.product(
@@ -583,16 +595,25 @@ class TestSymbolicExpression(unittest.TestCase):
             )
             op_reverse = operators_reverse[op]
             for lhs, rhs in operand_combinatorics_iter:
-                if True:
-                    print(repr((op.__doc__, lhs, rhs)))
-                value = op(lhs, rhs)
-                reverse_value = op_reverse(rhs, lhs)
-                numpy_compare.assert_equal(value, reverse_value)
+                try:
+                    value = op(lhs, rhs)
+                    assert_nontrivial_formula(value)
+                    reverse_value = op_reverse(rhs, lhs)
+                    assert_nontrivial_formula(reverse_value)
+                    numpy_compare.assert_equal(value, reverse_value)
+                except Exception:
+                    # N.B. With unittest's --failfast option (at least on Python
+                    # 3.6), an error in `self.subTest` does not stop execution,
+                    # so we use this workaround instead.
+                    print("Failure encountered with:")
+                    print(
+                        f"  {op.__doc__}: {repr(lhs)}, {repr(rhs)}")
+                    raise
 
         # Combinations (unordered) that we're interested in.
         operand_combinations = (
-            (T_operands, T_operands),
-            (T_operands, numeric_operands),
+            (T_operands_x, T_operands_y),
+            (T_operands_x, numeric_operands),
         )
         for op in operators:
             for (op_a, op_b) in operand_combinations:
