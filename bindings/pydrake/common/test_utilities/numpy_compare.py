@@ -202,6 +202,13 @@ def _str_eq(a, b):
     assert a == b, (a, b)
 
 
+def _str_eq_both(a, b):
+    # Both a and b are to be converted to string.
+    a = str(a)
+    b = str(b)
+    assert a == b, (a, b)
+
+
 def _str_ne(a, b):
     # b is a string, a is to be converted.
     a = str(a)
@@ -258,6 +265,7 @@ def _register_symbolic():
 
     _registry.register_to_float(Expression, Expression.Evaluate)
     _registry.register_comparator(Formula, str, _str_eq, _str_ne)
+    _registry.register_comparator(Formula, Formula, _str_eq_both, None)
     # Ensure that we can do simple boolean comparison, e.g. in lieu of
     # `unittest.TestCase.assertTrue`, use
     # `numpy_compare.assert_equal(f, True)`.

@@ -38,12 +38,12 @@ from pydrake.symbolic import Expression as _Expression
 # type is not bool.
 # N.B. Defined in order listed in Python documentation:
 # https://docs.python.org/3.6/library/operator.html
-lt = np.vectorize(operator.lt)
-le = np.vectorize(operator.le)
-eq = np.vectorize(operator.eq)
-ne = np.vectorize(operator.ne)
-ge = np.vectorize(operator.ge)
-gt = np.vectorize(operator.gt)
+lt = np.vectorize(operator.lt, doc="Drake's vectorized `lt`")
+le = np.vectorize(operator.le, doc="Drake's vectorized `le`")
+eq = np.vectorize(operator.eq, doc="Drake's vectorized `eq`")
+ne = np.vectorize(operator.ne, doc="Drake's vectorized `ne`")
+ge = np.vectorize(operator.ge, doc="Drake's vectorized `ge`")
+gt = np.vectorize(operator.gt, doc="Drake's vectorized `gt`")
 
 
 def _indented_repr(o):

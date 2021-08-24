@@ -8,6 +8,7 @@ import numpy as np
 
 import pydrake.symbolic as sym
 import pydrake.common
+import pydrake.math as drake_math
 from pydrake.test.algebra_test_util import ScalarAlgebra, VectorizedAlgebra
 from pydrake.common.containers import EqualToDict
 from pydrake.common.deprecation import install_numpy_warning_filters
@@ -541,21 +542,21 @@ class TestSymbolicExpression(unittest.TestCase):
             )
 
         operators = (
-            mut.lt,
-            mut.le,
-            mut.eq,
-            mut.ne,
-            mut.ge,
-            mut.gt,
+            drake_math.lt,
+            drake_math.le,
+            drake_math.eq,
+            drake_math.ne,
+            drake_math.ge,
+            drake_math.gt,
         )
         # Equivalent expression when operands are reversed.
         operators_reverse = {
-            mut.lt: mut.gt,
-            mut.le: mut.ge,
-            mut.eq: mut.eq,
-            mut.ne: mut.ne,
-            mut.gt: mut.lt,
-            mut.ge: mut.le,
+            drake_math.lt: drake_math.gt,
+            drake_math.le: drake_math.ge,
+            drake_math.eq: drake_math.eq,
+            drake_math.ne: drake_math.ne,
+            drake_math.gt: drake_math.lt,
+            drake_math.ge: drake_math.le,
         }
         T_operands = (
             # Variable.
@@ -582,19 +583,21 @@ class TestSymbolicExpression(unittest.TestCase):
             )
             op_reverse = operators_reverse[op]
             for lhs, rhs in operand_combinatorics_iter:
+                if True:
+                    print(repr((op.__doc__, lhs, rhs)))
                 value = op(lhs, rhs)
                 reverse_value = op_reverse(rhs, lhs)
                 numpy_compare.assert_equal(value, reverse_value)
 
         # Combinations (unordered) that we're interested in.
         operand_combinations = (
-            {T_operands, T_operands},
-            {T_operands, numeric_operands},
+            (T_operands, T_operands),
+            (T_operands, numeric_operands),
         )
         for op in operators:
             for (op_a, op_b) in operand_combinations:
-                check_combination(op, op_a, op_b)
-                check_combination(op, op_b, op_a)
+                check_operands(op, op_a, op_b)
+                check_operands(op, op_b, op_a)
 
     def test_equalto(self):
         self.assertTrue((x + y).EqualTo(x + y))
