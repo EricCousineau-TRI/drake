@@ -24,24 +24,12 @@ As an example::
 # See `ExecuteExtraPythonCode` in `pydrake_pybind.h` for usage details and
 # rationale.
 
-import functools
 import operator
 
 import numpy as np
 
 from pydrake.autodiffutils import AutoDiffXd as _AutoDiffXd
 from pydrake.symbolic import Expression as _Expression
-
-def _best_effort_rich_compare(a, b, *, oper):
-    try:
-        return oper(a, b)
-    except RuntimeError as e:
-        if "not call `__bool__` / `__nonzero__` on `Formula`" in str(e):
-            if isinstance(a, _Expression):
-                return oper(a, _Expression(b))
-            elif isinstance(b, _Expression,):
-                return oper(_Expression(a), b)
-        raise
 
 # As mentioned in top-level, add generic logical operators as ufuncs so that we
 # may do comparisons on arrays of any scalar type, without restriction on the
@@ -50,12 +38,12 @@ def _best_effort_rich_compare(a, b, *, oper):
 # type is not bool.
 # N.B. Defined in order listed in Python documentation:
 # https://docs.python.org/3.6/library/operator.html
-lt = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.lt))
-le = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.le))
-eq = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.eq))
-ne = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.ne))
-ge = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.ge))
-gt = np.vectorize(functools.partial(_best_effort_rich_compare, oper=operator.gt))
+lt = np.vectorize(operator.lt)
+le = np.vectorize(operator.le)
+eq = np.vectorize(operator.eq)
+ne = np.vectorize(operator.ne)
+ge = np.vectorize(operator.ge)
+gt = np.vectorize(operator.gt)
 
 
 def _indented_repr(o):

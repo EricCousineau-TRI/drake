@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import itertools
 import unittest
 
 import numpy as np
@@ -521,6 +522,79 @@ class TestSymbolicExpression(unittest.TestCase):
         self.assertIsInstance(xv[0], sym.Variable)
         self.assertEqual(e_xv.shape, (2,))
         self.assertIsInstance(e_xv[0], sym.Expression)
+
+    def test_comparison_combinatorics(self):
+        """
+        Tests basic combinatorics per #15549.
+        """
+
+        def _expand_values(value):
+            return (
+                # Scalar.
+                value,
+                # Scalar array.
+                np.array(value),
+                # Size-1 array.
+                np.array([value]),
+                # Size-2 array.
+                np.array([value, value]),
+            )
+
+        operators = (
+            mut.lt,
+            mut.le,
+            mut.eq,
+            mut.ne,
+            mut.ge,
+            mut.gt,
+        )
+        # Equivalent expression when operands are reversed.
+        operators_reverse = {
+            mut.lt: mut.gt,
+            mut.le: mut.ge,
+            mut.eq: mut.eq,
+            mut.ne: mut.ne,
+            mut.gt: mut.lt,
+            mut.ge: mut.le,
+        }
+        T_operands = (
+            # Variable.
+            _expand_values(x)
+            # Expression.
+            + _expand_values(e_x)
+        )
+        numeric_operands = (
+            # Float.
+            # - Native.
+            _expand_values(1.0)
+            # - np.generic
+            + _expand_values(np.float32(1.0))
+            # Int.
+            # - Native.
+            + _expand_values(1)
+            # - np.generic
+            + _expand_values(np.int64(1.0))
+        )
+
+        def check_operands(op, lhs_operands, rhs_operands):
+            operand_combinatorics_iter = itertools.product(
+                lhs_operands, rhs_operands
+            )
+            op_reverse = operators_reverse[op]
+            for lhs, rhs in operand_combinatorics_iter:
+                value = op(lhs, rhs)
+                reverse_value = op_reverse(rhs, lhs)
+                numpy_compare.assert_equal(value, reverse_value)
+
+        # Combinations (unordered) that we're interested in.
+        operand_combinations = (
+            {T_operands, T_operands},
+            {T_operands, numeric_operands},
+        )
+        for op in operators:
+            for (op_a, op_b) in operand_combinations:
+                check_combination(op, op_a, op_b)
+                check_combination(op, op_b, op_a)
 
     def test_equalto(self):
         self.assertTrue((x + y).EqualTo(x + y))
