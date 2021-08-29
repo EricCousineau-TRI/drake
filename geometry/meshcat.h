@@ -4,12 +4,16 @@
 #include <string>
 
 #include "drake/common/drake_copyable.h"
+#include "drake/common/type_safe_index.h"
 #include "drake/geometry/rgba.h"
 #include "drake/geometry/shape_specification.h"
 #include "drake/math/rigid_transform.h"
 
 namespace drake {
 namespace geometry {
+
+using MeshcatButtonIndex = TypeSafeIndex<class MeshcatButtonTag>;
+using MeshcatSliderIndex = TypeSafeIndex<class MeshcatSliderTag>;
 
 /** Provides an interface to %Meshcat (https://github.com/rdeits/meshcat).
 
@@ -153,8 +157,16 @@ class Meshcat {
   void SetProperty(std::string_view path, std::string property, double value);
 
   // TODO(russt): Implement SetAnimation().
-  // TODO(russt): Implement SetButton() and SetSlider() as wrappers on
-  // set_control.
+
+  MeshcatButtonIndex AddButton(std::string name);
+  int GetButtonClicks(MeshcatButtonIndex button);
+  void DeleteButton(MeshcatButtonIndex button);
+
+  MeshcatSliderIndex AddSlider(std::string name, double min, double max,
+                               double step, double value);
+  void SetSliderValue(MeshcatSliderIndex slider, double value);
+  double GetSliderValue(MeshcatSliderIndex slider);
+  void DeleteSlider(MeshcatSliderIndex slider);
 
   /* These remaining public methods are intended to primarily for testing. These
   calls must safely acquire the data from the websocket thread and will block

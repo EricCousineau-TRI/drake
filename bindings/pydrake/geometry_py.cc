@@ -10,6 +10,7 @@
 #include "drake/bindings/pydrake/common/default_scalars_pybind.h"
 #include "drake/bindings/pydrake/common/deprecation_pybind.h"
 #include "drake/bindings/pydrake/common/type_pack.h"
+#include "drake/bindings/pydrake/common/type_safe_index_pybind.h"
 #include "drake/bindings/pydrake/common/value_pybind.h"
 #include "drake/bindings/pydrake/documentation_pybind.h"
 #include "drake/bindings/pydrake/pydrake_pybind.h"
@@ -1429,7 +1430,27 @@ void DoScalarIndependentDefinitions(py::module m) {
             py::overload_cast<std::string_view, std::string, double>(
                 &Class::SetProperty),
             py::arg("path"), py::arg("property"), py::arg("value"),
-            cls_doc.SetProperty.doc_double);
+            cls_doc.SetProperty.doc_double)
+        .def("AddButton", &Class::AddButton, py::arg("name"),
+            cls_doc.AddButton.doc)
+        .def("GetButtonClicks", &Class::GetButtonClicks, py::arg("button"),
+            cls_doc.GetButtonClicks.doc)
+        .def("DeleteButton", &Class::DeleteButton, py::arg("button"),
+            cls_doc.DeleteButton.doc)
+        .def("AddSlider", &Class::AddSlider, py::arg("name"), py::arg("min"),
+            py::arg("max"), py::arg("step"), py::arg("value"),
+            cls_doc.AddSlider.doc)
+        .def("SetSliderValue", &Class::SetSliderValue, py::arg("slider"),
+            py::arg("value"), cls_doc.SetSliderValue.doc)
+        .def("GetSliderValue", &Class::GetSliderValue, py::arg("slider"),
+            cls_doc.GetSliderValue.doc)
+        .def("DeleteSlider", &Class::DeleteSlider, py::arg("slider"),
+            cls_doc.DeleteSlider.doc);
+
+    BindTypeSafeIndex<MeshcatButtonIndex>(
+        m, "MeshcatButtonIndex", doc.MeshcatButtonIndex.doc);
+    BindTypeSafeIndex<MeshcatSliderIndex>(
+        m, "MeshcatSliderIndex", doc.MeshcatSliderIndex.doc);
   }
 
   // MeshcatVisualizerParams
@@ -1461,7 +1482,7 @@ void DoScalarIndependentDefinitions(py::module m) {
               .format(self.publish_period, self.role, self.default_color,
                   self.prefix, self.delete_prefix_on_initialization_event);
         });
-  }      
+  }
 }
 
 void def_geometry(py::module m) {
