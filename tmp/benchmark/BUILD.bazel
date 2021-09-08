@@ -1,0 +1,44 @@
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+    "drake_py_test",
+    "drake_py_unittest",
+)
+
+drake_py_binary(
+    name = "model_benchmark",
+    srcs = ["model_benchmark.py"],
+    testonly = 1,
+    data = [
+        "//manipulation/models/allegro_hand_description:models",
+    ],
+    deps = [
+        "//bindings/pydrake",
+    ],
+    imports = ["."],  # HACK
+    visibility = ["//visibility:public"],
+)
+
+drake_py_unittest(
+    name = "model_benchmark_test",
+    deps = [":model_benchmark"],
+)
+
+filegroup(
+    name = "data",
+    srcs = glob(["data/**/*.yaml"]),
+)
+
+drake_py_test(
+    name = "model_regression_test",
+    data = [":data"],
+    deps = [":model_benchmark"],
+    allow_import_unittest = True,
+)
+
+drake_py_binary(
+    name = "repro_anzu_issue",
+    srcs = ["repro_anzu_issue.py"],
+    data = ["repro_anzu_issue_dummy.sdf"],
+    deps = ["//bindings/pydrake"],
+)
