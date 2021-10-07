@@ -71,10 +71,6 @@ KNOWN_REQUIRED_EXCEPTIONS = {
     "examples/simple_four_bar/FourBar.sdf": (
         "This mobilizer is creating a closed loop since"
     ),
-    "multibody/parsing/test/box_package/sdfs/box.sdf": (
-        # Needs to be added as a data deps.
-        "provided uri \"package://box_model/meshes/box.obj\""
-    ),
     "multibody/parsing/test/sdf_parser_test/include_models.sdf": (
         # Needs to be added as a data deps.
         "Error: Unable to find uri[model://simple_robot1]"
@@ -89,16 +85,14 @@ KNOWN_REQUIRED_EXCEPTIONS = {
     ),
     "multibody/parsing/test/sdf_parser_test/two_models.sdf": (
         # Negative test case.
+        "Error: Root object can only contain one model. Using the first one found",
         "File must have a single <model> element."
-    ),
-    "multibody/parsing/test/drake_manifest_resolution_test/cube_visual.sdf": (
-        "provided uri \"package://drake/multibody/parsing/test/tri_cube.obj\""
     ),
     "multibody/parsing/test/sdf_parser_test/include_models.sdf": (
         "Error: Unable to find uri[model://simple_robot1/]"
     ),
     "multibody/parsing/test/sdf_parser_test/interface_api_test/top.sdf": (
-        "Error: Unable to find uri[package://interface_api_test/arm.forced_nesting_sdf]"
+        "Error: PoseRelativeToGraph unable to find path to source vertex"
     ),
 }
 
@@ -112,9 +106,9 @@ KNOWN_POSSIBLE_EXCEPTIONS = {
     "multibody/parsing/test/sdf_parser_test/model_with_directly_nested_models.sdf": {
         "Newly added"
     },
-    "multibody/parsing/test/sdf_parser_test/merge_include_models.sdf": {
-        "Newly added"
-    },
+    "multibody/parsing/test/sdf_parser_test/merge_include_models.sdf": (
+        "Error: Unable to find uri[model://simple_robot1/]"
+    ),
 }
 
 
@@ -146,6 +140,12 @@ def list_checks(*, use_source_tree=True):
     # files = ["multibody/parsing/test/sdf_parser_test/model_with_directly_nested_models.sdf"]
     return [Check(f) for f in files]
 
+def is_known_error(err_str, expected_error):
+    if isinstance(expected_error, tuple):
+        return any(err in err_str for err in expected_error if err is not None)
+    elif expected_error is not None:
+        return expected_error in err_str
+    return False
 
 def regenerate():
     if not os.path.exists("WORKSPACE"):
@@ -165,10 +165,10 @@ def regenerate():
         except (RuntimeError, AssertionError) as e:
             expected_substr = KNOWN_REQUIRED_EXCEPTIONS.get(check.sdf_file)
             possible_substr = KNOWN_POSSIBLE_EXCEPTIONS.get(check.sdf_file)
-            if expected_substr is not None and expected_substr in str(e):
+            if is_known_error(str(e), expected_substr):
                 print(f"  Known error - ignoring: {expected_substr}")
                 known_error_files.add(check.sdf_file)
-            elif possible_substr is not None and possible_substr in str(e):
+            elif is_known_error(str(e), possible_substr):
                 print(f"  Known optional error - ignoring: {possible_substr}")
                 known_option_error_files.add(check.sdf_file)
             else:

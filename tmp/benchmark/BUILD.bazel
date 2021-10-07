@@ -31,7 +31,7 @@ filegroup(
 
 drake_py_test(
     name = "model_regression_test",
-    data = [":data"],
+    data = [":data", "//multibody/parsing:test_models"],
     deps = [":model_benchmark"],
     allow_import_unittest = True,
 )
