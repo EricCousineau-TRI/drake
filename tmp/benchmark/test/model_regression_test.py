@@ -112,6 +112,9 @@ KNOWN_POSSIBLE_EXCEPTIONS = {
     "multibody/parsing/test/sdf_parser_test/model_with_directly_nested_models.sdf": {
         "Newly added"
     },
+    "multibody/parsing/test/sdf_parser_test/merge_include_models.sdf": {
+        "Newly added"
+    },
 }
 
 
