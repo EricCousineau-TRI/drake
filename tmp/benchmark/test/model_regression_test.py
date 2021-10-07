@@ -89,7 +89,7 @@ KNOWN_REQUIRED_EXCEPTIONS = {
     ),
     "multibody/parsing/test/sdf_parser_test/two_models.sdf": (
         # Negative test case.
-        "Error: Root object can only contain one model. Using the first one found"
+        "File must have a single <model> element."
     ),
     "multibody/parsing/test/drake_manifest_resolution_test/cube_visual.sdf": (
         "provided uri \"package://drake/multibody/parsing/test/tri_cube.obj\""
