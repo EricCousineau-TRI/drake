@@ -1,0 +1,603 @@
+# GENERATED FILE - DO NOT EDIT BY HAND
+configurations:
+- frames:
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: WorldBody
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L1
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::L1_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L2
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::L2_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::M1::M1_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M1::base_link
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::M2::M2_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M2::base_link
+  note: Zeros
+  q:
+    names: []
+    values: []
+- frames:
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: WorldBody
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L1
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::L1_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L2
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::L2_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::M1::M1_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M1::base_link
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::M2::M2_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M2::base_link
+  note: Ones
+  q:
+    names: []
+    values: []
+- frames:
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: WorldBody
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L1
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::L1_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L2
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::L2_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::M1::M1_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M1::base_link
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::M2::M2_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M2::base_link
+  note: Incrementing
+  q:
+    names: []
+    values: []
+- frames:
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: WorldBody
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L1
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::L1_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::L2
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::L2_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 1.0
+      - 2.0
+      - 3.0
+    name: parent_model::M1::M1_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M1::base_link
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 4.0
+      - 5.0
+      - 6.0
+    name: parent_model::M2::M2_base_link_offset
+  - X_WF:
+      rotation:
+      - - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 1.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+      translation:
+      - 0.0
+      - 0.0
+      - 0.0
+    name: parent_model::M2::base_link
+  note: Pi/2
+  q:
+    names: []
+    values: []
+expression:
+  expr: make_plant(try_find_file('multibody/parsing/test/sdf_parser_test/frames_as_joint_parent_or_child.sdf'),
+    find_resource=False)
+  module: __main__
+type_name: tuple
