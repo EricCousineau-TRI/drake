@@ -93,6 +93,9 @@ KNOWN_REQUIRED_EXCEPTIONS = {
 # TODO(eric): How to easily check merge-base vs. feature branch? This is kinda
 # messy.
 KNOWN_POSSIBLE_EXCEPTIONS = {
+    "multibody/parsing/test/sdf_parser_test/merge_include_models.sdf": (
+        "Newly added"
+    ),
 }
 
 
