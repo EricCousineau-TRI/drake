@@ -82,6 +82,7 @@ KNOWN_REQUIRED_EXCEPTIONS = {
     "multibody/parsing/test/sdf_parser_test/two_models.sdf": (
         # Negative test case.
         "Error: Root object can only contain one model. Using the first one found",
+        "File must have exactly one <model>",
         "File must have a single <model> element."
     ),
     "multibody/parsing/test/sdf_parser_test/interface_api_test/top.sdf": (
