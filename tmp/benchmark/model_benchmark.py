@@ -22,7 +22,7 @@ from pydrake.lcm import DrakeLcm
 
 from pydrake.math import RigidTransform, RotationMatrix
 from pydrake.multibody.parsing import (
-    Parser,
+    Parser, PackageMap
 )
 from pydrake.multibody.tree import (
     FrameIndex,
@@ -533,7 +533,10 @@ def make_plant(model_path, *, find_resource=True):
     plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=arbitrary_time_step)
     if find_resource:
         model_path = FindResourceOrThrow(model_path)
-    Parser(plant).AddModelFromFile(model_path)
+
+    parser = Parser(plant)
+    parser.package_map().PopulateFromFolder(os.path.dirname(model_path))
+    parser.AddAllModelsFromFile(model_path)
     plant.Finalize()
     DrakeVisualizer.AddToBuilder(
         builder=builder, scene_graph=scene_graph)

@@ -66,14 +66,10 @@ KNOWN_REQUIRED_EXCEPTIONS = {
         "Error: Unable to find uri[model://cinder_block_wide]"
     ),
     "examples/atlas/sdf/sun/model.sdf": (
-        "File must have a single <model> element."
+        "File must have exactly one <model>"
     ),
     "examples/simple_four_bar/FourBar.sdf": (
         "This mobilizer is creating a closed loop since"
-    ),
-    "multibody/parsing/test/sdf_parser_test/include_models.sdf": (
-        # Needs to be added as a data deps.
-        "Error: Unable to find uri[model://simple_robot1]"
     ),
     "multibody/parsing/test/sdf_parser_test/joint_parsing_test.sdf": (
         # Needs to be supported in configuration stuff (BallRpyJoin).
@@ -88,9 +84,6 @@ KNOWN_REQUIRED_EXCEPTIONS = {
         "Error: Root object can only contain one model. Using the first one found",
         "File must have a single <model> element."
     ),
-    "multibody/parsing/test/sdf_parser_test/include_models.sdf": (
-        "Error: Unable to find uri[model://simple_robot1/]"
-    ),
     "multibody/parsing/test/sdf_parser_test/interface_api_test/top.sdf": (
         "Error: PoseRelativeToGraph unable to find path to source vertex"
     ),
@@ -99,16 +92,6 @@ KNOWN_REQUIRED_EXCEPTIONS = {
 # TODO(eric): How to easily check merge-base vs. feature branch? This is kinda
 # messy.
 KNOWN_POSSIBLE_EXCEPTIONS = {
-    "multibody/parsing/test/sdf_parser_test/world_with_directly_nested_models.sdf": (
-        # Negative test case.
-        "File must have a single <model> element."
-    ),
-    "multibody/parsing/test/sdf_parser_test/model_with_directly_nested_models.sdf": {
-        "Newly added"
-    },
-    "multibody/parsing/test/sdf_parser_test/merge_include_models.sdf": (
-        "Error: Unable to find uri[model://simple_robot1/]"
-    ),
 }
 
 
