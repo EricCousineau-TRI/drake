@@ -372,7 +372,7 @@ class Benchmark(object):
         print("Save: {}".format(filename))
         with open(filename, 'w') as f:
             f.write("# GENERATED FILE - DO NOT EDIT BY HAND\n")
-            yaml.dump(self.to_yaml(), f)
+            yaml.dump(self.to_yaml(), f, default_flow_style=False)
         self.filename = filename
 
 
