@@ -45,10 +45,11 @@ void DoScalarDependentDefinitions(py::module m, T) {
 
         .def_static("AddToBuilder",
             [](systems::DiagramBuilder<T>* builder,
-               const SceneGraph<T>& scene_graph) -> auto&& {
-              return DrakeVisualizer<T>::AddToBuilder(builder, scene_graph);
+               const SceneGraph<T>& scene_graph,
+               lcm::DrakeLcmInterface* lcm) -> auto&& {
+              return DrakeVisualizer<T>::AddToBuilder(builder, scene_graph, lcm);
             },
-            py::arg("builder"), py::arg("scene_graph"),
+            py::arg("builder"), py::arg("scene_graph"), py::arg("lcm") = nullptr,
             // Keep alive, ownership: `return` keeps `builder` alive.
             py::keep_alive<0, 1>(),
             cls_doc.AddToBuilder.doc_4args_builder_scene_graph_lcm_params);
