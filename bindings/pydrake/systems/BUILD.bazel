@@ -395,6 +395,15 @@ drake_py_binary(
     ],
 )
 
+drake_py_library(
+    name = "tmp_py",
+    visibility = ["//tmp:__pkg__"],
+    deps = [
+        ":framework_py",
+        "//bindings/pydrake:geometry_py",
+    ],
+)
+
 drake_jupyter_py_binary(
     name = "jupyter_widgets_examples",
     add_test_rule = 1,
