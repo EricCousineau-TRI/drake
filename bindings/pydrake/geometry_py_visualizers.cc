@@ -295,8 +295,9 @@ void DoScalarIndependentDefinitions(py::module m) {
 
 void DefineGeometryVisualizers(py::module m) {
   DoScalarIndependentDefinitions(m);
-  type_visit([m](auto dummy) { DoScalarDependentDefinitions(m, dummy); },
-      NonSymbolicScalarPack{});
+  DoScalarDependentDefinitions(m, double{});
+  // type_visit([m](auto dummy) { DoScalarDependentDefinitions(m, dummy); },
+  //     NonSymbolicScalarPack{});
 }
 }  // namespace pydrake
 }  // namespace drake

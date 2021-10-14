@@ -5,4 +5,4 @@ from pydrake.systems.framework import DiagramBuilder
 from pydrake.geometry import DrakeVisualizer, SceneGraph
 builder = DiagramBuilder()
 scene_graph = SceneGraph()
-DrakeVisualizer.AddToBuilder(builder, scene_graph)
+DrakeVisualizer.AddToBuilder(builder=builder, scene_graph=scene_graph)
