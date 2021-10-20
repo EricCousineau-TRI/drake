@@ -471,6 +471,21 @@ void DoScalarIndependentDefinitions(py::module m) {
         .def("radius", &Sphere::radius, doc.Sphere.radius.doc)
         .def(py::pickle([](const Sphere& self) { return self.radius(); },
             [](const double radius) { return Sphere(radius); }));
+
+    py::class_<MeshcatCone, Shape>(m, "MeshcatCone", doc.MeshcatCone.doc)
+        .def(py::init<double, double, double>(), py::arg("height"),
+            py::arg("a") = 1.0, py::arg("b") = 1.0, doc.MeshcatCone.ctor.doc)
+        .def("height", &MeshcatCone::height, doc.MeshcatCone.height.doc)
+        .def("a", &MeshcatCone::a, doc.MeshcatCone.a.doc)
+        .def("b", &MeshcatCone::b, doc.MeshcatCone.b.doc)
+        .def(py::pickle(
+            [](const MeshcatCone& self) {
+              return std::make_tuple(self.height(), self.a(), self.b());
+            },
+            [](std::tuple<double, double, double> params) {
+              return MeshcatCone(std::get<0>(params), std::get<1>(params),
+                  std::get<2>(params));
+            }));
   }
 
   m.def("MakePhongIllustrationProperties", &MakePhongIllustrationProperties,
@@ -482,7 +497,7 @@ void DoScalarIndependentDefinitions(py::module m) {
           const std::optional<double>&, const std::optional<double>&,
           const std::optional<multibody::CoulombFriction<double>>&,
           ProximityProperties*>(&AddContactMaterial),
-      py::arg("elastic_modulus") = std::nullopt,
+      py::arg("hydroelastic_modulus") = std::nullopt,
       py::arg("dissipation") = std::nullopt,
       py::arg("point_stiffness") = std::nullopt,
       py::arg("friction") = std::nullopt, py::arg("properties"),

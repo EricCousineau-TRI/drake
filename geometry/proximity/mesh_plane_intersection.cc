@@ -62,7 +62,7 @@ constexpr std::array<std::array<int, 4>, 16> kMarchingTetsTable = {
 }  // namespace
 
 template <typename T>
-void SliceTetWithPlane(VolumeElementIndex tet_index,
+void SliceTetWithPlane(int tet_index,
                        const VolumeMeshFieldLinear<double, double>& field_M,
                        const Plane<T>& plane_M,
                        const math::RigidTransform<T>& X_WM,
@@ -70,15 +70,14 @@ void SliceTetWithPlane(VolumeElementIndex tet_index,
                        std::vector<SurfaceFace>* faces,
                        std::vector<Vector3<T>>* vertices_W,
                        std::vector<T>* surface_e,
-                       std::unordered_map<SortedPair<VolumeVertexIndex>,
-                                          int>* cut_edges) {
+                       std::unordered_map<SortedPair<int>, int>* cut_edges) {
   const VolumeMesh<double>& mesh_M = field_M.mesh();
 
   T distance[4];
   // Bit encoding of the sign of signed-distance: v0, v1, v2, v3.
   int intersection_code = 0;
   for (int i = 0; i < 4; ++i) {
-    const VolumeVertexIndex v = mesh_M.element(tet_index).vertex(i);
+    const int v = mesh_M.element(tet_index).vertex(i);
     distance[i] = plane_M.CalcHeight(mesh_M.vertex(v));
     if (distance[i] > T(0)) intersection_code |= 1 << i;
   }
@@ -102,11 +101,9 @@ void SliceTetWithPlane(VolumeElementIndex tet_index,
     if (edge_index == -1) break;
     ++num_intersections;
     const TetrahedronEdge& tet_edge = kTetEdges[edge_index];
-    const VolumeVertexIndex v0 =
-        mesh_M.element(tet_index).vertex(tet_edge.first);
-    const VolumeVertexIndex v1 =
-        mesh_M.element(tet_index).vertex(tet_edge.second);
-    const SortedPair<VolumeVertexIndex> mesh_edge{v0, v1};
+    const int v0 = mesh_M.element(tet_index).vertex(tet_edge.first);
+    const int v1 = mesh_M.element(tet_index).vertex(tet_edge.second);
+    const SortedPair<int> mesh_edge{v0, v1};
 
     auto iter = cut_edges->find(mesh_edge);
     if (representation == ContactPolygonRepresentation::kCentroidSubdivision &&
@@ -175,7 +172,7 @@ std::unique_ptr<ContactSurface<T>> ComputeContactSurface(
     GeometryId mesh_id,
     const VolumeMeshFieldLinear<double, double>& mesh_field_M,
     GeometryId plane_id, const Plane<T>& plane_M,
-    const std::vector<VolumeElementIndex>& tet_indices,
+    const std::vector<int>& tet_indices,
     const math::RigidTransform<T>& X_WM,
     ContactPolygonRepresentation representation) {
   if (tet_indices.size() == 0) return nullptr;
@@ -183,7 +180,7 @@ std::unique_ptr<ContactSurface<T>> ComputeContactSurface(
   std::vector<SurfaceFace> faces;
   std::vector<Vector3<T>> vertices_W;
   std::vector<T> surface_e;
-  std::unordered_map<SortedPair<VolumeVertexIndex>, int> cut_edges;
+  std::unordered_map<SortedPair<int>, int> cut_edges;
 
   auto grad_eM_W = std::make_unique<std::vector<Vector3<T>>>();
   size_t old_face_count = 0;
@@ -223,9 +220,9 @@ ComputeContactSurfaceFromSoftVolumeRigidHalfSpace(
     const math::RigidTransform<T>& X_WS, const GeometryId id_R,
     const math::RigidTransform<T>& X_WR,
     ContactPolygonRepresentation representation) {
-  std::vector<VolumeElementIndex> tet_indices;
+  std::vector<int> tet_indices;
   tet_indices.reserve(field_S.mesh().num_elements());
-  auto callback = [&tet_indices](VolumeElementIndex tet_index) {
+  auto callback = [&tet_indices](int tet_index) {
     tet_indices.push_back(tet_index);
     return BvttCallbackResult::Continue;
   };

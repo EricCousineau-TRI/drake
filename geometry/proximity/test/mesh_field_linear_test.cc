@@ -135,7 +135,7 @@ GTEST_TEST(MeshFieldLinearTest, TestEvaluateGradient) {
       std::make_unique<MeshFieldLinear<double, SurfaceMesh<double>>>(
           std::move(e_values), mesh.get());
 
-  Vector3d gradient = mesh_field->EvaluateGradient(SurfaceFaceIndex(0));
+  Vector3d gradient = mesh_field->EvaluateGradient(0);
 
   Vector3d expect_gradient(1., 1., 0.);
   EXPECT_TRUE(CompareMatrices(expect_gradient, gradient, 1e-14));
@@ -151,7 +151,7 @@ GTEST_TEST(MeshFieldLinearTest, TestEvaluateGradientThrow) {
       std::make_unique<MeshFieldLinear<double, SurfaceMesh<double>>>(
           std::move(e_values), mesh.get(), calculate_gradient);
 
-  EXPECT_THROW(mesh_field->EvaluateGradient(SurfaceFaceIndex(0)),
+  EXPECT_THROW(mesh_field->EvaluateGradient(0),
                std::runtime_error);
 }
 
@@ -166,7 +166,7 @@ GTEST_TEST(MeshFieldLinearTest, TestTransformGradients) {
 
   // We will not check all gradient vectors. Instead we will use the gradient
   // vector of the first triangle as a representative.
-  Vector3d gradient_M = mesh_field->EvaluateGradient(SurfaceFaceIndex(0));
+  Vector3d gradient_M = mesh_field->EvaluateGradient(0);
 
   // Confirm the gradient vector before rigid transform.
   Vector3d expect_gradient_M(1., 1., 0.);
@@ -177,7 +177,7 @@ GTEST_TEST(MeshFieldLinearTest, TestTransformGradients) {
   mesh->TransformVertices(X_MN);
   mesh_field->TransformGradients(X_MN);
 
-  Vector3d gradient_N = mesh_field->EvaluateGradient(SurfaceFaceIndex(0));
+  Vector3d gradient_N = mesh_field->EvaluateGradient(0);
   Vector3d expect_gradient_N = X_MN.rotation() * expect_gradient_M;
 
   EXPECT_TRUE(CompareMatrices(expect_gradient_N, gradient_N, 1e-14));
@@ -197,8 +197,8 @@ GTEST_TEST(MeshFieldLinearTest, EvaluateCartesianWithAndWithoutGradient) {
   // "positive tetrahedron" and the latter "negative tetrahedron".
   // No tetrahedron crosses the x=0 plane in frame M. Obviously we assume
   // the tetrahedra fill the volume of the box.
-  std::set<VolumeElementIndex> positive_set;  // set of positive tetrahedra.
-  for (VolumeElementIndex e(0); e < mesh_M.num_elements(); ++e) {
+  std::set<int> positive_set;  // set of positive tetrahedra.
+  for (int e = 0; e < mesh_M.num_elements(); ++e) {
     int num_positive_or_zero = 0;
     int num_negative_or_zero = 0;
     for (int i = 0; i < 4; ++i) {
@@ -251,9 +251,8 @@ GTEST_TEST(MeshFieldLinearTest, EvaluateCartesianWithAndWithoutGradient) {
   const MeshFieldLinear<double, VolumeMesh<double>> field_with_gradient(
       std::move(values), &mesh_M, true);
 
-  ASSERT_THROW(field_without_gradient.EvaluateGradient(VolumeElementIndex(0)),
-               std::runtime_error);
-  ASSERT_NO_THROW(field_with_gradient.EvaluateGradient(VolumeElementIndex(0)));
+  ASSERT_THROW(field_without_gradient.EvaluateGradient(0), std::runtime_error);
+  ASSERT_NO_THROW(field_with_gradient.EvaluateGradient(0));
 
   {
     // Evaluating the field for points within tetrahedra.  The tolerance
@@ -265,7 +264,7 @@ GTEST_TEST(MeshFieldLinearTest, EvaluateCartesianWithAndWithoutGradient) {
           Barycentric{0.49999, 0.49999, 1e-5, 1e-5} /* near edge */}) {
       // TODO(SeanCurtis-TRI): it's ridiculous that we don't have a mesh method
       //  that turns (element index, barycentric) --> cartesian.
-      for (VolumeElementIndex e(0); e < mesh_M.num_elements(); ++e) {
+      for (int e = 0; e < mesh_M.num_elements(); ++e) {
         Vector3d p_MQ{0, 0, 0};
         for (int i = 0; i < 4; ++i) {
           p_MQ += mesh_M.vertex(mesh_M.element(e).vertex(i)) * b_Q(i);
@@ -285,7 +284,7 @@ GTEST_TEST(MeshFieldLinearTest, EvaluateCartesianWithAndWithoutGradient) {
   for (const Vector3d& p_MQ :
        {Vector3d{1e-15, 1e-15, 1e-15}, Vector3d{0.1, 0.2, 0.3},
         Vector3d{-10.23, 27, 77}, Vector3d{321.3, -843.2, 202.02}}) {
-    for (VolumeElementIndex e(0); e < mesh_M.num_elements(); ++e) {
+    for (int e = 0; e < mesh_M.num_elements(); ++e) {
       if (positive_set.count(e) == 1) {
         // f⁺(x,y,z) =  3.5x - 2.7y + 0.7z + 1.23
         const double expect = f_p(p_MQ);
@@ -358,8 +357,8 @@ class ScalarMixingTest : public ::testing::Test {
   std::unique_ptr<MeshFieldLinear<double, SurfaceMesh<double>>> field_d_;
   std::unique_ptr<MeshFieldLinear<AutoDiffXd, SurfaceMesh<double>>> field_ad_;
 
-  SurfaceFaceIndex e0_{0};
-  SurfaceFaceIndex e1_{1};
+  int e0_{0};
+  int e1_{1};
   // The centroid of triangle 0.
   Vector3<double> p_WQ_d_;
   Vector3<AutoDiffXd> p_WQ_ad_;

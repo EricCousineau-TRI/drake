@@ -128,7 +128,7 @@ ContactSurface<T> TestContactSurface() {
   EXPECT_EQ(4, contact_surface.mesh_W().num_vertices());
   // Tests evaluation of `e` on face f0 {0, 1, 2}.
   {
-    const SurfaceFaceIndex f0(0);
+    const int f0{0};
     const typename SurfaceMesh<T>::template Barycentric<double> b{0.2, 0.3,
                                                                   0.5};
     const T expect_e = b(0) * e0 + b(1) * e1 + b(2) * e2;
@@ -136,8 +136,8 @@ ContactSurface<T> TestContactSurface() {
   }
   // Tests area() of triangular faces.
   {
-    EXPECT_EQ(T(0.5), contact_surface.mesh_W().area(SurfaceFaceIndex(0)));
-    EXPECT_EQ(T(0.5), contact_surface.mesh_W().area(SurfaceFaceIndex(1)));
+    EXPECT_EQ(T(0.5), contact_surface.mesh_W().area(0));
+    EXPECT_EQ(T(0.5), contact_surface.mesh_W().area(1));
   }
 
   return contact_surface;
@@ -146,8 +146,6 @@ ContactSurface<T> TestContactSurface() {
 // Tests the ContactSurface with constituent gradients: construction, successful
 // reversal, access, etc.
 GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
-  using Index = SurfaceMesh<double>::ElementIndex;
-
   // Define two ids: A and B. When we create a ContactSurface with A and B in
   // that order, then the data is taken as is (i.e., A --> M, B --> N). When
   // we reverse the order, ContactSurface will swap/reverse the data so that
@@ -173,9 +171,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         id_A, id_B, make_unique<SurfaceMesh<double>>(*surface_mesh),
         make_e_field(surface_mesh.get()), nullptr, nullptr);
     EXPECT_FALSE(surface.HasGradE_M());
-    EXPECT_THROW(surface.EvaluateGradE_M_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_M_W(1), std::runtime_error);
     EXPECT_FALSE(surface.HasGradE_N());
-    EXPECT_THROW(surface.EvaluateGradE_N_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_N_W(1), std::runtime_error);
   }
 
   {
@@ -186,9 +184,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), make_unique<vector<Vector3d>>(grad_e),
         nullptr);
     EXPECT_TRUE(surface.HasGradE_M());
-    EXPECT_EQ(surface.EvaluateGradE_M_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_M_W(1), grad_e[1]);
     EXPECT_FALSE(surface.HasGradE_N());
-    EXPECT_THROW(surface.EvaluateGradE_N_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_N_W(1), std::runtime_error);
   }
 
   {
@@ -199,9 +197,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), make_unique<vector<Vector3d>>(grad_e),
         nullptr);
     EXPECT_FALSE(surface.HasGradE_M());
-    EXPECT_THROW(surface.EvaluateGradE_M_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_M_W(1), std::runtime_error);
     EXPECT_TRUE(surface.HasGradE_N());
-    EXPECT_EQ(surface.EvaluateGradE_N_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_N_W(1), grad_e[1]);
   }
 
   {
@@ -212,9 +210,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), nullptr,
         make_unique<vector<Vector3d>>(grad_e));
     EXPECT_FALSE(surface.HasGradE_M());
-    EXPECT_THROW(surface.EvaluateGradE_M_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_M_W(1), std::runtime_error);
     EXPECT_TRUE(surface.HasGradE_N());
-    EXPECT_EQ(surface.EvaluateGradE_N_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_N_W(1), grad_e[1]);
   }
 
   {
@@ -225,9 +223,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), nullptr,
         make_unique<vector<Vector3d>>(grad_e));
     EXPECT_TRUE(surface.HasGradE_M());
-    EXPECT_EQ(surface.EvaluateGradE_M_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_M_W(1), grad_e[1]);
     EXPECT_FALSE(surface.HasGradE_N());
-    EXPECT_THROW(surface.EvaluateGradE_N_W(Index(1)), std::runtime_error);
+    EXPECT_THROW(surface.EvaluateGradE_N_W(1), std::runtime_error);
   }
 
   vector<Vector3d> grad_e2;
@@ -242,9 +240,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), make_unique<vector<Vector3d>>(grad_e),
         make_unique<vector<Vector3d>>(grad_e2));
     EXPECT_TRUE(surface.HasGradE_M());
-    EXPECT_EQ(surface.EvaluateGradE_M_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_M_W(1), grad_e[1]);
     EXPECT_TRUE(surface.HasGradE_N());
-    EXPECT_EQ(surface.EvaluateGradE_N_W(Index(1)), grad_e2[1]);
+    EXPECT_EQ(surface.EvaluateGradE_N_W(1), grad_e2[1]);
   }
 
   {
@@ -255,9 +253,9 @@ GTEST_TEST(ContactSurfaceTest, ConstituentGradients) {
         make_e_field(surface_mesh.get()), make_unique<vector<Vector3d>>(grad_e),
         make_unique<vector<Vector3d>>(grad_e2));
     EXPECT_TRUE(surface.HasGradE_M());
-    EXPECT_EQ(surface.EvaluateGradE_M_W(Index(1)), grad_e2[1]);
+    EXPECT_EQ(surface.EvaluateGradE_M_W(1), grad_e2[1]);
     EXPECT_TRUE(surface.HasGradE_N());
-    EXPECT_EQ(surface.EvaluateGradE_N_W(Index(1)), grad_e[1]);
+    EXPECT_EQ(surface.EvaluateGradE_N_W(1), grad_e[1]);
   }
 }
 
@@ -279,7 +277,7 @@ GTEST_TEST(ContactSurfaceTest, TestCopy) {
   EXPECT_EQ(original.mesh_W().num_faces(), copy.mesh_W().num_faces());
 
   // We check evaluation of field values only at one position.
-  const SurfaceFaceIndex f(0);
+  const int f{0};
   const typename SurfaceMesh<double>::Barycentric<double> b{0.2, 0.3, 0.5};
   EXPECT_EQ(original.e_MN().Evaluate(f, b), copy.e_MN().Evaluate(f, b));
 }
@@ -348,7 +346,7 @@ GTEST_TEST(ContactSurfaceTest, TestSwapMAndN) {
            f1.vertex(2) == f2.vertex(2);
   };
   // Face winding is changed.
-  for (SurfaceFaceIndex f(0); f < original.mesh_W().num_faces(); ++f) {
+  for (int f = 0; f < original.mesh_W().num_faces(); ++f) {
     EXPECT_FALSE(
         are_identical(dut.mesh_W().element(f), original.mesh_W().element(f)));
   }
@@ -356,7 +354,7 @@ GTEST_TEST(ContactSurfaceTest, TestSwapMAndN) {
   // Evaluate the mesh field, once per face for an arbitrary point Q on the
   // interior of the triangle. We expect e_MN function hasn't changed.
   const SurfaceMesh<double>::Barycentric<double> b_Q{0.25, 0.25, 0.5};
-  for (SurfaceFaceIndex f(0); f < original.mesh_W().num_faces(); ++f) {
+  for (int f = 0; f < original.mesh_W().num_faces(); ++f) {
     EXPECT_EQ(dut.e_MN().Evaluate(f, b_Q), original.e_MN().Evaluate(f, b_Q));
   }
 }
