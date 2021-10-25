@@ -313,11 +313,12 @@ class TestCustom(unittest.TestCase):
                     "system reset", WitnessFunctionDirection.kCrossesZero,
                     self._guard, UnrestrictedUpdateEvent(
                         system_callback=self._system_reset))
+                value_producer = ValueProducer(
+                    allocate=lambda: Scratch(),
+                    calc=ValueProducer.NoopCalc)
                 scratch_cache_entry = self.DeclareCacheEntry(
                     description="scatch",
-                    value_producer=ValueProducer(
-                        allocate=lambda: Scratch(),
-                        calc=ValueProducer.NoopCalc),
+                    value_producer=value_producer,
                     prerequisites_of_calc={self.nothing_ticket()})
                 test.check_cache_entry(scratch_cache_entry)
                 self._scratch_cache_index = scratch_cache_entry.cache_index()
