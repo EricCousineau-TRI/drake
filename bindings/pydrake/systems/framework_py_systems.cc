@@ -307,6 +307,19 @@ struct Impl {
             py_rvp::reference_internal, py::arg("name"), py::arg("type"),
             py::arg("size"), py::arg("random_type") = std::nullopt,
             doc.System.DeclareInputPort.doc)
+        .def("DeclareCacheEntry",
+            [](System<T>* self,
+               std::string description,
+               ValueProducer value_producer, 
+               std::set<DependencyTicket> prerequisites_of_calc) -> auto& {
+              return self->DeclareCacheEntry(
+                  description, value_producer, prerequisites_of_calc);
+            },
+          py_rvp::reference_internal,
+          py::arg("description"), py::arg("value_producer"),
+          py::arg("prerequisites_of_calc") =
+              std::set<DependencyTicket>{SystemBase::all_sources_ticket()},
+          doc.SystemBase.DeclareCacheEntry.doc_3args_description_value_producer_prerequisites_of_calc)
         // Feedthrough.
         .def("HasAnyDirectFeedthrough", &System<T>::HasAnyDirectFeedthrough,
             doc.System.HasAnyDirectFeedthrough.doc)

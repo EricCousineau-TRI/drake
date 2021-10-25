@@ -16,6 +16,7 @@ from pydrake.systems.framework import (
     AbstractParameterIndex,
     AbstractStateIndex,
     BasicVector, BasicVector_,
+    CacheEntry,
     CacheIndex,
     Context,
     ContinuousStateIndex,
@@ -32,6 +33,7 @@ from pydrake.systems.framework import (
     System,
     TriggerType,
     UnrestrictedUpdateEvent,
+    ValueProducer,
     VectorSystem,
     WitnessFunctionDirection,
     kUseDefaultName,
@@ -236,8 +238,18 @@ class TestCustom(unittest.TestCase):
             Oops()
         self.assertIn("LeafSystem_[float].__init__", str(cm.exception))
 
+    def check_cache_entry(self, entry):
+        self.assertIsInstance(entry, CacheEntry)
+        self.assertIsInstance(entry.prerequisites(), set)
+        self.assertIsInstance(entry.cache_index(), CacheIndex)
+        self.assertIsInstance(entry.ticket(), DependencyTicket)
+
     def test_all_leaf_system_overrides(self):
         test = self
+
+        class Scratch:
+            """Simple object to test abstract values for caching."""
+            pass
 
         class TrivialSystem(LeafSystem):
             def __init__(self):
@@ -301,6 +313,14 @@ class TestCustom(unittest.TestCase):
                     "system reset", WitnessFunctionDirection.kCrossesZero,
                     self._guard, UnrestrictedUpdateEvent(
                         system_callback=self._system_reset))
+                scratch_cache_entry = self.DeclareCacheEntry(
+                    description="scatch",
+                    value_producer=ValueProducer(
+                        allocate=lambda: Scratch(),
+                        calc=ValueProducer.NoopCalc),
+                    prerequisites_of_calc={self.nothing_ticket()})
+                test.check_cache_entry(scratch_cache_entry)
+                self._scratch_cache_index = scratch_cache_entry.cache_index()
 
             def DoPublish(self, context, events):
                 # Call base method to ensure we do not get recursion.
@@ -330,6 +350,14 @@ class TestCustom(unittest.TestCase):
                 self.called_getwitness = True
                 return [self.witness, self.reset_witness,
                         self.system_reset_witness]
+
+            def get_scratch_value(self, context):
+                scratch_cache_entry = self.get_cache_entry(
+                    self._scratch_cache_index)
+                entry = scratch_cache_entry.get_mutable_cache_entry_value(
+                    context)
+                abstract_value = entry.GetAbstractValueOrThrow()
+                return abstract_value.get_mutable_value()
 
             def _on_initialize(self, context, event):
                 test.assertIsInstance(context, Context)
@@ -405,6 +433,17 @@ class TestCustom(unittest.TestCase):
             context=context,
             discrete_state=context_update.get_mutable_discrete_state())
         self.assertTrue(system.called_discrete)
+
+        scratch = system.get_scratch_value(context)
+        self.assertIsInstance(scratch, Scratch)
+        # Ensure we get the same value when retrieving from the same
+        # context.
+        scratch_again = system.get_scratch_value(context)
+        self.assertIs(scratch, scratch_again)
+        # Ensure we do not get the same value when retrieving from another
+        # context.
+        scratch_update = system.get_scratch_value(context_update)
+        self.assertIsNot(scratch, scratch_update)
 
         # Test per-step, periodic, and witness call backs
         system = TrivialSystem()

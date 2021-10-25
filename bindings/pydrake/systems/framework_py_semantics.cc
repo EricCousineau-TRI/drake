@@ -191,6 +191,34 @@ void DoScalarIndependentDefinitions(py::module m) {
           doc.ContextBase.UnfreezeCache.doc)
       .def("is_cache_frozen", &ContextBase::is_cache_frozen,
           doc.ContextBase.is_cache_frozen.doc);
+
+  {
+    using Class = ValueProducer;
+    constexpr auto& cls_doc = doc.ValueProducer;
+    py::class_<Class>(m, "ValueProducer", cls_doc.doc)
+        .def(py::init(
+            WrapCallbacks([](
+                ValueProducer::AllocateCallback allocate,
+                ValueProducer::CalcCallback calc) {
+              return Class(allocate, calc);
+            })),
+            py::arg("allocate"), py::arg("calc"),
+            cls_doc.ctor.doc_overload_5d)
+        .def_static(
+            "NoopCalc",
+            &Class::NoopCalc,
+            py::arg("context"), py::arg("value"),
+            cls_doc.NoopCalc.doc);
+  }
+
+  {
+    using Class = CacheEntry;
+    constexpr auto& cls_doc = doc.CacheEntry;
+    py::class_<Class>(m, "CacheEntry", cls_doc.doc)
+        .def("prerequisites", &Class::prerequisites, cls_doc.prerequisites.doc)
+        .def("cache_index", &Class::cache_index, cls_doc.cache_index.doc)
+        .def("ticket", &Class::ticket, cls_doc.ticket.doc);
+  }
 }
 
 template <typename T>
