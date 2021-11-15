@@ -6,7 +6,7 @@ Captures limitations for the present state of the Python bindings for the
 lifetime of objects, eventually lock down capabilities as they are introduced.
 """
 
-
+import gc
 import unittest
 import numpy as np
 
@@ -23,6 +23,11 @@ from pydrake.systems.test.test_util import (
     DeleteListenerSystem,
     DeleteListenerVector,
     )
+
+from pydrake.common.value import AbstractValue
+from pydrake.math import RigidTransform
+from pydrake.systems.primitives import ConstantValueSource
+
 
 
 class Info:
@@ -114,3 +119,23 @@ class TestLifetime(unittest.TestCase):
         self.assertTrue(np.allclose(vector.get_value(), [0.]))
         vector.get_mutable_value()[:] = [10.]
         self.assertTrue(np.allclose(vector.get_value(), [10.]))
+
+    def test_other(self):
+
+        def _create_context_value_reference():
+            """Returns a reference to a C++ object whose storage comes from inside a Context.
+            The return value should keep the entire (otherwise-unused) context alive.
+            """
+            system = ConstantValueSource(AbstractValue.Make(RigidTransform()))
+            context = system.CreateDefaultContext()
+            return system.get_output_port().Eval(context)
+
+        # Check that the object still retains its correct value.
+        X = _create_context_value_reference()
+        print(X)
+        assert X.IsExactlyIdentity()
+
+        gc.collect()
+        # Re-check that the object still retains its correct value.
+        print(X)
+        assert X.IsExactlyIdentity()
