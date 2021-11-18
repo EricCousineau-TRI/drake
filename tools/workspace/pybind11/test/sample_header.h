@@ -44,10 +44,10 @@ namespace drake {
  * 3. Begin third ordered list element. Dictum sit amet justo donec enim.
  *    Pharetra convallis posuere morbi leo urna molestie. End third ordered
  *    list element.
- *
  * Senectus et netus et malesuada fames ac. Tincidunt lobortis feugiat vivamus
  * at augue eget arcu dictum varius.
  */
+// Oops this may break things.
 struct MidLevelSymbol {};
 
 namespace mkdoc_test {

@@ -1,6 +1,6 @@
 #pragma once
 
-// <GENERIC MARKER SCRUBBED FOR REVIEWABLE>
+// GENERATED FILE DO NOT EDIT
 // This file contains docstrings for the Python bindings that were
 // automatically extracted by mkdoc.py.
 
@@ -32,10 +32,8 @@ element. Ipsum faucibus vitae aliquet nec. Ligula ullamcorper
 malesuada proin libero. End second ordered list element. 3. Begin
 third ordered list element. Dictum sit amet justo donec enim. Pharetra
 convallis posuere morbi leo urna molestie. End third ordered list
-element.
-
-Senectus et netus et malesuada fames ac. Tincidunt lobortis feugiat
-vivamus at augue eget arcu dictum varius.)""";
+element. Senectus et netus et malesuada fames ac. Tincidunt lobortis
+feugiat vivamus at augue eget arcu dictum varius.)""";
     } MidLevelSymbol;
     // Symbol: drake::mkdoc_test
     struct /* mkdoc_test */ {
