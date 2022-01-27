@@ -28,7 +28,10 @@ def method_py():
     builder = DiagramBuilder()
     plant, scene_graph = AddMultibodyPlantSceneGraph(builder, 1e-4)
     addFlatTerrain_py(plant=plant, scene_graph=scene_graph, mu_static=1.0, mu_kinetic=1.0)
-
+    plant.Finalize()
+    DrakeVisualizer.AddToBuilder(builder, scene_graph)
+    diagram = builder.Build()
+    Simulator(diagram).AdvanceTo(0.1)
 
 
 def method_cc():
@@ -36,6 +39,10 @@ def method_cc():
     builder = DiagramBuilder()
     plant, scene_graph = AddMultibodyPlantSceneGraph(builder, 1e-4)
     addFlatTerrain(plant=plant, scene_graph=scene_graph, mu_static=1.0, mu_kinetic=1.0)
+    plant.Finalize()
+    DrakeVisualizer.AddToBuilder(builder, scene_graph)
+    diagram = builder.Build()
+    Simulator(diagram).AdvanceTo(0.1)
 
 
 def main():
