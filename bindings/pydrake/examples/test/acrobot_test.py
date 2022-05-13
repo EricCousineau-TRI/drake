@@ -65,6 +65,20 @@ class TestAcrobot(unittest.TestCase):
         builder.Build()
         self.assertIsInstance(geom, AcrobotGeometry)
 
+    def test_hack_from_repro(self):
+        from pydrake.examples.acrobot import (AcrobotPlant)
+        acrobot = AcrobotPlant()
+        context = acrobot.CreateDefaultContext()
+        state = acrobot.get_mutable_state(context)
+        state.set_theta1(1.)
+        state.set_theta1dot(2.)
+        state.set_theta2(3.)
+        state.set_theta2dot(4.)
+        print(state)
+        state_2 = acrobot.get_mutable_state(context)
+        # Fails here?
+        self.assertIs(state, state_2)
+
     def test_simulation(self):
         # Basic constant-torque acrobot simulation.
         acrobot = AcrobotPlant()
@@ -84,6 +98,12 @@ class TestAcrobot(unittest.TestCase):
         state.set_theta1dot(0.)
         state.set_theta2(0.)
         state.set_theta2dot(0.)
+        # Observe changes.
+        state_2 = context.get_continuous_state_vector()
+        self.assertEqual(state_2.theta1(), 1.)
+        self.assertEqual(state_2.theta1dot(), 0.)
+        self.assertEqual(state_2.theta2(), 0.)
+        self.assertEqual(state_2.theta2dot(), 0.)
 
         self.assertIsInstance(acrobot.get_state(context=context), AcrobotState)
         self.assertIsInstance(acrobot.get_mutable_state(context=context),
@@ -92,6 +112,14 @@ class TestAcrobot(unittest.TestCase):
                               AcrobotParams)
         self.assertIsInstance(acrobot.get_mutable_parameters(context=context),
                               AcrobotParams)
+        # Ensure we do not copy.
+        self.assertIs(acrobot.get_state(context), acrobot.get_state(context))
+        # Ensure mutable view is the same object as (ideally) immutable view.
+        self.assertIs(acrobot.get_state(context), acrobot.get_mutable_state(context))
+        state_a = acrobot.get_mutable_state(context)
+        state_b = acrobot.get_mutable_state(context)
+        self.assertIs(state_a, state_b)
+        print("Succeeds")
 
         self.assertTrue(acrobot.DynamicsBiasTerm(context).shape == (2,))
         self.assertTrue(acrobot.MassMatrix(context).shape == (2, 2))
