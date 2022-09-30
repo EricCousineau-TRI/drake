@@ -1,5 +1,7 @@
 # -*- python -*-
 
+# HACK = "/home/eacousineau/proj/tri/repo/branches/drake/master/drake/.venv/bin/python"
+
 # Default value of interpreter_path used by the py_runtime in the default
 # Python toolchain registered on the @platforms//os:linux platform.
 LINUX_INTERPRETER_PATH = "/usr/bin/python3"
