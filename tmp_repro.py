@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "/home/eacousineau/proj/tri/repo/branches/drake/master/drake/.venv/lib/python3.8/site-packages")
+# import sys
+# sys.path.insert(0, "/home/eacousineau/proj/tri/repo/branches/drake/master/drake/.venv/lib/python3.8/site-packages")
 
 import numpy as np
 from pydrake.symbolic import MakeVectorVariable
