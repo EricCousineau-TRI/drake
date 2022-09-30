@@ -13,7 +13,8 @@ pip install numpy==1.21.1
 
 deactivate
 
-bazel run \
-    --test_env=PYTHONPATH=${PWD}/.venv/lib/python3.8/site-packages \
-    //:tmp_repro
+# bazel run \
+#     --test_env=PYTHONPATH=${PWD}/.venv/lib/python3.8/site-packages \
+#     //:py/tmp_repro
+./bazel-bin/py/tmp_repro
 ```
