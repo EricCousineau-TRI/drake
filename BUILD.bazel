@@ -94,3 +94,16 @@ add_lint_tests(
         "cmake/external/workspace/fmt/BUILD.bazel.in",
     ],
 )
+
+
+# Hack
+load(
+    "@drake//tools/skylark:drake_py.bzl",
+    "drake_py_binary",
+)
+
+drake_py_binary(
+    name = "tmp_repro",
+    srcs = ["tmp_repro.py"],
+    deps = ["//bindings/pydrake"],
+)
