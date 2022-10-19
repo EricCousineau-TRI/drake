@@ -106,12 +106,12 @@ PYBIND11_MODULE(serialize_test_util, m) {
   // This simulates forgetting to import a dependent module or bind a required
   // type.
   m.def("bind_MyData3", [m]() {
-    py::class_<MyData3> cls3(m, "MyData3");
-    cls3  // BR
-        .def(py::init())
-        .def(ParamInit<MyData3>());
-    DefAttributesUsingSerialize(&cls3);
-    DefReprUsingSerialize(&cls3);
+    // py::class_<MyData3> cls3(m, "MyData3");
+    // cls3  // BR
+    //     .def(py::init())
+    //     .def(ParamInit<MyData3>());
+    // DefAttributesUsingSerialize(&cls3);
+    // DefReprUsingSerialize(&cls3);
   });
   // Binding of MyData4.
   py::class_<MyData4> cls4(m, "MyData4");
