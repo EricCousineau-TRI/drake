@@ -695,6 +695,7 @@ def main():
     ignore_patterns = []
     output_filename = None
     output_filename_xml = None
+    ouput_all = None
 
     # TODO(m-chaturvedi): Consider using argparse.
     for item in sys.argv[1:]:
@@ -704,6 +705,8 @@ def main():
             output_filename = item[len('-output='):]
         elif item.startswith('-output_xml='):
             output_filename_xml = item[len('-output_xml='):]
+        elif item.startswith('-output_all='):
+            output_all = item[len('-output_all='):]
         elif item.startswith('-std='):
             std = item
         elif item.startswith('-ignore-dirs-for-coverage='):
@@ -731,6 +734,9 @@ def main():
     f_xml = None
     if output_filename_xml is not None:
         f_xml = open(output_filename_xml, 'w')
+    f_all = None
+    if output_all is not None:
+        f_all = open(output_all, "w")
 
     # N.B. We substitute the `GENERATED FILE...` bits in this fashion because
     # otherwise Reviewable gets confused.
@@ -792,6 +798,7 @@ def main():
     tmpdir = output_filename + ".tmp_artifacts"
     os.mkdir(tmpdir)
     glue_filename = os.path.join(tmpdir, "mkdoc_glue.h")
+
     with open(glue_filename, 'w') as glue_f:
         # As the first line of the glue file, include a C++17 standard library
         # file to sanity check that it's working, before we start processing
@@ -802,6 +809,7 @@ def main():
             line = "#include \"{}\"".format(include_file)
             glue_f.write(line + "\n")
             f.write("// " + line + "\n")
+            f_all.write(line + "\n")
         f.write("\n")
         glue_f.flush()
         if not quiet:
@@ -866,8 +874,12 @@ If you are on Ubuntu, please ensure you have en_US.UTF-8 locales generated:
 #pragma GCC diagnostic pop
 #endif
 ''')
+
     if f_xml is not None:
         f_xml.write(prettify(tree_parser["tree_parser_xpath"][0]))
+        f_xml.close()
+    if f_all is not None:
+        f_all.close()
 
 
 if __name__ == '__main__':

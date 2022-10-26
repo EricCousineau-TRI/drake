@@ -62,6 +62,7 @@ generate_pybind_documentation_header(
         "drake/common/yaml",
         "drake/examples",
     ],
+    out_all = "all.h",
     out_xml = "documentation_pybind.xml",
     root_name = "pydrake_doc",
     targets = [

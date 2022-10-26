@@ -426,6 +426,10 @@ def _generate_pybind_documentation_header_impl(ctx):
     if out_xml != None:
         outputs.append(out_xml)
         args.add("-output_xml=" + out_xml.path)
+    out_all = getattr(ctx.outputs, "out_all", None)
+    if out_all != None:
+        outputs.append(out_all)
+        args.add("-output_all=" + out_all.path)
     args.add("-quiet")
     args.add("-root-name=" + ctx.attr.root_name)
     args.add("-ignore-dirs-for-coverage=" +
@@ -471,6 +475,7 @@ generate_pybind_documentation_header = rule(
             executable = True,
         ),
         "out": attr.output(mandatory = True),
+        "out_all": attr.output(mandatory = False),
         "out_xml": attr.output(mandatory = False),
         "root_name": attr.string(default = "pydrake_doc"),
         "exclude_hdr_patterns": attr.string_list(),
