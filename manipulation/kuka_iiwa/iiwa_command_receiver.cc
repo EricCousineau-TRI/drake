@@ -18,7 +18,7 @@ using systems::NumericParameterIndex;
 using systems::kVectorValued;
 
 IiwaCommandReceiver::IiwaCommandReceiver(int num_joints, int control_mode)
-    : num_joints_(num_joints) {
+    : num_joints_(num_joints), control_mode_(control_mode) {
   DRAKE_THROW_UNLESS(num_joints > 0);
   DRAKE_THROW_UNLESS(
       control_mode_ >= kIiwaPositionMode
@@ -98,6 +98,12 @@ void IiwaCommandReceiver::LatchInitialPosition(
 void IiwaCommandReceiver::DoCalcNextUpdateTime(
     const Context<double>& context,
     CompositeEventCollection<double>* events, double* time) const {
+  const bool has_position = control_mode_ & kIiwaPositionMode;
+  if (!has_position) {
+    // No need to schedule events.
+    return;
+  }
+
   // We do not support events other than our own message timing events.
   LeafSystem<double>::DoCalcNextUpdateTime(context, events, time);
   DRAKE_THROW_UNLESS(events->HasEvents() == false);

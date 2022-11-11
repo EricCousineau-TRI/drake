@@ -21,12 +21,12 @@ class IiwaCommandReceiverTest : public testing::Test {
   void MakeDut(Args&&... args) {
     dut_ = std::make_unique<IiwaCommandReceiver>(
           kIiwaArmNumJoints, std::forward<Args>(args)...);
-    context_ptr_ = dut().CreateDefaultContext();
-    fixed_input_ = FixInput();
+    context_ = dut().CreateDefaultContext();
+    fixed_input_ = &FixInput();
   }
 
   IiwaCommandReceiver& dut() { return *dut_; }
-  systems::Context<double>& context() { return *context_ptr_; }
+  systems::Context<double>& context() { return *context_; }
   systems::FixedInputPortValue& fixed_input() { return *fixed_input_; }
 
   // For use only by our constructor.
@@ -42,17 +42,17 @@ class IiwaCommandReceiverTest : public testing::Test {
         template get_mutable_value<lcmt_iiwa_command>() = message;
   }
 
-  VectorXd position() const {
+  VectorXd position() {
     const auto& port = dut().get_commanded_position_output_port();
     const VectorXd result = port.Eval(context());
     return result;
   }
 
-  VectorXd torque() const {
+  VectorXd torque() {
     return dut().get_commanded_torque_output_port().Eval(context());
   }
 
-  double time_output() const {
+  double time_output() {
     return dut().get_time_output_port().Eval(context())[0];
   }
 
@@ -65,6 +65,7 @@ class IiwaCommandReceiverTest : public testing::Test {
 constexpr double kCommandTime = 1.2;
 
 TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithoutMeasuredPositionInput) {
+  MakeDut();
   // When no message has been received and *no* position measurement is
   // connected, the command is all zeros.
   const VectorXd zero = VectorXd::Zero(N);
@@ -74,6 +75,7 @@ TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithoutMeasuredPositionInput) {
 }
 
 TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithMeasuredPositionInput) {
+  MakeDut();
   const VectorXd zero = VectorXd::Zero(N);
 
   // When no message has been received and a measurement *is* connected, the
@@ -106,6 +108,7 @@ TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithMeasuredPositionInput) {
 }
 
 TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithLatching) {
+  MakeDut();
   const VectorXd zero = VectorXd::Zero(N);
 
   // When no message has been received and a measurement *is* connected, the
@@ -144,6 +147,19 @@ TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithLatching) {
   EXPECT_TRUE(CompareMatrices(position(), q3));
   EXPECT_TRUE(CompareMatrices(torque(), t3));
   EXPECT_EQ(time_output(), kCommandTime);
+}
+
+TEST_F(IiwaCommandReceiverTest, TorqueOnly) {
+  MakeDut(kIiwaTorqueMode);
+  EXPECT_THROW(dut().get_commanded_position_output_port(), std::runtime_error);
+  const VectorXd t0 = VectorXd::LinSpaced(N, 0.5, 0.6);
+  lcmt_iiwa_command command{};
+  command.utime = kCommandTime * 1e6;
+  command.num_joints = 0;
+  command.num_torques = N;
+  command.joint_torque = {t0.data(), t0.data() + t0.size()};
+  SetInput(command);
+  EXPECT_TRUE(CompareMatrices(torque(), t0));
 }
 
 }  // namespace
