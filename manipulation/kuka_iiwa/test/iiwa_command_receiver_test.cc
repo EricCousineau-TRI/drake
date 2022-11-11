@@ -15,11 +15,19 @@ constexpr int N = kIiwaArmNumJoints;
 
 class IiwaCommandReceiverTest : public testing::Test {
  public:
-  IiwaCommandReceiverTest()
-      : dut_(),
-        context_ptr_(dut_.CreateDefaultContext()),
-        context_(*context_ptr_),
-        fixed_input_(FixInput()) {}
+  IiwaCommandReceiverTest() {}
+
+  template <typename... Args>
+  void MakeDut(Args&&... args) {
+    dut_ = std::make_unique<IiwaCommandReceiver>(
+          kIiwaArmNumJoints, std::forward<Args>(args)...);
+    context_ptr_ = dut().CreateDefaultContext();
+    fixed_input_ = FixInput();
+  }
+
+  IiwaCommandReceiver& dut() { return *dut_; }
+  systems::Context<double>& context() { return *context_ptr_; }
+  systems::FixedInputPortValue& fixed_input() { return *fixed_input_; }
 
   // For use only by our constructor.
   systems::FixedInputPortValue& FixInput() {
@@ -49,10 +57,9 @@ class IiwaCommandReceiverTest : public testing::Test {
   }
 
  protected:
-  IiwaCommandReceiver dut_;
-  std::unique_ptr<systems::Context<double>> context_ptr_;
-  systems::Context<double>& context_;
-  systems::FixedInputPortValue& fixed_input_;
+  std::unique_ptr<IiwaCommandReceiver> dut_;
+  std::unique_ptr<systems::Context<double>> context_;
+  systems::FixedInputPortValue* fixed_input_{};
 };
 
 constexpr double kCommandTime = 1.2;

@@ -55,7 +55,7 @@ void BuildIiwaControl(const MultibodyPlant<double>& plant,
   iiwa_command_sub->set_name(
       plant.GetModelInstanceName(iiwa_instance) + "_iiwa_command_subscriber");
   auto iiwa_command_receiver =
-      builder->AddSystem<IiwaCommandReceiver>(num_iiwa_positions);
+      builder->AddSystem<IiwaCommandReceiver>(num_iiwa_positions, control_mode);
   builder->Connect(iiwa_command_sub->get_output_port(),
                    iiwa_command_receiver->get_message_input_port());
 

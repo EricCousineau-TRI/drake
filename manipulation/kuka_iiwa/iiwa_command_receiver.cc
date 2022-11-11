@@ -17,9 +17,12 @@ using systems::DiscreteUpdateEvent;
 using systems::NumericParameterIndex;
 using systems::kVectorValued;
 
-IiwaCommandReceiver::IiwaCommandReceiver(int num_joints)
+IiwaCommandReceiver::IiwaCommandReceiver(int num_joints, int control_mode)
     : num_joints_(num_joints) {
   DRAKE_THROW_UNLESS(num_joints > 0);
+  DRAKE_THROW_UNLESS(
+      control_mode_ >= kIiwaPositionMode
+      && control_mode_ <= (kIiwaPositionMode | kIiwaTorqueMode));
 
   message_input_ = &DeclareAbstractInputPort(
       "lcmt_iiwa_command", Value<lcmt_iiwa_command>());
@@ -44,13 +47,17 @@ IiwaCommandReceiver::IiwaCommandReceiver(int num_joints)
        discrete_state_ticket(latched_position_measured_),
        position_measured_or_zero_->ticket()});
 
-  commanded_position_output_ = &DeclareVectorOutputPort(
-      "position", num_joints, &IiwaCommandReceiver::CalcPositionOutput,
-      {defaulted_command_->ticket()});
+  if (control_mode_ & kIiwaPositionMode) {
+    commanded_position_output_ = &DeclareVectorOutputPort(
+        "position", num_joints, &IiwaCommandReceiver::CalcPositionOutput,
+        {defaulted_command_->ticket()});
+  }
 
-  commanded_torque_output_ = &DeclareVectorOutputPort(
-      "torque", num_joints, &IiwaCommandReceiver::CalcTorqueOutput,
-      {defaulted_command_->ticket()});
+  if (control_mode_ & kIiwaTorqueMode) {
+    commanded_torque_output_ = &DeclareVectorOutputPort(
+        "torque", num_joints, &IiwaCommandReceiver::CalcTorqueOutput,
+        {defaulted_command_->ticket()});
+  }
 
   time_output_ = &DeclareVectorOutputPort(
       "time", 1, &IiwaCommandReceiver::CalcTimeOutput,
