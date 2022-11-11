@@ -31,29 +31,29 @@ class IiwaCommandReceiverTest : public testing::Test {
 
   // For use only by our constructor.
   systems::FixedInputPortValue& FixInput() {
-    return dut_.get_message_input_port().FixValue(
-        &context_, lcmt_iiwa_command{});
+    return dut().get_message_input_port().FixValue(
+        &context(), lcmt_iiwa_command{});
   }
 
   // Test cases should call this to set the DUT's input value.
   void SetInput(lcmt_iiwa_command message) {
     // TODO(jwnimmer-tri) This systems framework API is not very ergonomic.
-    fixed_input_.GetMutableData()->
+    fixed_input().GetMutableData()->
         template get_mutable_value<lcmt_iiwa_command>() = message;
   }
 
   VectorXd position() const {
-    const auto& port = dut_.get_commanded_position_output_port();
-    const VectorXd result = port.Eval(context_);
+    const auto& port = dut().get_commanded_position_output_port();
+    const VectorXd result = port.Eval(context());
     return result;
   }
 
   VectorXd torque() const {
-    return dut_.get_commanded_torque_output_port().Eval(context_);
+    return dut().get_commanded_torque_output_port().Eval(context());
   }
 
   double time_output() const {
-    return dut_.get_time_output_port().Eval(context_)[0];
+    return dut().get_time_output_port().Eval(context())[0];
   }
 
  protected:
@@ -79,7 +79,7 @@ TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithMeasuredPositionInput) {
   // When no message has been received and a measurement *is* connected, the
   // command is to hold at the current position.
   const VectorXd q0 = VectorXd::LinSpaced(N, 0.2, 0.3);
-  dut_.get_position_measured_input_port().FixValue(&context_, q0);
+  dut().get_position_measured_input_port().FixValue(&context(), q0);
   EXPECT_TRUE(CompareMatrices(position(), q0));
   EXPECT_TRUE(CompareMatrices(torque(), zero));
   EXPECT_EQ(time_output(), 0);
@@ -111,22 +111,22 @@ TEST_F(IiwaCommandReceiverTest, AcceptanceTestWithLatching) {
   // When no message has been received and a measurement *is* connected, the
   // command is to hold at the current position.
   const VectorXd q0 = VectorXd::LinSpaced(N, 0.0, 0.1);
-  dut_.get_position_measured_input_port().FixValue(&context_, q0);
+  dut().get_position_measured_input_port().FixValue(&context(), q0);
   EXPECT_TRUE(CompareMatrices(position(), q0));
   EXPECT_TRUE(CompareMatrices(torque(), zero));
   EXPECT_EQ(time_output(), 0);
 
   // Prior to any update events, changes to position_measured feed through.
   const VectorXd q1 = VectorXd::LinSpaced(N, 0.1, 0.2);
-  dut_.get_position_measured_input_port().FixValue(&context_, q1);
+  dut().get_position_measured_input_port().FixValue(&context(), q1);
   EXPECT_TRUE(CompareMatrices(position(), q1));
   EXPECT_TRUE(CompareMatrices(torque(), zero));
 
   // Once an update event occurs, further changes to position_measured have no
   // effect.
-  dut_.LatchInitialPosition(&context_);
+  dut().LatchInitialPosition(&context());
   const VectorXd q2 = VectorXd::LinSpaced(N, 0.3, 0.4);
-  dut_.get_position_measured_input_port().FixValue(&context_, q2);
+  dut().get_position_measured_input_port().FixValue(&context(), q2);
   EXPECT_TRUE(CompareMatrices(position(), q1));
   EXPECT_TRUE(CompareMatrices(torque(), zero));
 
