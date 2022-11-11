@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "drake/common/eigen_types.h"
 
 namespace drake {

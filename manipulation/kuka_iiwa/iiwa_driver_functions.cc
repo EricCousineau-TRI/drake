@@ -1,5 +1,7 @@
 #include "drake/manipulation/kuka_iiwa/iiwa_driver_functions.h"
 
+#include <optional>
+
 #include "drake/manipulation/kuka_iiwa/build_iiwa_control.h"
 #include "drake/manipulation/kuka_iiwa/iiwa_constants.h"
 #include "drake/manipulation/util/make_arm_controller_model.h"
