@@ -33,15 +33,18 @@ void ApplyDriverConfig(
         "IiwaDriver could not find arm model directive '{}' to actuate",
         arm_name));
   }
-  if (models_from_directives.count(hand_name) == 0) {
-    throw std::runtime_error(fmt::format(
-        "IiwaDriver could not find hand model directive '{}' to actuate",
-        hand_name));
+  const ModelInstanceInfo& arm_model = models_from_directives.at(arm_name);
+  std::optional<ModelInstanceInfo> hand_model;
+  if (!hand_name.empty()) {
+    if (models_from_directives.count(hand_name) == 0) {
+      throw std::runtime_error(fmt::format(
+          "IiwaDriver could not find hand model directive '{}' to actuate",
+          hand_name));
+    }
+    hand_model = models_from_directives.at(hand_name);
   }
   DrakeLcmInterface* lcm =
       lcms.Find("Driver for " + arm_name, driver_config.lcm_bus);
-  const ModelInstanceInfo& arm_model = models_from_directives.at(arm_name);
-  const ModelInstanceInfo& hand_model = models_from_directives.at(hand_name);
   MultibodyPlant<double>* controller_plant =
       SharedPointerSystem<double>::AddToBuilder(
           builder, internal::MakeArmControllerModel(

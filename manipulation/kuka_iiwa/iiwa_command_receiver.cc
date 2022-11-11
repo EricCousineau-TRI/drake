@@ -101,6 +101,7 @@ void IiwaCommandReceiver::DoCalcNextUpdateTime(
   const bool has_position = control_mode_ & kIiwaPositionMode;
   if (!has_position) {
     // No need to schedule events.
+    *time = std::numeric_limits<double>::infinity();
     return;
   }
 

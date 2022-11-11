@@ -98,8 +98,11 @@ void BuildIiwaControl(const MultibodyPlant<double>& plant,
                    iiwa_command_receiver->get_position_measured_input_port());
 
   // Also send commanded state through the Iiwa status sender.
-  builder->Connect(iiwa_command_receiver->get_commanded_position_output_port(),
-                   iiwa_status_sender->get_position_commanded_input_port());
+  if (control_mode & kIiwaPositionMode) {
+    builder->Connect(
+        iiwa_command_receiver->get_commanded_position_output_port(),
+        iiwa_status_sender->get_position_commanded_input_port());
+  }
 
   // Also send control torque through the Iiwa status sender.
   builder->Connect(*iiwa_control_ports.joint_torque,
