@@ -123,12 +123,19 @@ IiwaControlPorts BuildSimplifiedIiwaControl(
     const std::optional<Eigen::VectorXd>& desired_kp_gains,
     int control_mode) {
   DRAKE_DEMAND(
-      control_mode_ >= kIiwaPositionMode
-      && control_mode_ <= (kIiwaPositionMode | kIiwaTorqueMode));
+      control_mode >= kIiwaPositionMode
+      && control_mode <= (kIiwaPositionMode | kIiwaTorqueMode));
 
   IiwaControlPorts ports{};
   const int num_iiwa_positions = controller_plant.num_positions();
   DRAKE_THROW_UNLESS(num_iiwa_positions == 7);
+
+  // Intercept desired torque so we can also send it as measured torque.
+  const Gain<double>* torque_proxy =
+      builder->AddSystem<Gain>(1, num_iiwa_positions);
+  builder->Connect(
+      torque_proxy->get_output_port(),
+      plant.get_actuation_input_port(iiwa_instance));
 
   if (control_mode & kIiwaPositionMode) {
     VectorX<double> iiwa_kp, iiwa_kd, iiwa_ki;
@@ -164,23 +171,19 @@ IiwaControlPorts BuildSimplifiedIiwaControl(
 
     ports.commanded_positions =
         &iiwa_commanded_state_interpolator->get_input_port();
-    if (enable_feedforward_torque) {
+    if (control_mode & kIiwaTorqueMode) {
       auto adder = builder->template AddSystem<Adder>(2, num_iiwa_positions);
       builder->Connect(iiwa_controller->get_output_port_control(),
                        adder->get_input_port(0));
       builder->Connect(adder->get_output_port(),
-                       plant.get_actuation_input_port(iiwa_instance));
+                       torque_proxy->get_input_port());
       ports.commanded_torque = &adder->get_input_port(1);
     } else {
       builder->Connect(iiwa_controller->get_output_port_control(),
-                       plant.get_actuation_input_port(iiwa_instance));
+                       torque_proxy->get_input_port());
     }
-
-    auto torque_gain = builder->AddSystem<Gain>(-1, num_iiwa_positions);
-    builder->Connect(iiwa_controller->get_output_port_control(),
-                     torque_gain->get_input_port());
   } else if (control_mode & kIiwaTorqueMode) {
-    ports.commanded_torque = &plant.get_actuation_input_port(iiwa_instance);
+    ports.commanded_torque = &torque_proxy->get_input_port();
   }
 
   // Filter for simulated external torques. Unlike the real robot, external
@@ -209,6 +212,11 @@ IiwaControlPorts BuildSimplifiedIiwaControl(
             // TODO(jwnimmer-tri) Add a unit test for this.
             *value = system.get_output_port(0).Eval(context);
           }));
+
+  // TODO(eric.cousineau): Why do we fliip this?
+  auto torque_gain = builder->AddSystem<Gain>(-1, num_iiwa_positions);
+  builder->Connect(torque_proxy->get_output_port(),
+                   torque_gain->get_input_port());
 
   ports.external_torque = &external_torque_filter->get_output_port();
   ports.joint_torque = &torque_gain->get_output_port();
