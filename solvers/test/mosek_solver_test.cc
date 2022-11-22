@@ -98,6 +98,13 @@ INSTANTIATE_TEST_SUITE_P(
     MosekTest, TestEllipsoidsSeparation,
     ::testing::ValuesIn(GetEllipsoidsSeparationProblems()));
 
+GTEST_TEST(TestDuplicatedVariableQuadraticProgram, Test) {
+  MosekSolver solver;
+  if (solver.available()) {
+    TestDuplicatedVariableQuadraticProgram(solver);
+  }
+}
+
 TEST_P(TestQPasSOCP, TestSOCP) {
   MosekSolver mosek_solver;
   if (mosek_solver.available()) {
@@ -146,7 +153,7 @@ GTEST_TEST(TestSOCP, SmallestEllipsoidCoveringProblem) {
 
 GTEST_TEST(TestSOCP, TestSocpDuplicatedVariable1) {
   MosekSolver solver;
-  TestSocpDuplicatedVariable1(solver, 1E-6);
+  TestSocpDuplicatedVariable1(solver, std::nullopt, 1E-6);
 }
 
 GTEST_TEST(TestSemidefiniteProgram, TrivialSDP) {

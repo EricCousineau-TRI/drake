@@ -137,6 +137,13 @@ GTEST_TEST(GurobiTest, TestInitialGuess) {
   }
 }
 
+GTEST_TEST(TestDuplicatedVariableQuadraticProgram, Test) {
+  GurobiSolver solver;
+  if (solver.available()) {
+    TestDuplicatedVariableQuadraticProgram(solver);
+  }
+}
+
 namespace TestCallbacks {
 
 struct TestCallbackInfo {
@@ -294,7 +301,7 @@ GTEST_TEST(TestSOCP, SmallestEllipsoidCoveringProblem) {
 
 GTEST_TEST(TestSOCP, TestSocpDuplicatedVariable1) {
   GurobiSolver solver;
-  TestSocpDuplicatedVariable1(solver, 1E-6);
+  TestSocpDuplicatedVariable1(solver, std::nullopt, 1E-6);
 }
 
 GTEST_TEST(GurobiTest, MultipleThreadsSharingEnvironment) {
