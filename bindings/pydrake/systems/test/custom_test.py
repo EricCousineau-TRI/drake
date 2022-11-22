@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import copy
+from types import SimpleNamespace
 import unittest
 import warnings
+
 import numpy as np
 
 from pydrake.autodiffutils import AutoDiffXd
@@ -232,12 +234,17 @@ class TestCustom(unittest.TestCase):
 
         # Cover DeclareCacheEntry.
         dummy = LeafSystem()
-        allocate_abstract_int = AbstractValue.Make(0).Clone
+        model_value = AbstractValue.Make(SimpleNamespace())
+
+        def calc_cache(context, cache):
+            self.assertIsInstance(cache, SimpleNamespace)
+            cache.updated = True
+
         cache_entry = dummy.DeclareCacheEntry(
             description="scratch",
             value_producer=ValueProducer(
-                allocate=allocate_abstract_int,
-                calc=ValueProducer.NoopCalc),
+                allocate=model_value.Clone,
+                calc=calc_cache),
             prerequisites_of_calc={dummy.nothing_ticket()})
         self.assertIsInstance(cache_entry, CacheEntry)
 
@@ -253,7 +260,13 @@ class TestCustom(unittest.TestCase):
         cache_entry_value = cache_entry.get_mutable_cache_entry_value(context)
         self.assertIsInstance(cache_entry_value, CacheEntryValue)
         data = cache_entry_value.GetMutableValueOrThrow()
-        self.assertIsInstance(data, int)
+        self.assertIsInstance(data, SimpleNamespace)
+        self.assertTrue(data.updated, True)
+        # Check const flavoring.
+        cache_entry_value_const = cache_entry.get_cache_entry_value(context)
+        self.assertIs(cache_entry_value_const, cache_entry_value)
+        data_const = cache_entry_value_const.GetValueOrThrow()
+        self.assertIs(data_const, data)
 
     def test_leaf_system_issue13792(self):
         """

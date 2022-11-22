@@ -220,6 +220,14 @@ void DoScalarIndependentDefinitions(py::module m) {
     constexpr auto& cls_doc = doc.CacheEntryValue;
     py::class_<Class>(m, "CacheEntryValue", cls_doc.doc)
         .def(
+            "GetValueOrThrow",
+            [](const Class& self) {
+              py::object value = py::cast<const AbstractValue*>(
+                  &self.GetAbstractValueOrThrow());
+              return value.attr("get_value")();
+            },
+            py_rvp::reference_internal, cls_doc.GetValueOrThrow.doc)
+        .def(
             "GetMutableValueOrThrow",
             [](Class* self) {
               py::object value = py::cast<AbstractValue*>(
@@ -234,6 +242,11 @@ void DoScalarIndependentDefinitions(py::module m) {
     constexpr auto& cls_doc = doc.CacheEntry;
     py::class_<Class>(m, "CacheEntry", cls_doc.doc)
         .def("prerequisites", &Class::prerequisites, cls_doc.prerequisites.doc)
+        .def("get_cache_entry_value",
+            &Class::get_cache_entry_value, py::arg("context"),
+            // Keep alive, ownership: `return` keeps `context` alive.
+            py::keep_alive<0, 2>(), py_rvp::reference,
+            cls_doc.get_cache_entry_value.doc)
         .def("get_mutable_cache_entry_value",
             &Class::get_mutable_cache_entry_value, py::arg("context"),
             // Keep alive, ownership: `return` keeps `context` alive.
