@@ -56,19 +56,6 @@ py::object DoEval(const SomeObject* self, const systems::Context<T>& context) {
   DRAKE_UNREACHABLE();
 }
 
-// Given a CacheEntry, returns self.Eval(context) in the same way that DoEval()
-// above operates.
-template <typename SomeObject>
-py::object DoEvalAbstract(
-    const SomeObject* self, const systems::ContextBase& context) {
-  const auto& abstract = self->EvalAbstract(context);
-  // See above comments in `DoEval`.
-  py::object context_ref = py::cast(&context);
-  py::object abstract_value_ref =
-      py::cast(&abstract, py_rvp::reference_internal, context_ref);
-  return abstract_value_ref.attr("get_value")();
-}
-
 void DoScalarIndependentDefinitions(py::module m) {
   // NOLINTNEXTLINE(build/namespaces): Emulate placement in namespace.
   using namespace drake::systems;
@@ -260,7 +247,12 @@ void DoScalarIndependentDefinitions(py::module m) {
         .def(
             "Eval",
             [](const Class& self, const ContextBase& context) {
-              return DoEvalAbstract(&self, context);
+              const auto& abstract = self.EvalAbstract(context);
+              // See above comments in `DoEval`.
+              py::object context_ref = py::cast(&context);
+              py::object abstract_value_ref =
+                  py::cast(&abstract, py_rvp::reference_internal, context_ref);
+              return abstract_value_ref.attr("get_value")();
             },
             py::arg("context"), cls_doc.Eval.doc)
         .def("get_cache_entry_value", &Class::get_cache_entry_value,
