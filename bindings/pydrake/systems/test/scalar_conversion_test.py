@@ -287,3 +287,22 @@ class TestScalarConversion(unittest.TestCase):
         for T in SystemScalarConverter.SupportedScalars:
             diagram = MyDiagram_[T]()
             diagram.CreateDefaultContext()
+
+    def test_non_convertible_in_builder(self):
+        @mut.TemplateSystem.define("NoCopy_")
+        def NoCopy_(T):
+
+            class Impl(LeafSystem_[T]):
+                def _construct(self, converter=None):
+                    LeafSystem_[T].__init__(self, converter=converter)
+
+                def _construct_copy(self, converter=None):
+                    raise NotImplementedError()
+
+            return Impl
+
+        for T in SystemScalarConverter.SupportedScalars:
+            builder = DiagramBuilder_[T]()
+            builder.AddSystem(NoCopy_[T]())
+            # Should not raise an error.
+            builder.Build()
