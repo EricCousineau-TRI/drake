@@ -6,6 +6,7 @@ from functools import partial
 from pydrake.common import pretty_class_name
 from pydrake.systems.framework import (
     LeafSystem_,
+    System_,
     SystemScalarConverter,
 )
 from pydrake.common.cpp_template import (
@@ -150,7 +151,7 @@ class TemplateSystem(TemplateClass):
 
         # Check that the user has not defined `__init__`, and has defined
         # `_construct` and `_construct_copy`.
-        if not issubclass(cls, LeafSystem_[T]):
+        if not issubclass(cls, System_[T]):
             raise RuntimeError(
                 "{} must inherit from {}".format(
                     pretty_class_name(cls), LeafSystem_[T]))
