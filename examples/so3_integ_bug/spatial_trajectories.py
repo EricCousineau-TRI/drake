@@ -1,7 +1,9 @@
 import dataclasses as dc
 import functools
 
+import mujoco
 import numpy as np
+import pinocchio as pin
 
 from pydrake.all import (
     AngleAxis,
@@ -1015,3 +1017,12 @@ class NaiveFeedforward(LeafSystem):
             size=num_spatial,
             calc=calc_u,
         )
+
+
+class MujocoPlant(LeafSystem):
+    def __init__(self, M):
+        assert False
+
+
+class PinocchioPlant(LeafSystem):        
+    assert False
