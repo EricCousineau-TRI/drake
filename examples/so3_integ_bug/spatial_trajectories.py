@@ -960,16 +960,16 @@ def spatial_mujoco_to_drake(xm):
 class MujocoForceToAccel(LeafSystem):
     def __init__(self, M):
         super().__init__()
-        assert M == np.eye(6)
+        assert (M == np.eye(6)).all()
         xml = textwrap.dedent(r"""
         <mujoco>
-          <options gravity="0 0 0"/>
-          <body
-              name="body"
-              mass="1"
-              diaginertia="1 1 1">
-            <freejoint/>
-          </body>
+          <option gravity="0 0 0"/>
+          <worldbody>
+            <body>
+              <inertial mass="1" diaginertia="1 1 1" pos="0 0 0"/>
+              <freejoint/>
+            </body>
+          </worldbody>
         </mujoco>
         """.lstrip())
         model = mujoco.MjModel.from_xml_string(xml)

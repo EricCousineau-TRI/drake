@@ -23,6 +23,7 @@ from spatial_trajectories import (
     MbpForceToAccel,
     MbpPlant,
     MbpPlant_,
+    MujocoForceToAccel,
     NaiveFeedforward,
     NaiveForceToAccel,
     NaiveForceToAccel_,
@@ -196,6 +197,9 @@ class Test(unittest.TestCase):
     def test_floating_tracking_naive_mbp(self):
         self.check_floating_tracking(use_rpy=False, mode="naive_mbp")
 
+    def test_floating_tracking_naive_mujoco(self):
+        self.check_floating_tracking(use_rpy=False, mode="naive_mujoco")
+
     def check_floating_tracking(
         self,
         *,
@@ -217,6 +221,8 @@ class Test(unittest.TestCase):
             plant = NaivePlant(rot_info, NaiveForceToAccel(M))
         elif mode == "naive_mbp":
             plant = NaivePlant(rot_info, MbpForceToAccel(M))
+        elif mode == "naive_mujoco":
+            plant = NaivePlant(rot_info, MujocoForceToAccel(M))
         else:
             assert False
         builder.AddSystem(plant)
