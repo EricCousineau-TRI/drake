@@ -935,7 +935,8 @@ class MbpForceToAccel(LeafSystem):
             plant.get_applied_generalized_force_input_port().FixValue(
                 plant_context, u
             )
-            vd = plant.EvalTimeDerivatives(plant_context).get_value()
+            xd = plant.EvalTimeDerivatives(plant_context).CopyToVector()
+            vd = xd[7:]
             output.set_value(vd)
 
         self.vd = self.DeclareVectorOutputPort("vd", 6, calc_vd)
