@@ -1019,10 +1019,40 @@ class NaiveFeedforward(LeafSystem):
         )
 
 
+class MujocoForceToAccel(LeafSystem):
+    assert False
+
+
 class MujocoPlant(LeafSystem):
     def __init__(self, M):
+        assert M == np.eye(6)
+
+        xml = dedent(r"""
+        <mujoco>
+            <options
+                gravity="0 0 0"/>
+            <body
+                name="body"
+                mass="1"
+                diaginertia="1 1 1">
+                <freejoint/>
+            </body>
+        </mujoco>
+        """)
+        model = mujoco.MjModel.from_xml_string(xml)
+        data = mujoco.MjData(model)
+        mujoco.mj_resetData(model, data)
+
+        # errr
+        data.qpos = q
+        data.qvel = v
+        data.qfrc_applied = u
+        mujoco.mj_forward(model, data)
+        data.qacc = vd
+
+        # How to get mujoco to provide xd?
         assert False
 
 
-class PinocchioPlant(LeafSystem):        
+class PinocchioPlant(LeafSystem):
     assert False
