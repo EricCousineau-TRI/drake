@@ -39,6 +39,7 @@ from spatial_trajectories import (
     make_rot_info_rpy_sym,
     make_rotation_2nd_order_integrator,
     maxabs,
+    mujoco,
     num_spatial,
     se3_diff,
     sym_to_float,
@@ -197,6 +198,7 @@ class Test(unittest.TestCase):
     def test_floating_tracking_naive_mbp(self):
         self.check_floating_tracking(use_rpy=False, mode="naive_mbp")
 
+    @unittest.skipIf(mujoco is None, "no mujoco")
     def test_floating_tracking_naive_mujoco(self):
         self.check_floating_tracking(use_rpy=False, mode="naive_mujoco")
 

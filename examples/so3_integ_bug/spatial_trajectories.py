@@ -2,9 +2,7 @@ import dataclasses as dc
 import functools
 import textwrap
 
-import mujoco
 import numpy as np
-import pinocchio as pin
 
 from pydrake.all import (
     AngleAxis,
@@ -32,6 +30,17 @@ from pydrake.all import (
     Variable,
 )
 import pydrake.math as drake_math
+
+try:
+    import mujoco
+except ImportError:
+    mujoco = None
+
+try:
+    import pinocchio as pin
+except ImportError:
+    pin = None
+
 
 # Vector and matrix manipulation.
 
