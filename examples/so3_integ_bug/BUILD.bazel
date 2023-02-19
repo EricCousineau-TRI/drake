@@ -15,9 +15,14 @@ py_library(
         exclude = [
             "* *",
             "**/setuptools/**",
+            "**/cmeel.prefix/include/**",
         ],
     ),
-    imports = [venv_dir],
+    imports = [
+        venv_dir,
+        # Er, what?
+        venv_dir + "/cmeel.prefix/lib/python3.10/site-packages",
+    ],
 )
 
 drake_py_library(
@@ -32,6 +37,7 @@ drake_py_library(
 
 drake_py_unittest(
     name = "spatial_trajectories_test",
+    legacy_create_init = False,
     deps = [
         ":spatial_trajectories_py",
         "//bindings/pydrake",

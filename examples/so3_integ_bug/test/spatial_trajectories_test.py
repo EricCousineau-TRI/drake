@@ -23,6 +23,8 @@ from spatial_trajectories import (
     MbpPlant,
     MbpPlant_,
     NaiveFeedforward,
+    NaiveForceToAccel,
+    NaiveForceToAccel_,
     NaivePlant,
     NaivePlant_,
     SecondOrderIntegrator,
@@ -209,7 +211,7 @@ class Test(unittest.TestCase):
         if use_mbp:
             plant = MbpPlant(M)
         else:
-            plant = NaivePlant(rot_info, M)
+            plant = NaivePlant(rot_info, NaiveForceToAccel(M))
         builder.AddSystem(plant)
 
         controller = builder.AddSystem(NaiveFeedforward(M))
@@ -275,7 +277,8 @@ class Test(unittest.TestCase):
         builder.Connect(u_port, mbp.generalized_forces_input)
 
         # Naive floating body plant.
-        naive = builder.AddSystem(NaivePlant_[T](rot_info, M))
+        force_to_accel = NaiveForceToAccel_[T](M)
+        naive = builder.AddSystem(NaivePlant_[T](rot_info, force_to_accel))
         builder.Connect(u_port, naive.generalized_forces_input)
 
         diagram = builder.Build()
