@@ -564,6 +564,12 @@ class TestSymbolicExpression(unittest.TestCase):
         self.assertEqual(e_xv.shape, (2,))
         self.assertIsInstance(e_xv[0], sym.Expression)
 
+    def test_linear_algebra(self):
+        A = np.array([[w, x], [y, z]])
+        with self.assertRaises(RuntimeError) as cm:
+            drake_math.inv(A)
+        self.assertIn("variable y", str(cm.exception))
+
     def test_vectorized_binary_operator_type_combinatorics(self):
         """
         Tests vectorized binary operator via brute-force combinatorics per
