@@ -36,6 +36,8 @@ from pydrake.all import (
 )
 import pydrake.math as drake_math
 
+from cc import QuaternionRate
+
 try:
     import mujoco
 except ImportError:
@@ -374,6 +376,24 @@ def make_rot_info_quat_sym():
         project_values=project_values,
         calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
     )
+
+
+def make_rot_info_quat_drake_jacobian():
+    quat_info = make_rot_info_quat_sym()
+
+    def calc_rate_jacobian(q):
+        q = Quaternion(q)
+        Jqd = QuaternionRate.AngularVelocityToQuaternionRateMatrix(q)
+        return Jqd
+
+    return RotationInfo(
+        num_rot=quat_info.num_rot,
+        r0=quat_info.r0,
+        calc_values=quat_info.calc_values,
+        project_values=quat_info.project_values,
+        calc_rate_jacobian=calc_rate_jacobian,
+    )
+
 
 
 def calc_rotational_values(rot_info, r, rd, rdd):
