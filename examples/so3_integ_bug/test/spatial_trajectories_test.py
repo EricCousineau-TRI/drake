@@ -279,7 +279,7 @@ class Test(unittest.TestCase):
         """
         M = make_identity_inertia_matrix()
         # u = np.array([Variable(f"u{i}") for i in range(num_spatial)])
-        u = np.ones(num_spatial)
+        u = np.zeros(num_spatial)
         rot_info = make_rot_info_quat_sym()
 
         # T = Expression
@@ -341,8 +341,8 @@ class Test(unittest.TestCase):
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
         assert_allclose(quat_dot_diff, 0.0, tol=tol)
 
-        # However, axis of rotation with a time derivative != 0 shows some
-        # inaccuracy.
+        # However, axis of rotation with a misalined axis of angular velocity
+        # (perhaps relating non-constant axis) shows a diff.
         q0[:4] = angle_axis_deg_to_quat(90, [0, 0, 1])
         v0[:3] = [0, 0.1, 1]
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
