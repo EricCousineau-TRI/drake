@@ -22,7 +22,6 @@ drake_cc_package_library(
         ":multibody_tree_core",
         ":multibody_tree_indexes",
         ":multibody_tree_topology",
-        ":quaternion_rate",
         ":rotational_inertia",
         ":spatial_inertia",
         ":string_view_map_key",
@@ -107,7 +106,17 @@ drake_cc_library(
         "//common",
         "//math:geometric_transform",
     ],
+    internal = True,
+    visibility = ["//visibility:private"]
 )
+
+drake_cc_library(
+    name = "quaternion_rate_hack",
+    hdrs = ["quaternion_rate.h"],
+    visibility = ["//visibility:public"],
+    tags = ["nolint"],
+)
+
 
 drake_cc_library(
     name = "multibody_tree_core",

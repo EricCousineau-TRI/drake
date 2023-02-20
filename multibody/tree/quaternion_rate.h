@@ -9,6 +9,38 @@ namespace multibody {
 template <typename T>
 class QuaternionRate {
  public:
+  static Eigen::Matrix<T, 4, 3> AngularVelocityToQuaternionRateMatrix(
+      const Quaternion<T>& q_FM) {
+    // With L given by CalcLMatrix we have:
+    // N(q) = L(q_FM/2)
+    return CalcLMatrix(
+        {q_FM.w() / 2.0, q_FM.x() / 2.0, q_FM.y() / 2.0, q_FM.z() / 2.0});
+  }
+
+  static Eigen::Matrix<T, 3, 4> QuaternionRateToAngularVelocityMatrix(
+      const Quaternion<T>& q_FM) {
+    const T q_norm = q_FM.norm();
+    // The input quaternion might not be normalized. We refer to the normalized
+    // quaternion as q_FM_tilde. This is retrieved as a Vector4 with its storage
+    // order consistent with the storage order in a MultibodyPlant context. That
+    // is, scalar component first followed by the vector component. See developers
+    // notes in the implementation for get_quaternion().
+    const Vector4<T> q_FM_tilde =
+        Vector4<T>(q_FM.w(), q_FM.x(), q_FM.y(), q_FM.z()) / q_norm;
+
+    // Gradient of the normalized quaternion with respect to the unnormalized
+    // generalized coordinates:
+    const Matrix4<T> dqnorm_dq =
+        (Matrix4<T>::Identity() - q_FM_tilde * q_FM_tilde.transpose()) / q_norm;
+
+    // With L given by CalcLMatrix we have:
+    // N⁺(q_tilde) = L(2 q_FM_tilde)ᵀ
+    return CalcLMatrix({2.0 * q_FM_tilde[0], 2.0 * q_FM_tilde[1],
+                        2.0 * q_FM_tilde[2], 2.0 * q_FM_tilde[3]})
+        .transpose() * dqnorm_dq;
+  }
+
+ private:
   static Eigen::Matrix<T, 4, 3> CalcLMatrix(
       const Quaternion<T>& q_FM) {
     // This L matrix helps us compute both N(q) and N⁺(q) since it turns out that:
@@ -51,36 +83,6 @@ class QuaternionRate {
         .finished();
   }
 
-  static Eigen::Matrix<T, 4, 3> AngularVelocityToQuaternionRateMatrix(
-      const Quaternion<T>& q_FM) {
-    // With L given by CalcLMatrix we have:
-    // N(q) = L(q_FM/2)
-    return CalcLMatrix(
-        {q_FM.w() / 2.0, q_FM.x() / 2.0, q_FM.y() / 2.0, q_FM.z() / 2.0});
-  }
-
-  static Eigen::Matrix<T, 3, 4> QuaternionRateToAngularVelocityMatrix(
-      const Quaternion<T>& q_FM) {
-    const T q_norm = q_FM.norm();
-    // The input quaternion might not be normalized. We refer to the normalized
-    // quaternion as q_FM_tilde. This is retrieved as a Vector4 with its storage
-    // order consistent with the storage order in a MultibodyPlant context. That
-    // is, scalar component first followed by the vector component. See developers
-    // notes in the implementation for get_quaternion().
-    const Vector4<T> q_FM_tilde =
-        Vector4<T>(q_FM.w(), q_FM.x(), q_FM.y(), q_FM.z()) / q_norm;
-
-    // Gradient of the normalized quaternion with respect to the unnormalized
-    // generalized coordinates:
-    const Matrix4<T> dqnorm_dq =
-        (Matrix4<T>::Identity() - q_FM_tilde * q_FM_tilde.transpose()) / q_norm;
-
-    // With L given by CalcLMatrix we have:
-    // N⁺(q_tilde) = L(2 q_FM_tilde)ᵀ
-    return CalcLMatrix({2.0 * q_FM_tilde[0], 2.0 * q_FM_tilde[1],
-                        2.0 * q_FM_tilde[2], 2.0 * q_FM_tilde[3]})
-        .transpose() * dqnorm_dq;
-  }
 };
 
 }  // namespace multibody

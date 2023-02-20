@@ -31,9 +31,12 @@ py_library(
 
 pybind_py_library(
     name = "cc_py",
-    cc_srcs = ["cc_py.cc"],
+    cc_srcs = [
+        "cc_py.cc",
+    ],
     cc_deps = [
         "//bindings/pydrake:pydrake_pybind",
+        "//multibody/tree:quaternion_rate_hack",
         "//:drake_shared_library",
     ],
 )

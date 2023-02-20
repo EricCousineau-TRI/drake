@@ -235,8 +235,6 @@ class RotationInfo:
     r0: np.ndarray
     # R(r), w(r, rd), a(r, rd, rdd)
     calc_values: object
-    # J = dw/dr
-    calc_angular_velocity_jacobian: object
     # J+ = dr/dw
     calc_rate_jacobian: object
     # Projects "raw" inputs (r_i, rd_i, rdd_i) onto proper subspace
@@ -301,8 +299,7 @@ def make_rot_info_rpy_sym():
         num_rot=len(r_s),
         r0=np.zeros(3),
         calc_values=calc_values,
-        calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
-        calc_rate_jacobian=None,
+        calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
         project_values=project_values,
     )
 
@@ -375,8 +372,7 @@ def make_rot_info_quat_sym():
         r0=np.array([1.0, 0.0, 0.0, 0.0]),
         calc_values=calc_values,
         project_values=project_values,
-        calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
-        calc_rate_jacobian=None,
+        calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
     )
 
 
@@ -417,26 +413,25 @@ def make_rotation_2nd_order_integrator(rot_info):
     return SecondOrderIntegratorWithMapping(
         num_q=rot_info.num_rot,
         num_v=num_ang_vel,
-        calc_dv_dqd=rot_info.calc_angular_velocity_jacobian,
         calc_dqd_dv=rot_info.calc_rate_jacobian,
         q0=rot_info.r0,
     )
 
 
-def calc_jacobian_spatial(dX, rot_info):
+def calc_rate_jacobian_spatial(dX, rot_info):
     num_rot = rot_info.num_rot
     r, p = split_spatial(dX, num_rot)
-    Jw = rot_info.calc_angular_velocity_jacobian(r)
+    Jr = rot_info.calc_rate_jacobian(r)
     num_q = num_rot + num_pos
-    JdX = np.zeros_like(Jw, shape=(num_spatial, num_q))
-    JdX[:num_ang_vel, :num_rot] = Jw
-    JdX[num_ang_vel:, num_rot:] = np.eye(num_pos)
+    JdX = np.zeros_like(Jw, shape=(num_q, num_spatial))
+    JdX[:num_rot, :num_ang_vel] = Jr
+    JdX[num_rot:, num_ang_vel:] = np.eye(num_pos)
     return JdX
 
 
 def make_spatial_2nd_order_integrator(rot_info, *, T=float):
-    calc_dv_dqd = functools.partial(
-        calc_jacobian_spatial,
+    calc_dqd_dv = functools.partial(
+        calc_rate_jacobian_spatial,
         rot_info=rot_info,
     )
     p0 = np.zeros(num_pos)
@@ -444,7 +439,7 @@ def make_spatial_2nd_order_integrator(rot_info, *, T=float):
     return SecondOrderIntegratorWithMapping_[T](
         num_q=rot_info.num_rot + num_pos,
         num_v=num_spatial,
-        calc_dv_dqd=calc_dv_dqd,
+        calc_dqd_dv=calc_dqd_dv,
         q0=dX0,
     )
 
@@ -767,11 +762,11 @@ def SecondOrderIntegratorWithMapping_(T):
         """
         Given vd, integrates to provide x = [q, v].
 
-        Note that v = N(q) * qd.
+        Note that qd = N+(q) * v, where N+ = dqd/dv
         """
 
         def _construct(
-            self, num_q, num_v, calc_dv_dqd, *, calc_dqd_dv=None, q0=None, v0=None, converter=None
+            self, num_q, num_v, calc_dqd_dv, *, q0=None, v0=None, converter=None
         ):
             LeafSystem_[T].__init__(self, converter=converter)
             num_x = num_q + num_v
@@ -814,11 +809,7 @@ def SecondOrderIntegratorWithMapping_(T):
                 vector = derivatives.get_mutable_vector()
                 x = context.get_continuous_state_vector().CopyToVector()
                 q, v = split(x)
-                if calc_dqd_dv is None:
-                    N = calc_dv_dqd(q)
-                    Npinv = pinv(N)
-                else:
-                    Npinv = calc_dqd_dv(q)
+                Npinv = calc_dqd_dv(q)
                 qd = Npinv @ v
                 vd = self.get_input_port().Eval(context)
                 xd = cat(qd, vd)
