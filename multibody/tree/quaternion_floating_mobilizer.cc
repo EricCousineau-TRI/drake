@@ -269,22 +269,22 @@ void QuaternionFloatingMobilizer<T>::ProjectSpatialForce(
 
 template <typename T>
 Eigen::Matrix<T, 4, 3> QuaternionFloatingMobilizer<T>::CalcLMatrix(
-    const Quaternion<T>& q_FM) {
-  return QuaternionRate::CalcLMatrix(q_FM);
+    const Quaternion<T>&) {
+  DRAKE_UNREACHABLE();
 }
 
 template <typename T>
 Eigen::Matrix<T, 4, 3>
 QuaternionFloatingMobilizer<T>::AngularVelocityToQuaternionRateMatrix(
     const Quaternion<T>& q_FM) {
-  return QuaternionRate::AngularVelocityToQuaternionRateMatrix(q_FM);
+  return QuaternionRate<T>::AngularVelocityToQuaternionRateMatrix(q_FM);
 }
 
 template <typename T>
 Eigen::Matrix<T, 3, 4>
 QuaternionFloatingMobilizer<T>::QuaternionRateToAngularVelocityMatrix(
     const Quaternion<T>& q_FM) {
-  return QuaternionRate::QuaternionRateToAngularVelocityMatrix(q_FM);
+  return QuaternionRate<T>::QuaternionRateToAngularVelocityMatrix(q_FM);
 }
 
 template <typename T>

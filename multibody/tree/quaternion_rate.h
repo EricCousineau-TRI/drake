@@ -9,7 +9,6 @@ namespace multibody {
 template <typename T>
 class QuaternionRate {
  public:
-  template <typename T>
   static Eigen::Matrix<T, 4, 3> CalcLMatrix(
       const Quaternion<T>& q_FM) {
     // This L matrix helps us compute both N(q) and N⁺(q) since it turns out that:
