@@ -299,8 +299,8 @@ class Test(unittest.TestCase):
         u = np.zeros(num_spatial)
         rot_info = make_rot_info_quat_sym()
 
-        T = Expression
-        # T = float
+        # T = Expression
+        T = float
         builder = DiagramBuilder_[T]()
         u_sys = builder.AddSystem(ConstantVectorSource_[T](u))
         u_port = u_sys.get_output_port()
@@ -373,30 +373,34 @@ class Test(unittest.TestCase):
         print(f"Difference!")
 
         # Look at dem symbolics.
-        v0[:3] = [0, Variable("a"), 1]
-        mbp_dx, naive_dx = calc_derivs(q0, v0)
-        diff_dx = mbp_dx - naive_dx
-        print(diff_dx[:4])
-        print(mbp_dx[1])
-        print(naive_dx[1])
+        if T == Expression:
+            v0[:3] = [0, Variable("a"), 1]
+            mbp_dx, naive_dx = calc_derivs(q0, v0)
+            diff_dx = mbp_dx - naive_dx
+            print(diff_dx[:4])
+            print(mbp_dx[1])
+            print(naive_dx[1])
 
-        # Moar symbolics.
-        q0[:4] = [Variable(n) for n in "wxyz"]
-        quat = q0[:4]
-        mbp_dx, naive_dx = calc_derivs(q0, v0)
-        diff_dx = mbp_dx - naive_dx
-        # # Not legible :(
-        # bad = diff_dx[1]
-        # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
-        # print(bad)
+            # Moar symbolics.
+            q0[:4] = [Variable(n) for n in "wxyz"]
+            quat = q0[:4]
+            mbp_dx, naive_dx = calc_derivs(q0, v0)
+            diff_dx = mbp_dx - naive_dx
+            # # Not legible :(
+            # bad = diff_dx[1]
+            # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
+            # print(bad)
 
-    def test_jacobian(self):
+    def test_jacobian_difference(self):
         calc_a = make_rot_info_quat_sym().calc_rate_jacobian
         calc_b = make_rot_info_quat_drake_jacobian().calc_rate_jacobian
 
-        q = angle_axis_deg_to_quat(90, [0, 0, 1])
-        w = np.array([0, 0, 1])
-        
-        a = calc_a(q) @ w
-        b = calc_b(q) @ w
-        print(a - b)
+        q = angle_axis_deg_to_quat(65, [0, 1, 1])
+        w = np.array([0, 1, 1])
+
+        print(q)
+        qd_a = calc_a(q) @ w
+        qd_b = calc_b(q) @ w
+        print(qd_a)
+        print(qd_b)
+        print(qd_a - qd_b)
