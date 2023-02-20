@@ -34,6 +34,7 @@ from spatial_trajectories import (
     SimpleSpatialReference,
     angle_axis_deg_to_quat,
     cat,
+    drake_sym_replace,
     eval_port,
     make_rot_info_quat_sym,
     make_rot_info_rpy_sym,
@@ -365,8 +366,10 @@ class Test(unittest.TestCase):
 
         # Moar symbolics.
         q0[:4] = [Variable(n) for n in "wxyz"]
+        quat = q0[:4]
         mbp_dx, naive_dx = calc_derivs(q0, v0)
         diff_dx = mbp_dx - naive_dx
-        print(diff_dx[:4])
-        print(mbp_dx[1])
-        print(naive_dx[1])
+        # # Not legible :(
+        # bad = diff_dx[1]
+        # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
+        # print(bad)

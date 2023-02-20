@@ -702,30 +702,7 @@ def SecondOrderIntegrator_(T):
 
 SecondOrderIntegrator = SecondOrderIntegrator_[None]
 
-from contextlib import contextmanager
 
-@contextmanager
-def launch_pdb_on_exception():
-    import bdb
-    import traceback
-    import pdb
-    import sys
-    try:
-        yield
-    except bdb.BdbQuit:
-        pass
-    except (Exception, SystemExit):
-        traceback.print_exc()
-        _, _, tb = sys.exc_info()
-        pdb.post_mortem(tb)
-        # Resume original execution.
-        raise
-
-
-iex = launch_pdb_on_exception()
-
-
-@iex
 def hack_inv(X):
     # Decompose matrix to allow for 4x4-ish matrices to do symbolic stuff.
     n = X.shape[0]
