@@ -116,6 +116,11 @@ def assert_allclose(a, b, *, tol):
     np.testing.assert_allclose(a, b, rtol=0, atol=tol)
 
 
+def assert_not_allclose(test, a, b, *, tol):
+    with test.assertRaises(AssertionError):
+        assert_allclose(a, b, tol=tol)
+
+
 class Test(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", RuntimeWarning)
@@ -395,12 +400,17 @@ class Test(unittest.TestCase):
         calc_a = make_rot_info_quat_sym().calc_rate_jacobian
         calc_b = make_rot_info_quat_drake_jacobian().calc_rate_jacobian
 
-        q = angle_axis_deg_to_quat(65, [0, 1, 1])
-        w = np.array([0, 1, 1])
+        q = angle_axis_deg_to_quat(90, [0, 0, 1])
+        w = np.array([0, 0, 1])
 
-        print(q)
-        qd_a = calc_a(q) @ w
-        qd_b = calc_b(q) @ w
-        print(qd_a)
-        print(qd_b)
-        print(qd_a - qd_b)
+        Ja = calc_a(q)
+        Jb = calc_b(q)
+        # Jacobians project same for this subspace.
+        qd_a = Ja @ w
+        qd_b = Jb @ w
+        assert_allclose(qd_a, qd_b, tol=1e-15)
+        # But they aren't the same (thus won't map correctly for other
+        # subspaces).
+        assert_not_allclose(self, Ja, Jb, tol=0.3)
+        print(Ja)
+        print(Jb)
