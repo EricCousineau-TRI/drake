@@ -33,6 +33,7 @@ pybind_py_library(
     name = "cc_py",
     cc_srcs = ["cc_py.cc"],
     cc_deps = [
+        "//bindings/pydrake:pydrake_pybind",
         "//:drake_shared_library",
     ],
 )

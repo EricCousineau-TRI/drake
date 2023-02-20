@@ -1,6 +1,7 @@
 #include "pybind11/eigen.h"
 #include "pybind11/pybind11.h"
 
+#include "drake/bindings/pydrake/pydrake_pybind.h"
 #include "drake/multibody/tree/quaternion_rate.h"
 
 namespace drake {
@@ -13,7 +14,7 @@ PYBIND11_MODULE(cc, m) {
   py::module::import("pydrake.common.eigen_geometry");
 
   {
-    using Class = QuaternionRate;
+    using Class = QuaternionRate<double>;
     py::class_<Class>(m, "QuaternionRate")
         .def_static(
             "AngularVelocityToQuaternionRateMatrix",
