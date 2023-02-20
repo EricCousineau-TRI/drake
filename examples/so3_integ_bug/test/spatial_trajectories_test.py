@@ -81,7 +81,6 @@ def make_sample_spatial_reference(use_rpy=True):
     acceleration at some point.
     """
     # N.B. The translation portions of this don't really matter.
-    # N.B.
     As_p = [0.5, 0.6, 0.7]
     Ts_p = [1.0, 2.0, 3.0]
     T0_ratios_p = [0.0, 0.0, 0.0]
@@ -124,7 +123,7 @@ class Test(unittest.TestCase):
     def test_rotation_integration(self):
         self.check_rotation_integration(use_rpy=True)
         self.check_rotation_integration(use_rpy=False)
-    
+
     def test_rotation_integration_drake(self):
         # Fails, even with large tolerance.
         with self.assertRaises(AssertionError):
