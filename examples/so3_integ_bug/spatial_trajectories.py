@@ -702,9 +702,49 @@ def SecondOrderIntegrator_(T):
 
 SecondOrderIntegrator = SecondOrderIntegrator_[None]
 
+from contextlib import contextmanager
+
+@contextmanager
+def launch_pdb_on_exception():
+    import bdb
+    import traceback
+    import pdb
+    import sys
+    try:
+        yield
+    except bdb.BdbQuit:
+        pass
+    except (Exception, SystemExit):
+        traceback.print_exc()
+        _, _, tb = sys.exc_info()
+        pdb.post_mortem(tb)
+        # Resume original execution.
+        raise
+
+
+iex = launch_pdb_on_exception()
+
+
+@iex
+def hack_inv(X):
+    # Decompose matrix to allow for 4x4-ish matrices to do symbolic stuff.
+    n = X.shape[0]
+    nr = n - 3
+    assert nr in [3, 4]
+    Xr = X[:nr, :nr]
+    Xp = X[nr:, nr:]
+    assert (to_float(X[:nr, nr:]) == 0).all()
+    assert (to_float(X[nr:, :nr]) == 0).all()
+    assert (to_float(Xp) == np.eye(3)).all()
+    Xr_inv = drake_math.inv(Xr)
+    X_inv = np.zeros_like(X)
+    X_inv[:nr, :nr] = Xr_inv
+    X_inv[nr:, nr:] = np.eye(3)
+    return X_inv
+
 
 def pinv_raw(A):
-    return A.T @ drake_math.inv(A @ A.T)
+    return A.T @ hack_inv(A @ A.T)
 
 
 def pinv(A):
