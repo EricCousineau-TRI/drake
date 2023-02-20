@@ -1,6 +1,11 @@
 import dataclasses as dc
 import functools
 import textwrap
+import bdb
+from contextlib import contextmanager
+import pdb
+import sys
+import traceback
 
 import numpy as np
 
@@ -40,6 +45,23 @@ try:
     import pinocchio as pin
 except ImportError:
     pin = None
+
+
+@contextmanager
+def launch_pdb_on_exception():
+    try:
+        yield
+    except bdb.BdbQuit:
+        pass
+    except (Exception, SystemExit):
+        traceback.print_exc()
+        _, _, tb = sys.exc_info()
+        pdb.post_mortem(tb)
+        # Resume original execution.
+        raise
+
+
+iex = launch_pdb_on_exception()
 
 
 # Vector and matrix manipulation.
@@ -706,18 +728,21 @@ SecondOrderIntegrator = SecondOrderIntegrator_[None]
 def hack_inv(X):
     # Decompose matrix to allow for 4x4-ish matrices to do symbolic stuff.
     n = X.shape[0]
-    nr = n - 3
-    assert nr in [3, 4]
-    Xr = X[:nr, :nr]
-    Xp = X[nr:, nr:]
-    assert (to_float(X[:nr, nr:]) == 0).all()
-    assert (to_float(X[nr:, :nr]) == 0).all()
-    assert (to_float(Xp) == np.eye(3)).all()
-    Xr_inv = drake_math.inv(Xr)
-    X_inv = np.zeros_like(X)
-    X_inv[:nr, :nr] = Xr_inv
-    X_inv[nr:, nr:] = np.eye(3)
-    return X_inv
+    if n <= 4:
+        return drake_math.inv(X)
+    else:
+        nr = n - 3
+        assert nr in [3, 4]
+        Xr = X[:nr, :nr]
+        Xp = X[nr:, nr:]
+        assert (to_float(X[:nr, nr:]) == 0).all()
+        assert (to_float(X[nr:, :nr]) == 0).all()
+        assert (to_float(Xp) == np.eye(3)).all()
+        Xr_inv = drake_math.inv(Xr)
+        X_inv = np.zeros_like(X)
+        X_inv[:nr, :nr] = Xr_inv
+        X_inv[nr:, nr:] = np.eye(3)
+        return X_inv
 
 
 def pinv_raw(A):
