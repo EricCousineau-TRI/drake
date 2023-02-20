@@ -212,9 +212,7 @@ class Test(unittest.TestCase):
         """
         Same as above, but use MultibodyPlant.
         """
-        # WARNING: This currently fails :(
-        with self.assertRaises(AssertionError):
-            self.check_floating_tracking(use_rpy=False, mode="full_mbp")
+        self.check_floating_tracking(use_rpy=False, mode="full_mbp")
 
     def test_floating_tracking_naive_mbp(self):
         self.check_floating_tracking(use_rpy=False, mode="naive_mbp")
