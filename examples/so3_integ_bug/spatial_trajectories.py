@@ -357,13 +357,23 @@ def make_rot_info_quat_sym():
     )
 
 
-def make_rot_info_quat_drake_jacobian():
+def make_rot_info_quat_drake_jacobian(*, use_pinv=False):
     quat_info = make_rot_info_quat_sym()
 
-    def calc_rate_jacobian(q):
+    def calc_rate_jacobian_direct(q):
         q = hack_quaternion(q)
-        Jqd = QuaternionRate.AngularVelocityToQuaternionRateMatrix(q)
-        return Jqd
+        J = QuaternionRate.AngularVelocityToQuaternionRateMatrix(q)
+        return J
+
+    def calc_angular_velocity_jacobian(q):
+        q = hack_quaternion(q)
+        J = QuaternionRate.QuaternionRateToAngularVelocityMatrix(q)
+        return J
+
+    if use_pinv:
+        calc_rate_jacobian = make_pinv(calc_angular_velocity_jacobian)
+    else:
+        calc_rate_jacobian = calc_rate_jacobian_direct
 
     return RotationInfo(
         num_rot=quat_info.num_rot,

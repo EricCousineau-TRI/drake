@@ -120,29 +120,30 @@ class Test(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", RuntimeWarning)
 
-    def test_rotation_integration(self):
-        self.check_rotation_integration(use_rpy=True)
-        self.check_rotation_integration(use_rpy=False)
+    def test_rotation_integration_rpy(self):
+        reference, rot_info = make_sample_rotation_reference(use_rpy=True)
+        self.check_rotation_integration(reference, rot_info)
 
-    def test_rotation_integration_drake(self):
+    def test_rotation_integration_quat(self):
+        reference, rot_info = make_sample_rotation_reference(use_rpy=False)
+        self.check_rotation_integration(reference, rot_info)
+
+    def test_rotation_integration_quat_drake(self):
         # Fails, even with large tolerance.
-        with self.assertRaises(AssertionError):
-            self.check_rotation_integration(
-                use_rpy=False, use_drake=True, tol=0.1
-            )
+        for use_pinv in [False, True]:
+            reference, _ = make_sample_rotation_reference(use_rpy=False)
+            rot_info = make_rot_info_quat_drake_jacobian(use_pinv=use_pinv)
+            with self.assertRaises(AssertionError):
+                self.check_rotation_integration(reference, rot_info, tol=0.1)
 
     def check_rotation_integration(
-        self, *, use_rpy, use_drake=False, tol=1e-5, accuracy=1e-6,
+        self, reference, rot_info, *, tol=1e-5, accuracy=1e-6,
     ):
         """
         With a given SO(3) trajectory through time, take the angular
         acceleration, integrate it forward, and ensure we recover the original
         trajectory with our given coordinate representation.
         """
-        reference, rot_info = make_sample_rotation_reference(use_rpy)
-        if use_drake:
-            assert not use_rpy
-            rot_info = make_rot_info_quat_drake_jacobian()
 
         num_r = rot_info.num_rot
 
@@ -186,7 +187,6 @@ class Test(unittest.TestCase):
         simulator.Initialize()
         simulator.set_monitor(monitor)
 
-        print(f"Check rotation integration w/ use_rpy={use_rpy}...")
         try:
             simulator.AdvanceTo(3.0)
         except AssertionError:
