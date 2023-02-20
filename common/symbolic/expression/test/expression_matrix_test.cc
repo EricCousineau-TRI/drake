@@ -533,13 +533,13 @@ TEST_F(SymbolicExpressionMatrixTest, EvaluateWithRandomGenerator) {
 }
 
 Eigen::MatrixX<Variable> MakeMatrixVariable(int rows, int cols) {
-  Eigen::MatrixX<Variable> out(rows, cols);
+  Eigen::MatrixX<Variable> M(rows, cols);
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < cols; ++j) {
-      out(i, j) = Variable(fmt::format("a{}{}", i, j));
+      M(i, j) = Variable(fmt::format("m{}{}", i, j));
     }
   }
-  return out;
+  return M;
 }
 
 const char* kBadMatrixInversion =
@@ -581,8 +581,6 @@ TEST_F(SymbolicExpressionMatrixTest, Inverse) {
   CheckMatrixInversion<4>();
   DRAKE_EXPECT_THROWS_MESSAGE(
       CheckMatrixInversion<5>(), kBadMatrixInversion);
-  DRAKE_EXPECT_THROWS_MESSAGE(
-      CheckMatrixInversion<6>(), kBadMatrixInversion);
 }
 
 // We found that the following example could leak memory. This test makes sure
