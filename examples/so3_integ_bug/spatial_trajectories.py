@@ -237,6 +237,8 @@ class RotationInfo:
     calc_values: object
     # J = dw/dr
     calc_angular_velocity_jacobian: object
+    # J+ = dr/dw
+    calc_rate_jacobian: object
     # Projects "raw" inputs (r_i, rd_i, rdd_i) onto proper subspace
     # (r, rd, rdd)
     project_values: object
@@ -300,6 +302,7 @@ def make_rot_info_rpy_sym():
         r0=np.zeros(3),
         calc_values=calc_values,
         calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
+        calc_rate_jacobian=None,
         project_values=project_values,
     )
 
@@ -373,6 +376,7 @@ def make_rot_info_quat_sym():
         calc_values=calc_values,
         project_values=project_values,
         calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
+        calc_rate_jacobian=None,
     )
 
 
@@ -414,6 +418,7 @@ def make_rotation_2nd_order_integrator(rot_info):
         num_q=rot_info.num_rot,
         num_v=num_ang_vel,
         calc_dv_dqd=rot_info.calc_angular_velocity_jacobian,
+        calc_dqd_dv=rot_info.calc_rate_jacobian,
         q0=rot_info.r0,
     )
 
@@ -766,7 +771,7 @@ def SecondOrderIntegratorWithMapping_(T):
         """
 
         def _construct(
-            self, num_q, num_v, calc_dv_dqd, *, q0=None, v0=None, converter=None
+            self, num_q, num_v, calc_dv_dqd, *, calc_dqd_dv=None, q0=None, v0=None, converter=None
         ):
             LeafSystem_[T].__init__(self, converter=converter)
             num_x = num_q + num_v
@@ -809,8 +814,11 @@ def SecondOrderIntegratorWithMapping_(T):
                 vector = derivatives.get_mutable_vector()
                 x = context.get_continuous_state_vector().CopyToVector()
                 q, v = split(x)
-                N = calc_dv_dqd(q)
-                Npinv = pinv(N)
+                if calc_dqd_dv is None:
+                    N = calc_dv_dqd(q)
+                    Npinv = pinv(N)
+                else:
+                    Npinv = calc_dqd_dv(q)
                 qd = Npinv @ v
                 vd = self.get_input_port().Eval(context)
                 xd = cat(qd, vd)
