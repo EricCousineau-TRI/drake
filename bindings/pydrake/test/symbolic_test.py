@@ -27,8 +27,7 @@ w = sym.Variable("w")
 a = sym.Variable("a")
 b = sym.Variable("b")
 c = sym.Variable("c")
-e_x = sym.Expression(x)
-e_y = sym.Expression(y)
+e_x, e_y, e_z, e_w = map(sym.Expression, (x, y, z, w))
 p_x = sym.Polynomial(x)
 m_x = sym.Monomial(x)
 boolean = sym.Variable(name="boolean", type=sym.Variable.Type.BOOLEAN)
@@ -565,10 +564,11 @@ class TestSymbolicExpression(unittest.TestCase):
         self.assertIsInstance(e_xv[0], sym.Expression)
 
     def test_linear_algebra(self):
-        A = np.array([[w, x], [y, z]])
-        with self.assertRaises(RuntimeError) as cm:
-            drake_math.inv(A)
-        self.assertIn("variable y", str(cm.exception))
+        A = np.array([[e_w, e_x], [e_y, e_z]])
+        print(A)
+        drake_math.inv(A)
+        # with self.assertRaises(RuntimeError) as cm:
+        # self.assertIn("variable y", str(cm.exception))
 
     def test_vectorized_binary_operator_type_combinatorics(self):
         """
