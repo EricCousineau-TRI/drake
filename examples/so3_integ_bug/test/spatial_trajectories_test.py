@@ -366,32 +366,31 @@ class Test(unittest.TestCase):
         assert_allclose(quat_dot_diff, 0.0, tol=tol)
 
         # However, axis of rotation with a misalined axis of angular velocity
-        # (perhaps relating non-constant axis) shows a diff.
+        # (perhaps relating non-constant axis) used to show a diff.
         q0[:4] = angle_axis_deg_to_quat(90, [0, 0, 1])
         v0[:3] = [0, 0.1, 1]
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
         s2i = 1 / np.sqrt(2)
-        assert_allclose(quat_dot_diff, [0, v0[1] * s2i, 0, 0], tol=tol)
-        print(f"Difference!")
+        assert_allclose(quat_dot_diff, 0, tol=tol)
 
-        # Look at dem symbolics.
-        if T == Expression:
-            v0[:3] = [0, Variable("a"), 1]
-            mbp_dx, naive_dx = calc_derivs(q0, v0)
-            diff_dx = mbp_dx - naive_dx
-            print(diff_dx[:4])
-            print(mbp_dx[1])
-            print(naive_dx[1])
+        # # Look at dem symbolics.
+        # if T == Expression:
+        #     v0[:3] = [0, Variable("a"), 1]
+        #     mbp_dx, naive_dx = calc_derivs(q0, v0)
+        #     diff_dx = mbp_dx - naive_dx
+        #     print(diff_dx[:4])
+        #     print(mbp_dx[1])
+        #     print(naive_dx[1])
 
-            # Moar symbolics.
-            q0[:4] = [Variable(n) for n in "wxyz"]
-            quat = q0[:4]
-            mbp_dx, naive_dx = calc_derivs(q0, v0)
-            diff_dx = mbp_dx - naive_dx
-            # # Not legible :(
-            # bad = diff_dx[1]
-            # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
-            # print(bad)
+        #     # Moar symbolics.
+        #     q0[:4] = [Variable(n) for n in "wxyz"]
+        #     quat = q0[:4]
+        #     mbp_dx, naive_dx = calc_derivs(q0, v0)
+        #     diff_dx = mbp_dx - naive_dx
+        #     # # Not legible :(
+        #     # bad = diff_dx[1]
+        #     # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
+        #     # print(bad)
 
     def test_rate_jacobian_difference(self):
         calc_a = make_rot_info_quat_sym().calc_rate_jacobian
@@ -406,11 +405,7 @@ class Test(unittest.TestCase):
         qd_a = Ja @ w
         qd_b = Jb @ w
         assert_allclose(qd_a, qd_b, tol=1e-15)
-        # But they aren't the same (thus won't map correctly for other
-        # subspaces).
-        assert_not_allclose(self, Ja, Jb, tol=0.3)
-        print(Ja)
-        print(Jb)
+        assert_allclose(Ja, Jb, tol=0.3)
 
     def test_angular_velocity_jacobian_difference(self):
         rot_info = make_rot_info_quat_sym()
@@ -421,35 +416,19 @@ class Test(unittest.TestCase):
         q = angle_axis_deg_to_quat(65, [0, 1, 1])
         Ja = calc_a(q)
         Jb = calc_b(q)
-        Jc = calc_ang_vel(q)
         assert_allclose(Ja, Jb, tol=1e-10)
-        print(Ja.T)
-        print(Jb.T)
-        print(Jc.T)
-        print(sign_diff(Ja.T, Jb.T))
+        # Jc = calc_ang_vel(q)
 
 
-@np.vectorize
-def sign_diff(a, b, *, tol=1e-10):
-    if np.abs(a) < tol:
-        if np.abs(b) < tol:
-            return 0
-        else:
-            return np.inf
-    if np.abs(b) < tol:
-        return np.inf
-    return a / b
+# def calc_L(q):
+#     w, x, y, z = q
+#     return np.array([
+#         [-x, -y, -z],
+#         [w, z, -y],
+#         [-z, w, x],
+#         [y, -x, w],
+#     ])
 
 
-def calc_L(q):
-    w, x, y, z = q
-    return np.array([
-        [-x, -y, -z],
-        [w, z, -y],
-        [-z, w, x],
-        [y, -x, w],
-    ])
-
-
-def calc_ang_vel(q):
-    return calc_L(2 * q).T
+# def calc_ang_vel(q):
+#     return calc_L(2 * q).T
