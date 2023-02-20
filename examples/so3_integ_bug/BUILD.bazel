@@ -34,11 +34,13 @@ pybind_py_library(
     cc_srcs = [
         "cc_py.cc",
     ],
+    cc_so_name = "cc",
     cc_deps = [
         "//bindings/pydrake:pydrake_pybind",
         "//multibody/tree:quaternion_rate_hack",
         "//:drake_shared_library",
     ],
+    py_imports = ["."],
 )
 
 drake_py_library(
@@ -46,6 +48,7 @@ drake_py_library(
     srcs = ["spatial_trajectories.py"],
     imports = ["."],
     deps = [
+        ":cc_py",
         ":hack_venv_py",
         "//bindings/pydrake",
     ],
@@ -55,7 +58,6 @@ drake_py_unittest(
     name = "spatial_trajectories_test",
     legacy_create_init = False,
     deps = [
-        ":cc_py",
         ":spatial_trajectories_py",
         "//bindings/pydrake",
     ],

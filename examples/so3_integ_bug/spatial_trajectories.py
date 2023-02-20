@@ -443,7 +443,7 @@ def calc_rate_jacobian_spatial(dX, rot_info):
     r, p = split_spatial(dX, num_rot)
     Jr = rot_info.calc_rate_jacobian(r)
     num_q = num_rot + num_pos
-    JdX = np.zeros_like(Jw, shape=(num_q, num_spatial))
+    JdX = np.zeros_like(Jr, shape=(num_q, num_spatial))
     JdX[:num_rot, :num_ang_vel] = Jr
     JdX[num_rot:, num_ang_vel:] = np.eye(num_pos)
     return JdX
@@ -774,6 +774,16 @@ def pinv(A):
         return np.linalg.pinv(A)
     else:
         return pinv_raw(A)
+
+
+def make_pinv(calc):
+
+    def calc_pinv(q):
+        M = calc(q)
+        Mpinv = pinv(M)
+        return Mpinv
+
+    return calc_pinv
 
 
 @TemplateSystem.define("SecondOrderIntegratorWithMapping_", T_list=T_list)
