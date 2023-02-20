@@ -121,10 +121,15 @@ def eval_port(port, parent_context, *, resolve=True):
 
 
 @np.vectorize
-def sym_to_float(x):
-    _, (c,) = x.Unapply()
-    assert isinstance(c, float), type(c)
-    return c
+def to_float(x):
+    if isinstance(x, float):
+        return x
+    elif isinstance(x, Expression):
+        _, (c,) = x.Unapply()
+        assert isinstance(c, float), type(c)
+        return c
+    else:
+        assert False
 
 
 def drake_sym_replace(expr, old, new):

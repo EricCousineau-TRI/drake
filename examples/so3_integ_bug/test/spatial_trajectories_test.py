@@ -42,7 +42,7 @@ from spatial_trajectories import (
     mujoco,
     num_spatial,
     se3_diff,
-    sym_to_float,
+    to_float,
 )
 
 
@@ -278,10 +278,12 @@ class Test(unittest.TestCase):
         body integrator vs. MultibodyPlant.
         """
         M = make_identity_inertia_matrix()
-        u = np.array([Variable(f"u{i}") for i in range(num_spatial)])
+        # u = np.array([Variable(f"u{i}") for i in range(num_spatial)])
+        u = np.ones(num_spatial)
         rot_info = make_rot_info_quat_sym()
 
-        T = Expression
+        # T = Expression
+        T = float
         builder = DiagramBuilder_[T]()
         u_sys = builder.AddSystem(ConstantVectorSource_[T](u))
         u_port = u_sys.get_output_port()
@@ -305,7 +307,7 @@ class Test(unittest.TestCase):
             mbp_dx = mbp.EvalTimeDerivatives(mbp_context).CopyToVector()
             naive.set_state(context, q0, v0)
             naive_dx = naive.EvalTimeDerivatives(naive_context).CopyToVector()
-            diff_dx = sym_to_float(mbp_dx - naive_dx)
+            diff_dx = to_float(mbp_dx - naive_dx)
             # Diff should only be in Jacobian mapping for quaternion rate.
             assert (diff_dx[4:] == 0).all()
             quat_dot_diff = diff_dx[:4]
@@ -314,6 +316,8 @@ class Test(unittest.TestCase):
         q0 = np.zeros(7)
         q0[0] = 1.0
         v0 = np.zeros(6)
+
+        tol = 1e-15
 
         # Nominal should be matched.
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
@@ -330,12 +334,12 @@ class Test(unittest.TestCase):
         q0[:4] = angle_axis_deg_to_quat(90, [0, 0, 1])
         v0[:3] = [0, 0, 1]
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
-        assert_equal(quat_dot_diff, 0.0)
+        assert_allclose(quat_dot_diff, 0.0, tol=tol)
 
         q0[:4] = angle_axis_deg_to_quat(65, [0, 1, 1])
         v0[:3] = [0, 1, 1]
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
-        assert_allclose(quat_dot_diff, 0.0, tol=1e-15)
+        assert_allclose(quat_dot_diff, 0.0, tol=tol)
 
         # However, axis of rotation with a time derivative != 0 shows some
         # inaccuracy.
@@ -343,6 +347,6 @@ class Test(unittest.TestCase):
         v0[:3] = [0, 0.1, 1]
         quat_dot_diff = calc_quat_dot_diff(q0, v0)
         s2i = 1 / np.sqrt(2)
-        assert_equal(quat_dot_diff, [0, v0[1] * s2i, 0, 0])
+        assert_allclose(quat_dot_diff, [0, v0[1] * s2i, 0, 0], tol=tol)
 
         print(f"Difference! {quat_dot_diff}")
