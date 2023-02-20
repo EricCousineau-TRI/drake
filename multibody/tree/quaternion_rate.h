@@ -78,9 +78,12 @@ class QuaternionRate {
     // NOTE: the rows of this matrix are in an order consistent with the order
     // in which we store the quaternion in the state, with the scalar component
     // first followed by the vector component.
-    return (Eigen::Matrix<T, 4, 3>() << mqv.transpose(), qs, qv.z(), mqv.y(),
-            mqv.z(), qs, qv.x(), qv.y(), mqv.x(), qs)
-        .finished();
+
+    return (Eigen::Matrix<T, 4, 3>() <<
+        mqv.transpose(),
+        qs, qv.z(), mqv.y(),
+        mqv.z(), qs, qv.x(),
+        qv.y(), mqv.x(), qs).finished();
   }
 
 };

@@ -424,6 +424,22 @@ class Test(unittest.TestCase):
         q = angle_axis_deg_to_quat(90, [0, 0, 1])
         Ja = calc_a(q)
         Jb = calc_b(q)
+        Jc = calc_ang_vel(q)
         assert_not_allclose(self, Ja, Jb, tol=2.0)
-        print(Ja)
-        print(Jb)
+        print(Ja.T)
+        print(Jb.T)
+        print(Jc.T)
+
+
+def calc_L(q):
+    w, x, y, z = q
+    return np.array([
+        [-x, -y, -z],
+        [w, z, -y],
+        [-z, w, x],
+        [y, -x, w],
+    ])
+
+
+def calc_ang_vel(q):
+    return calc_L(2 * q).T
