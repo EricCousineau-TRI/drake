@@ -5,7 +5,6 @@ from functools import partial
 
 from pydrake.common import pretty_class_name
 from pydrake.systems.framework import (
-    LeafSystem_,
     System_,
     SystemScalarConverter,
 )
@@ -154,7 +153,7 @@ class TemplateSystem(TemplateClass):
         if not issubclass(cls, System_[T]):
             raise RuntimeError(
                 "{} must inherit from {}".format(
-                    pretty_class_name(cls), LeafSystem_[T]))
+                    pretty_class_name(cls), System_[T]))
 
         # Use the immediate `__dict__`, rather than querying the attributes, so
         # that we don't get spillover from inheritance.
