@@ -288,6 +288,7 @@ Eigen::Matrix<T, 4, 3> QuaternionFloatingMobilizer<T>::CalcLMatrix(
   // Dt_F(q) = 1/2 * w_FM⋅q_FM, where ⋅ denotes the "quaternion product" and
   // both the vector component qv_FM of q_FM and w_FM are expressed in frame F.
   // Dt_F(q) is short for [Dt_F(q)]_F.
+  // Dt_F(q) is short for [Dt_F(q)]_F.
   // The expression above can be written as:
   // Dt_F(q) = 1/2 * (-w_FM.dot(qv_F); qs * w_FM + w_FM.cross(qv_F))
   //         = 1/2 * (-w_FM.dot(qv_F); qs * w_FM - qv_F.cross(w_FM))
@@ -295,7 +296,7 @@ Eigen::Matrix<T, 4, 3> QuaternionFloatingMobilizer<T>::CalcLMatrix(
   //         = L(q_FM/2) * w_FM
   // That is:
   //        |         -qv_Fᵀ    |
-  // L(q) = | qs * Id - [qv_F]x |
+  // L(q) = | qs * Id + [qv_F]x |
 
   const T qs = q_FM.w();             // The scalar component.
   const Vector3<T> qv = q_FM.vec();  // The vector component.
@@ -304,9 +305,12 @@ Eigen::Matrix<T, 4, 3> QuaternionFloatingMobilizer<T>::CalcLMatrix(
   // NOTE: the rows of this matrix are in an order consistent with the order
   // in which we store the quaternion in the state, with the scalar component
   // first followed by the vector component.
-  return (Eigen::Matrix<T, 4, 3>() << mqv.transpose(), qs, qv.z(), mqv.y(),
-          mqv.z(), qs, qv.x(), qv.y(), mqv.x(), qs)
-      .finished();
+
+  return (Eigen::Matrix<T, 4, 3>() <<
+      mqv.transpose(),
+      qs, mqv.z(), qv.y(),
+      qv.z(), qs, mqv.x(),
+      mqv.y(), qv.x(), qs).finished();
 }
 
 template <typename T>
