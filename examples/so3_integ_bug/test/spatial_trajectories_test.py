@@ -138,8 +138,7 @@ class Test(unittest.TestCase):
         for use_pinv in [False, True]:
             reference, _ = make_sample_rotation_reference(use_rpy=False)
             rot_info = make_rot_info_quat_drake_jacobian(use_pinv=use_pinv)
-            with self.assertRaises(AssertionError):
-                self.check_rotation_integration(reference, rot_info, tol=0.1)
+            self.check_rotation_integration(reference, rot_info, tol=0.1)
 
     def check_rotation_integration(
         self, reference, rot_info, *, tol=1e-5, accuracy=1e-6,
@@ -421,14 +420,27 @@ class Test(unittest.TestCase):
         rot_info_b = make_rot_info_quat_drake_jacobian()
         calc_b = rot_info_b.calc_angular_velocity_jacobian
 
-        q = angle_axis_deg_to_quat(90, [0, 0, 1])
+        q = angle_axis_deg_to_quat(65, [0, 1, 1])
         Ja = calc_a(q)
         Jb = calc_b(q)
         Jc = calc_ang_vel(q)
-        assert_not_allclose(self, Ja, Jb, tol=2.0)
+        assert_allclose(Ja, Jb, tol=1e-10)
         print(Ja.T)
         print(Jb.T)
         print(Jc.T)
+        print(sign_diff(Ja.T, Jb.T))
+
+
+@np.vectorize
+def sign_diff(a, b, *, tol=1e-10):
+    if np.abs(a) < tol:
+        if np.abs(b) < tol:
+            return 0
+        else:
+            return np.inf
+    if np.abs(b) < tol:
+        return np.inf
+    return a / b
 
 
 def calc_L(q):

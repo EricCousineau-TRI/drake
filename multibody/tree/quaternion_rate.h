@@ -69,7 +69,7 @@ class QuaternionRate {
     //         = L(q_FM/2) * w_FM
     // That is:
     //        |         -qv_Fᵀ    |
-    // L(q) = | qs * Id - [qv_F]x |
+    // L(q) = | qs * Id + [qv_F]x |
 
     const T qs = q_FM.w();             // The scalar component.
     const Vector3<T> qv = q_FM.vec();  // The vector component.
@@ -81,9 +81,9 @@ class QuaternionRate {
 
     return (Eigen::Matrix<T, 4, 3>() <<
         mqv.transpose(),
-        qs, qv.z(), mqv.y(),
-        mqv.z(), qs, qv.x(),
-        qv.y(), mqv.x(), qs).finished();
+        qs, mqv.z(), qv.y(),
+        qv.z(), qs, mqv.x(),
+        mqv.y(), qv.x(), qs).finished();
   }
 
 };
