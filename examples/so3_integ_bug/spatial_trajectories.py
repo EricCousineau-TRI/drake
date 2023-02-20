@@ -21,6 +21,7 @@ from pydrake.all import (
     LeafSystem,
     LeafSystem_,
     MultibodyPlant_,
+    Quaternion,
     Quaternion_,
     RigidTransform,
     RollPitchYaw_,
@@ -36,7 +37,7 @@ from pydrake.all import (
 )
 import pydrake.math as drake_math
 
-from cc import QuaternionRate
+from cc import QuaternionRate, hack_quaternion
 
 try:
     import mujoco
@@ -382,7 +383,7 @@ def make_rot_info_quat_drake_jacobian():
     quat_info = make_rot_info_quat_sym()
 
     def calc_rate_jacobian(q):
-        q = Quaternion(q)
+        q = hack_quaternion(q)
         Jqd = QuaternionRate.AngularVelocityToQuaternionRateMatrix(q)
         return Jqd
 

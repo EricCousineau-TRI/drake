@@ -23,6 +23,11 @@ PYBIND11_MODULE(cc, m) {
             "QuaternionRateToAngularVelocityMatrix",
             &Class::QuaternionRateToAngularVelocityMatrix);
   }
+
+  // Hack around normalization check for bindings.
+  m.def(
+      "hack_quaternion",
+      [](const Eigen::Vector4d& q) { return Eigen::Quaternion<double>(q); });
 }
 
 }  // namespace pydrake
