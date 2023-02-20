@@ -389,3 +389,14 @@ class Test(unittest.TestCase):
         # bad = diff_dx[1]
         # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
         # print(bad)
+
+    def test_jacobian(self):
+        calc_a = make_rot_info_quat_sym().calc_rate_jacobian
+        calc_b = make_rot_info_quat_drake_jacobian().calc_rate_jacobian
+
+        q = angle_axis_deg_to_quat(90, [0, 0, 1])
+        w = np.array([0, 0, 1])
+        
+        a = calc_a(q) @ w
+        b = calc_b(q) @ w
+        print(a - b)

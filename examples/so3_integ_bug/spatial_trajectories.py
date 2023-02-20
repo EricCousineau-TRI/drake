@@ -218,6 +218,8 @@ class RotationInfo:
     calc_values: object
     # J+ = dr/dw
     calc_rate_jacobian: object
+    # J = dw/dr
+    calc_angular_velocity_jacobian: object
     # Projects "raw" inputs (r_i, rd_i, rdd_i) onto proper subspace
     # (r, rd, rdd)
     project_values: object
@@ -280,8 +282,9 @@ def make_rot_info_rpy_sym():
         num_rot=len(r_s),
         r0=np.zeros(3),
         calc_values=calc_values,
-        calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
         project_values=project_values,
+        calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
+        calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
     )
 
 
@@ -354,6 +357,7 @@ def make_rot_info_quat_sym():
         calc_values=calc_values,
         project_values=project_values,
         calc_rate_jacobian=make_pinv(calc_angular_velocity_jacobian),
+        calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
     )
 
 
@@ -381,6 +385,7 @@ def make_rot_info_quat_drake_jacobian(*, use_pinv=False):
         calc_values=quat_info.calc_values,
         project_values=quat_info.project_values,
         calc_rate_jacobian=calc_rate_jacobian,
+        calc_angular_velocity_jacobian=calc_angular_velocity_jacobian,
     )
 
 
