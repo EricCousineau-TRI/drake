@@ -396,7 +396,7 @@ class Test(unittest.TestCase):
             # bad = drake_sym_replace(bad, np.sum(quat**2), 1.0)
             # print(bad)
 
-    def test_jacobian_difference(self):
+    def test_rate_jacobian_difference(self):
         calc_a = make_rot_info_quat_sym().calc_rate_jacobian
         calc_b = make_rot_info_quat_drake_jacobian().calc_rate_jacobian
 
@@ -412,5 +412,18 @@ class Test(unittest.TestCase):
         # But they aren't the same (thus won't map correctly for other
         # subspaces).
         assert_not_allclose(self, Ja, Jb, tol=0.3)
+        print(Ja)
+        print(Jb)
+
+    def test_angular_velocity_jacobian_difference(self):
+        rot_info = make_rot_info_quat_sym()
+        calc_a = rot_info.calc_angular_velocity_jacobian
+        rot_info_b = make_rot_info_quat_drake_jacobian()
+        calc_b = rot_info_b.calc_angular_velocity_jacobian
+
+        q = angle_axis_deg_to_quat(90, [0, 0, 1])
+        Ja = calc_a(q)
+        Jb = calc_b(q)
+        assert_not_allclose(self, Ja, Jb, tol=2.0)
         print(Ja)
         print(Jb)
