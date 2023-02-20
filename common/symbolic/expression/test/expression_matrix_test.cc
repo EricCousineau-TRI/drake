@@ -542,41 +542,47 @@ Eigen::MatrixX<Variable> MakeMatrixVariable(int rows, int cols) {
   return out;
 }
 
-template <int Rows, int Cols>
+const char* kBadMatrixInversion =
+    R"""(.*does not have an entry for the variable[\s\S]*)""";
+
+template <int N>
 void CheckMatrixInversion() {
-  drake::log()->info("CheckMatrixInversion<{}, {}>()", Rows, Cols);
-  Eigen::Matrix<Variable, Rows, Cols> Mvar = MakeMatrixVariable(Rows, Cols);
-  Eigen::Matrix<Expression, Rows, Cols> M = Mvar;
-  Eigen::Matrix<Expression, Rows, Cols> Minv = M.inverse();
+  drake::log()->debug("CheckMatrixInversion<{}>()", N);
+  Eigen::Matrix<Variable, N, N> Mvar = MakeMatrixVariable(N, N);
+  Eigen::Matrix<Expression, N, N> M = Mvar;
+  Eigen::Matrix<Expression, N, N> Minv = M.inverse();
   Substitution subst;
-  for (int i = 0; i < Rows * Cols; ++i) {
-    subst[Mvar(i)] = (i + 1) * (i + 1);
+  for (int i = 0; i < N * N; ++i) {
+    subst[Mvar(i)] = pow(i, N - 1);
   }
   EXPECT_TRUE(CompareMatrices(Substitute(Minv, subst),
                               Substitute(M, subst).inverse(), 1e-10));
   // Show that the dynamically-sized variant fails.
   Eigen::MatrixX<Expression> Mdyn = M;
-  DRAKE_EXPECT_THROWS_MESSAGE(
-      Mdyn.inverse().eval(),
-      R"""(.*does not have an entry for the variable[\s\S]*)""");
+  DRAKE_EXPECT_THROWS_MESSAGE(Mdyn.inverse().eval(), kBadMatrixInversion);
 }
 
 // Tests Eigen `.inverse` method works for certain shapes of symbolic matrices.
 // We demonstrate it  by showing that the following two values are matched for
-// a 2x2 symbolic matrix `M` and a substitution (Variable -> double) `subst`:
+// a symbolic matrix `M` (of size 1x1, 2x2, 3x3, and 4x4) and a substitution
+// (Variable -> double) `subst`:
 //
 //  1. Substitute(M.inverse(), subst)
 //  2. Substitute(M, subst).inverse()
 //
 // Note that in 1) Matrix<Expression>::inverse() is called while in 2)
 // Matrix<double>::inverse() is used.
+// Also that it fails for matrices larger than 4x4 and any dynamically-sized
+// matrix.
 TEST_F(SymbolicExpressionMatrixTest, Inverse) {
-  CheckMatrixInversion<1, 1>();
-  CheckMatrixInversion<2, 2>();
-  CheckMatrixInversion<3, 3>();
-  CheckMatrixInversion<4, 4>();
-  CheckMatrixInversion<5, 5>();
-  CheckMatrixInversion<6, 6>();
+  CheckMatrixInversion<1>();
+  CheckMatrixInversion<2>();
+  CheckMatrixInversion<3>();
+  CheckMatrixInversion<4>();
+  DRAKE_EXPECT_THROWS_MESSAGE(
+      CheckMatrixInversion<5>(), kBadMatrixInversion);
+  DRAKE_EXPECT_THROWS_MESSAGE(
+      CheckMatrixInversion<6>(), kBadMatrixInversion);
 }
 
 // We found that the following example could leak memory. This test makes sure
