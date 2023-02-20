@@ -362,3 +362,11 @@ class Test(unittest.TestCase):
         print(diff_dx[:4])
         print(mbp_dx[1])
         print(naive_dx[1])
+
+        # Moar symbolics.
+        q0[:4] = [Variable(n) for n in "wxyz"]
+        mbp_dx, naive_dx = calc_derivs(q0, v0)
+        diff_dx = mbp_dx - naive_dx
+        print(diff_dx[:4])
+        print(mbp_dx[1])
+        print(naive_dx[1])

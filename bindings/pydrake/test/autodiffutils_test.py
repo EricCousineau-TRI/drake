@@ -234,6 +234,7 @@ class TestAutoDiffXd(unittest.TestCase):
         X_float = numpy_compare.to_float(X)
         Xinv_float = np.linalg.inv(X_float)
         Xinv = drake_math.inv(X)
+        assert Xinv.dtype == object
         np.testing.assert_equal(numpy_compare.to_float(Xinv), Xinv_float)
 
     def test_math_utils(self):
