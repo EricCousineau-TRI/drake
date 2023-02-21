@@ -1,6 +1,5 @@
 """
-Shows possible bug in MultibodyPlant dynamics by integrating a
-SE(3) trajectory that has a non-constant axis of rotation.
+Shows integration of SE(3) trajectory that has a non-constant axis of rotation.
 """
 
 import unittest
@@ -417,18 +416,3 @@ class Test(unittest.TestCase):
         Ja = calc_a(q)
         Jb = calc_b(q)
         assert_allclose(Ja, Jb, tol=1e-10)
-        # Jc = calc_ang_vel(q)
-
-
-# def calc_L(q):
-#     w, x, y, z = q
-#     return np.array([
-#         [-x, -y, -z],
-#         [w, z, -y],
-#         [-z, w, x],
-#         [y, -x, w],
-#     ])
-
-
-# def calc_ang_vel(q):
-#     return calc_L(2 * q).T
