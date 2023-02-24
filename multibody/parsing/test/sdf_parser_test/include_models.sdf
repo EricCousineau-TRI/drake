@@ -1,26 +1,36 @@
 <?xml version="1.0"?>
 <sdf version="1.8">
   <world name="SimWorld">
-    <include>
-      <uri>model://simple_robot1/</uri>
-    </include>
-    <include>
-      <uri>model://simple_robot2/</uri>
-    </include>
-    <model name="weld_models">
+    <model name="P">
       <include>
+        <pose>1 2 3   0 0 0</pose> 
         <uri>model://simple_robot1/</uri>
       </include>
+
+      <!-- <include> -->
+      <!--   <pose>5 6 7   0 0 0</pose>  -->
+      <!--   <uri>model://simple_robot2/</uri> -->
+      <!-- </include> -->
+
+      <!-- <joint name="J1" type="fixed"> -->
+      <!--   <parent>robot1::moving_link</parent> -->
+      <!--   <child>robot2::gripper::mount</child> -->
+      <!-- </joint> -->
+
+      <frame name="mount_tmp" attached_to="robot2::gripper">
+        <pose>5 6 7   0 0 0</pose>
+      </frame>
+
+      <frame name="mount" attached_to="mount_tmp">
+        <pose relative_to="robot1::moving_link"/>
+      </frame>
+
       <include>
+        <pose relative_to="mount"/>
+        <placement_frame>gripper</placement_frame>
         <uri>model://simple_robot2/</uri>
       </include>
-      <joint name="weld_robots" type="revolute">
-        <parent>robot1::base_link</parent>
-        <child>robot2::base_link</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-        </axis>
-      </joint>
+
     </model>
   </world>
 </sdf>

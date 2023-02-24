@@ -1,0 +1,15 @@
+directives:
+
+- add_model:
+    name: top_level_model
+    file: package://sdf_parser_test/model_with_directly_nested_models.sdf
+
+- add_model:
+    name: tool_model
+    file: package://process_model_directives_test/simple_model.sdf
+
+- add_weld:
+    #child: tool_model::base
+    #parent: top_level_model::parent_model::robot1::base_link
+    parent: tool_model::base
+    child: top_level_model::parent_model::robot1::base_link

@@ -1,6 +1,9 @@
+import argparse
 import lxml.etree as ET
 import os
 import unittest
+
+from pydrake.math import RollPitchYaw
 
 from pydrake.multibody.parsing import (
     Parser,
@@ -16,7 +19,7 @@ from pydrake.multibody.tree import (
     ModelInstanceIndex,
     JointIndex,
 )
-from pydrake.common import GetDrakePath
+from pydrake.common import GetDrakePath, FindResourceOrThrow
 from pydrake.common.test_utilities.meta import (
     ValueParameterizedTest,
     run_with_multiple_values,
@@ -68,6 +71,24 @@ def get_frames(plant, model_instances=None):
         plant.num_frames, plant.get_frame, FrameIndex, model_instances
     )
 
+def print_frames(plant, model_instances=None):
+    frames = get_frames(plant, model_instances)
+    for frame in frames:
+        model_scoped_name = plant.GetModelInstanceName(frame.model_instance())
+        X_WB = plant.GetDefaultFreeBodyPose(frame.body());
+        X_WF = X_WB.multiply(frame.GetFixedPoseInBodyFrame())
+        rpy = RollPitchYaw(X_WF.rotation())
+        pose_str = f"{rpy} xyz={X_WF.translation()}"
+        print(f"{model_scoped_name}::{frame.name()}: {pose_str}")
+
+def print_bodies(plant, model_instances=None):
+    bodies = get_bodies(plant, model_instances)
+    for body in bodies:
+        model_scoped_name = plant.GetModelInstanceName(body.model_instance())
+        pose = plant.GetDefaultFreeBodyPose(body)
+        rpy = RollPitchYaw(pose.rotation())
+        pose_str = f"{rpy} xyz={pose.translation()}"
+        print(f"{model_scoped_name}::{frame.name()}: {pose_str}")
 
 def get_frames_attached_to(plant, bodies):
     # TODO(eric.cousineau): Hoist this somewhere?
@@ -376,3 +397,24 @@ class TestConvertModelDirectiveToSDF(unittest.TestCase,
             ['-m',
              'multibody/parsing/test/'
              'model_directives_to_sdformat_files/add_directives.yaml']))
+
+    def test_list_frames(self):
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument("input_file")
+        args = arg_parser.parse_args()
+        # Load converted SDFormat
+        plant = MultibodyPlant(time_step=0.01)
+        parser = Parser(plant)
+
+        full_filename = os.path.abspath(args.input_file)
+        parser.package_map().PopulateFromFolder('multibody/parsing/test/')
+        parser.package_map().Add('sdf_parser_test', 
+                'multibody/parsing/test/sdf_parser_test')
+        if full_filename.endswith(".sdf"):
+            parser.AddModels(full_filename)
+        elif full_filename.endswith(".yaml"):
+            directives = LoadModelDirectives(full_filename)
+            ProcessModelDirectives(directives=directives,
+                                   plant=plant,
+                                   parser=parser)
+        print_frames(plant)
