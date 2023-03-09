@@ -3,6 +3,10 @@ import lxml.etree as ET
 import os
 import unittest
 
+import logging
+
+from pydrake.common import configure_logging
+
 from pydrake.math import RollPitchYaw
 
 from pydrake.multibody.parsing import (
@@ -399,6 +403,9 @@ class TestConvertModelDirectiveToSDF(unittest.TestCase,
              'model_directives_to_sdformat_files/add_directives.yaml']))
 
     def test_list_frames(self):
+        configure_logging()
+        logging.getLogger("drake").setLevel("TRACE")
+
         arg_parser = argparse.ArgumentParser()
         arg_parser.add_argument("input_file")
         args = arg_parser.parse_args()
@@ -408,7 +415,7 @@ class TestConvertModelDirectiveToSDF(unittest.TestCase,
 
         full_filename = os.path.abspath(args.input_file)
         parser.package_map().PopulateFromFolder('multibody/parsing/test/')
-        parser.package_map().Add('sdf_parser_test', 
+        parser.package_map().Add('sdf_parser_test',
                 'multibody/parsing/test/sdf_parser_test')
         if full_filename.endswith(".sdf"):
             parser.AddModels(full_filename)

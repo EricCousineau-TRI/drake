@@ -35,9 +35,12 @@ void AddWeld(
   if (added_models) {
     // Record weld info into crappy ModelInstanceInfo struct.
     bool found = false;
+    drake::log()->debug(
+        "Finding child_frame model instance ({}) in added_models",
+        plant->GetModelInstanceName(child_frame.model_instance()));
     for (auto& info : *added_models) {
-      drake::log()->warn("  info: {}   child {}", info.model_instance,
-                          child_frame.model_instance());
+      drake::log()->debug(
+          "  check: {}", plant->GetModelInstanceName(info.model_instance));
       if (info.model_instance == child_frame.model_instance()) {
         found = true;
         // See warning in ModelInstanceInfo about these members.
