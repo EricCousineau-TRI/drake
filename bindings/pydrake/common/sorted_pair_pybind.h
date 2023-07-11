@@ -10,6 +10,8 @@ namespace detail {
 template <typename T>
 struct type_caster<drake::SortedPair<T>> {
   using Type = drake::SortedPair<T>;
+  using InnerCaster = make_caster<T>;
+
   // N.B. This macro assumes placement in `pybind11::detail`.
   PYBIND11_TYPE_CASTER(Type, _("Tuple[") + type_caster<T>::name + _("]"));
 
@@ -19,7 +21,7 @@ struct type_caster<drake::SortedPair<T>> {
     }
     tuple t = reinterpret_borrow<tuple>(src);
     if (t.size() != 2) return false;
-    make_caster<T> first, second;
+    InnerCaster first, second;
     if (!first.load(t[0], convert) || !second.load(t[1], convert)) {
       return false;
     }
@@ -27,8 +29,9 @@ struct type_caster<drake::SortedPair<T>> {
     return true;
   }
 
-  static handle cast(Type src, return_value_policy, handle) {
-    return make_tuple(cast(src.first()), cast(src.second()));
+  static handle cast(Type src, return_value_policy policy, handle parent) {
+    return make_tuple(InnerCaster::cast(src.first(), policy, parent),
+        InnerCaster::cast(src.second(), policy, parent));
   }
 };
 
