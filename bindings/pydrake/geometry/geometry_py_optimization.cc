@@ -76,6 +76,12 @@ void DefineGeometryOptimization(py::module m) {
   m.doc() = "Local bindings for `drake::geometry::optimization`";
   constexpr auto& doc = pydrake_doc.drake.geometry.optimization;
 
+  // WARNING: We need this import for `multibody::RationalForwardKinematics`,
+  // but we cannot handle this because of dependency cycle between
+  // pydrake eometry and pydrake.geometry. The solution is to either move the
+  // bindings, or make `pydrake.geometry.optimization` be its own separate
+  // shared library module.
+  // py::module::import("pydrake.multibody.rational");
   py::module::import("pydrake.solvers");
 
   // ConvexSet
@@ -807,10 +813,10 @@ void DefineGeometryOptimization(py::module m) {
     cspace_free_polytope_base_cls
         // TODO(Alexandre.Amice): Figure out how to bind rational_forward_kin.
         // The naive method returns an "Unable to convert to Python type" error.
-        //        .def("rational_forward_kin",
-        //                &BaseClass::rational_forward_kin,
-        //                    py_rvp::reference_internal,
-        //                    base_cls_doc.rational_forward_kin.doc)
+        .def("rational_forward_kin",
+                &BaseClass::rational_forward_kin,
+                    py_rvp::reference_internal,
+                    base_cls_doc.rational_forward_kin.doc)
         .def("map_geometries_to_separating_planes",
             &BaseClass::map_geometries_to_separating_planes,
             base_cls_doc.map_geometries_to_separating_planes.doc)

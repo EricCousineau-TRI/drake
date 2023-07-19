@@ -121,6 +121,7 @@ drake_py_unittest(
         "//bindings/pydrake/multibody:inverse_kinematics_py",
         "//bindings/pydrake/multibody:parsing_py",
         "//bindings/pydrake/multibody:plant_py",
+        "//bindings/pydrake/multibody:rational_py",
         "//bindings/pydrake/solvers",
     ],
 )

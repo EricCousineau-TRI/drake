@@ -15,6 +15,8 @@ from pydrake.math import RigidTransform
 from pydrake.multibody.inverse_kinematics import InverseKinematics
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
+# See warning in geometry_py_optimization.cc. Users may not be able to import just our pydrake.geometry.optimzation at present.
+import pydrake.multibody.rational
 from pydrake.multibody.tree import BodyIndex
 from pydrake.systems.framework import DiagramBuilder
 from pydrake.solvers import (
@@ -846,12 +848,12 @@ class TestCspaceFreePolytope(unittest.TestCase):
         dut = self.cspace_free_polytope
 
         # TODO(Alexandre.Amice): uncomment once rational_forward_kin is bound.
-        # rat_forward = dut.rational_forward_kin()
-        # self.assertEqual(
-        #     rat_forward.ComputeSValue(
-        #         np.zeros(self.plant.num_positions()),
-        #         np.zeros(self.plant.num_positions())),
-        #     np.zeros(self.plant.num_positions()))
+        rat_forward = dut.rational_forward_kin()
+        self.assertEqual(
+            rat_forward.ComputeSValue(
+                np.zeros(self.plant.num_positions()),
+                np.zeros(self.plant.num_positions())),
+            np.zeros(self.plant.num_positions()))
 
         self.assertGreaterEqual(
             len(dut.map_geometries_to_separating_planes().keys()), 1)
