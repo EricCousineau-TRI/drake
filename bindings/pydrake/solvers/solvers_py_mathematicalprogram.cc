@@ -385,8 +385,13 @@ void BindSolverInterfaceAndFlags(py::module m) {
           doc.SolverType.kUnrevisedLemke.doc);
 
   // TODO(jwnimmer-tri) Bind the accessors for SolverOptions.
-  py::class_<SolverOptions>(m, "SolverOptions", doc.SolverOptions.doc)
+  py::class_<SolverOptions> opt_cls(m, "SolverOptions", doc.SolverOptions.doc);
+  DefCopyAndDeepCopy(&opt_cls);
+  opt_cls  // BR
       .def(py::init<>(), doc.SolverOptions.ctor.doc)
+      .def(
+            py::init<const SolverOptions&>(), py::arg("other"),
+            "Copy constructor")
       .def("SetOption",
           py::overload_cast<const SolverId&, const std::string&, double>(
               &SolverOptions::SetOption),
@@ -442,9 +447,12 @@ void BindSolverInterfaceAndFlags(py::module m) {
 
 void BindMathematicalProgram(py::module m) {
   constexpr auto& doc = pydrake_doc.drake.solvers;
-  py::class_<MathematicalProgramResult>(
-      m, "MathematicalProgramResult", doc.MathematicalProgramResult.doc)
+  py::class_<MathematicalProgramResult> result_cls(
+      m, "MathematicalProgramResult", doc.MathematicalProgramResult.doc);
+  DefCopyAndDeepCopy(&result_cls);
+  result_cls  // BR
       .def(py::init<>(), doc.MathematicalProgramResult.ctor.doc)
+      .def(py::init<const MathematicalProgramResult&>(), py::arg("other"))
       .def("is_success", &MathematicalProgramResult::is_success,
           doc.MathematicalProgramResult.is_success.doc)
       .def("set_x_val", &MathematicalProgramResult::set_x_val, py::arg("x_val"),
