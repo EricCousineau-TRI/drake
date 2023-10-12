@@ -1,0 +1,16 @@
+py_library(
+    name = "manipulation_py",
+    srcs = glob(["manipulation_repo/manipulation/**/*.py"], allow_empty=False),
+    data = glob(["manipulation_repo/manipulation/**/*"], allow_empty=False),
+    imports = ["manipulation_repo"],
+    deps = ["//bindings/pydrake"],
+)
+
+py_binary(
+    name = "repro",
+    srcs = ["repro.py"],
+    deps = [
+        ":manipulation_py",
+        "//bindings/pydrake",
+    ],
+)
