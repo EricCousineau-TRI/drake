@@ -11,27 +11,21 @@ _REPOSITORY = "RobotLocomotion/pybind11"
 
 # DNM PR: https://github.com/RobotLocomotion/pybind11/pull/63
 
-_COMMIT = "e61bb561a67037ca2ddcb1386f44a6014c8091e4"
+_COMMIT = "cf59d90835f78334877e59c270293d2beecfa559"
 
-_SHA256 = "dbcddb96dd5db5f24d00c8fc04d5d131166150c5c9730d37b721f8298dacf4f1"
+_SHA256 = "d578a0f204c7298075a15ba359689c8d822703383abcdf3cc46a950a4eb5ac11"
 
 def pybind11_repository(
         name,
         mirrors = None):
-    native.new_local_repository(
+    github_archive(
         name = name,
-        path = "/home/eacousineau/proj/tri/repo/externals/pybind11",
-        build_file = "//tools/workspace/pybind11:package.BUILD.bazel",
+        repository = _REPOSITORY,
+        commit = _COMMIT,
+        sha256 = _SHA256,
+        build_file = ":package.BUILD.bazel",
+        mirrors = mirrors,
     )
-
-    # github_archive(
-    #     name = name,
-    #     repository = _REPOSITORY,
-    #     commit = _COMMIT,
-    #     sha256 = _SHA256,
-    #     build_file = ":package.BUILD.bazel",
-    #     mirrors = mirrors,
-    # )
 
 def generate_pybind11_version_py_file(name):
     vars = dict(
