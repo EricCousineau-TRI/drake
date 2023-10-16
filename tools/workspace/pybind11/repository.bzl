@@ -24,6 +24,7 @@ def pybind11_repository(
         commit = _COMMIT,
         sha256 = _SHA256,
         build_file = ":package.BUILD.bazel",
+        local_repository_override = "/home/eacousineau/proj/tri/repo/externals/pybind11",  # noqa
         mirrors = mirrors,
     )
 
