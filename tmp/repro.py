@@ -9,6 +9,7 @@ debug.reexecute_if_unbuffered()
 
 
 import time
+import weakref
 
 import numpy as np
 from pydrake.all import (
@@ -196,13 +197,24 @@ def trajopt_shelves_demo():
     # evaluate_at_s = np.linspace(0, 1, 2)  # segfault
     evaluate_at_s = np.linspace(0, 1, 4)  # junk name error
 
+    keep_alive = []
+    refs = []
+
     for s in evaluate_at_s:
         context = diagram.CreateDefaultContext()
+        refs.append(weakref.ref(context))
+        # keep_alive.append(context)
+
         plant_context = plant.GetMyContextFromRoot(context)
+        # keep_alive.append(plant_context)
+
         collision_constraint = MinimumDistanceConstraint(
             plant, 0.001, plant_context, None, 0.01
         )
         trajopt.AddPathPositionConstraint(collision_constraint, s)
+
+    for ref in refs:
+        assert ref() is not None
 
     @debug.traced
     def PlotPath(control_points):
