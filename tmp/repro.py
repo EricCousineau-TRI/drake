@@ -169,9 +169,9 @@ def trajopt_shelves_demo():
         traj = BsplineTrajectory(
             trajopt.basis(), control_points.reshape((3, -1))
         )
-        meshcat.SetLine(
-            "positions_path", traj.vector_values(np.linspace(0, 1, 50))
-        )
+        values = traj.vector_values(np.linspace(0, 1, 50))
+        print(values)
+        meshcat.SetLine("positions_path", values)
 
     prog.AddVisualizationCallback(
         PlotPath, trajopt.control_points().reshape((-1,))
