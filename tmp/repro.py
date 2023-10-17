@@ -156,18 +156,18 @@ def trajopt_shelves_demo():
     names = []
     refs = []
 
-    def add_ref(x):
+    def add_weakref(x):
         names.append(repr(x))
         refs.append(weakref.ref(x))
 
     def add_constraint(s):
         context = diagram.CreateDefaultContext()
-        add_ref(context)
+        add_weakref(context)
         plant_context = plant.GetMyContextFromRoot(context)
         collision_constraint = MinimumDistanceConstraint(
             plant, 0.001, plant_context, None, 0.01
         )
-        add_ref(collision_constraint)
+        add_weakref(collision_constraint)
         trajopt.AddPathPositionConstraint(collision_constraint, s)
 
     for s in evaluate_at_s:
