@@ -234,8 +234,20 @@ class TestTrajectoryOptimization(unittest.TestCase):
 
         b = np.zeros((2, 1))
         trajopt.AddPathPositionConstraint(lb=b, ub=b, s=0)
-        con = mp.LinearConstraint(np.eye(2), lb=b, ub=b)
-        trajopt.AddPathPositionConstraint(con, 0)
+
+        import weakref
+        con_ref = None
+
+        def add_con():
+            nonlocal con_ref
+
+            con = mp.LinearConstraint(np.eye(2), lb=b, ub=b)
+            trajopt.AddPathPositionConstraint(con, 0)
+            con_ref = weakref.ref(con)
+
+        add_con()
+        assert con_ref() is not None
+
         trajopt.AddPathVelocityConstraint(lb=b, ub=b, s=0)
         velocity_constraint = mp.LinearConstraint(np.eye(4),
                                                   lb=np.zeros((4, 1)),
