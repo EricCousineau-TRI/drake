@@ -23,15 +23,10 @@ def Example_(T):
             LeafSystem_[T].__init__(self, converter=converter)
             self.value = value
             self.copied_from = None
-            self.self_reference = self
-            # self.DeclareVectorOutputPort("y", 1, self._calc_y)
 
         def _construct_copy(self, other, converter=None):
             Impl._construct(self, other.value, converter=converter)
             self.copied_from = other
-
-        # def _calc_y(self, context, output):
-        #     output.SetFromVector([0.0])
 
     return Impl
 
@@ -113,8 +108,7 @@ class TestScalarConversion(unittest.TestCase):
         builder_f.AddSystem(system_f)
         diagram_f = builder_f.Build()
 
-        # diagram_ad = diagram_f.ToAutoDiffXd()
-        diagram_ad = diagram_f.ToScalarType[AutoDiffXd]()
+        diagram_ad = diagram_f.ToAutoDiffXd()
         system_ad = diagram_ad.GetSubsystemByName(system_f.get_name())
         self.assertIsInstance(system_ad, Example_[AutoDiffXd])
         self.assertIs(system_ad.copied_from, system_f)
