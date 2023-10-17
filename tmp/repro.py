@@ -14,6 +14,7 @@ import numpy as np
 from pydrake.all import (
     AddMultibodyPlantSceneGraph,
     BsplineTrajectory,
+    Diagram,
     DiagramBuilder,
     KinematicTrajectoryOptimization,
     MeshcatVisualizer,
@@ -46,8 +47,33 @@ meshcat = StartMeshcat()
 
 # In[ ]:
 
+def get_all_systems(system):
+    # Should use SystemVisitor pattern. See:
+    # https://github.com/RobotLocomotion/drake/issues/18602
+    systems = []
 
-@debug.traced
+    def recurse(system):
+        systems.append(system)
+        if isinstance(system, Diagram):
+            for sub_system in system.GetSystems():
+                recurse(sub_system)
+
+    recurse(system)
+    return systems
+
+
+def print_stuff(diagram):
+    systems = get_all_systems(diagram)
+    for system in systems:
+        print(system.GetSystemPathname(), system)
+
+
+
+# In[ ]:
+
+
+
+# @debug.traced
 def trajopt_shelves_demo():
     meshcat.Delete()
     builder = DiagramBuilder()
@@ -79,6 +105,7 @@ def trajopt_shelves_demo():
         meshcat,
         MeshcatVisualizerParams(role=Role.kIllustration),
     )
+
     collision_visualizer = MeshcatVisualizer.AddToBuilder(
         builder,
         scene_graph,
@@ -88,7 +115,16 @@ def trajopt_shelves_demo():
         ),
     )
 
+    plant.set_name("plant")
+    scene_graph.set_name("scene_graph")
+    visualizer.set_name("illustration")
+    collision_visualizer.set_name("collision")
+
     diagram = builder.Build()
+    diagram.set_name("diagram")
+
+    # print_stuff(diagram)
+
     context = diagram.CreateDefaultContext()
     plant_context = plant.GetMyContextFromRoot(context)
 
@@ -156,7 +192,8 @@ def trajopt_shelves_demo():
     trajopt.SetInitialGuess(trajopt.ReconstructTrajectory(result))
 
     # collision constraints
-    evaluate_at_s = np.array([0.0, 1.0])  #np.linspace(0, 1, 2)
+    # evaluate_at_s = np.array([0.0, 1.0])  #np.linspace(0, 1, 2)
+    evaluate_at_s = np.linspace(0, 1, 25)
     for s in evaluate_at_s:
         context = diagram.CreateDefaultContext()
         plant_context = plant.GetMyContextFromRoot(context)
@@ -165,11 +202,13 @@ def trajopt_shelves_demo():
         )
         trajopt.AddPathPositionConstraint(collision_constraint, s)
 
+    @debug.traced
     def PlotPath(control_points):
         traj = BsplineTrajectory(
             trajopt.basis(), control_points.reshape((3, -1))
         )
         values = traj.vector_values(np.linspace(0, 1, 50))
+        print(meshcat.web_url())
         print(values)
         meshcat.SetLine("positions_path", values)
 
