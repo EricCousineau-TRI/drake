@@ -108,7 +108,8 @@ class TestScalarConversion(unittest.TestCase):
         builder_f.AddSystem(system_f)
         diagram_f = builder_f.Build()
 
-        diagram_ad = diagram_f.ToAutoDiffXd()
+        # diagram_ad = diagram_f.ToAutoDiffXd()
+        diagram_ad = diagram_f.ToScalarType[AutoDiffXd]()
         system_ad = diagram_ad.GetSubsystemByName(system_f.get_name())
         self.assertIsInstance(system_ad, Example_[AutoDiffXd])
         self.assertIs(system_ad.copied_from, system_f)
