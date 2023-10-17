@@ -193,14 +193,15 @@ def trajopt_shelves_demo():
     trajopt.SetInitialGuess(trajopt.ReconstructTrajectory(result))
 
     # collision constraints
+    evaluate_at_s = [0.0]
     # evaluate_at_s = np.array([0.0, 1.0])  #np.linspace(0, 1, 2)
     # evaluate_at_s = np.linspace(0, 1, 2)  # segfault
-    evaluate_at_s = np.linspace(0, 1, 4)  # junk name error
+    # evaluate_at_s = np.linspace(0, 1, 4)  # junk name error
 
-    keep_alive = []
+    # keep_alive = []
     refs = []
 
-    for s in evaluate_at_s:
+    def add_constraint(s):
         context = diagram.CreateDefaultContext()
         refs.append(weakref.ref(context))
         # keep_alive.append(context)
@@ -212,6 +213,9 @@ def trajopt_shelves_demo():
             plant, 0.001, plant_context, None, 0.01
         )
         trajopt.AddPathPositionConstraint(collision_constraint, s)
+
+    for s in evaluate_at_s:
+        add_constraint(s)
 
     for ref in refs:
         assert ref() is not None
