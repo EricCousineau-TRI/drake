@@ -3,6 +3,11 @@
 # In[ ]:
 
 
+
+import debug
+debug.reexecute_if_unbuffered()
+
+
 import time
 
 import numpy as np
@@ -42,6 +47,7 @@ meshcat = StartMeshcat()
 # In[ ]:
 
 
+@debug.traced
 def trajopt_shelves_demo():
     meshcat.Delete()
     builder = DiagramBuilder()
@@ -150,7 +156,7 @@ def trajopt_shelves_demo():
     trajopt.SetInitialGuess(trajopt.ReconstructTrajectory(result))
 
     # collision constraints
-    evaluate_at_s = np.linspace(0, 1, 2)
+    evaluate_at_s = np.array([0.0, 1.0])  #np.linspace(0, 1, 2)
     for s in evaluate_at_s:
         context = diagram.CreateDefaultContext()
         plant_context = plant.GetMyContextFromRoot(context)
