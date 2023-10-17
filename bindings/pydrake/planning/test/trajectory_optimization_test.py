@@ -1,6 +1,7 @@
 import math
 import unittest
 import warnings
+import weakref
 
 import numpy as np
 
@@ -235,12 +236,10 @@ class TestTrajectoryOptimization(unittest.TestCase):
         b = np.zeros((2, 1))
         trajopt.AddPathPositionConstraint(lb=b, ub=b, s=0)
 
-        import weakref
         con_ref = None
 
         def add_con():
             nonlocal con_ref
-
             con = mp.LinearConstraint(np.eye(2), lb=b, ub=b)
             trajopt.AddPathPositionConstraint(con, 0)
             con_ref = weakref.ref(con)
