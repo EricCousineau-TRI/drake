@@ -23,10 +23,14 @@ def Example_(T):
             LeafSystem_[T].__init__(self, converter=converter)
             self.value = value
             self.copied_from = None
+            self.DeclareVectorOutputPort("y", 1, self._calc_y)
 
         def _construct_copy(self, other, converter=None):
             Impl._construct(self, other.value, converter=converter)
             self.copied_from = other
+
+        def _calc_y(self, context, output):
+            output.SetFromVector([0.0])
 
     return Impl
 

@@ -1547,8 +1547,9 @@ class TestPlant(unittest.TestCase):
         #     test_system_f.get_output_port(1),
         #     plant_f.get_applied_generalized_force_input_port())
         diagram_f = builder_f.Build()
-        print(T)
-        diagram = to_type(diagram_f, T)
+        diagram_ad = diagram_f.ToAutoDiffXd()
+        # print(T)
+        # diagram = to_type(diagram_f, T)
 
         # plant = diagram.GetSubsystemByName(plant_f.get_name())
         # # Test that we can get those ports.
