@@ -193,7 +193,8 @@ def trajopt_shelves_demo():
 
     # collision constraints
     # evaluate_at_s = np.array([0.0, 1.0])  #np.linspace(0, 1, 2)
-    evaluate_at_s = np.linspace(0, 1, 25)
+    evaluate_at_s = np.linspace(0, 1, 4)
+
     for s in evaluate_at_s:
         context = diagram.CreateDefaultContext()
         plant_context = plant.GetMyContextFromRoot(context)
