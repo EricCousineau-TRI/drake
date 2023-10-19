@@ -3262,6 +3262,13 @@ void TestMergeIncludeWithInterfaceApi(const MultibodyPlant<double>& plant,
   const auto arm_mjcf_model_instance =
       plant.GetModelInstanceByName(sdf::JoinName(model_prefix, "arm_mjcf"));
 
+  ASSERT_TRUE(
+      plant.HasModelInstanceNamed(
+          sdf::JoinName(model_prefix, "arm_mjcf_no_worldbody")));
+  const auto arm_mjcf_no_worldbody_model_instance =
+      plant.GetModelInstanceByName(
+          sdf::JoinName(model_prefix, "arm_mjcf_no_worldbody"));
+
   // Pose of torso link
   const RigidTransformd X_WT(RollPitchYawd(0, 0, 0), Vector3d(0, 0, 1));
 
@@ -3337,6 +3344,22 @@ void TestMergeIncludeWithInterfaceApi(const MultibodyPlant<double>& plant,
 
     const RigidTransformd X_WL2_expected(RollPitchYawd(0.1, 0.2, 0.3),
                                          Vector3d(11, 4, 4));
+    const auto& arm_L2 = plant.GetFrameByName("L2", arm_mjcf_model_instance);
+    const RigidTransformd X_WL2 = arm_L2.CalcPoseInWorld(*context);
+    EXPECT_TRUE(CompareMatrices(X_WL2_expected.GetAsMatrix4(),
+                                X_WL2.GetAsMatrix4(), kEps));
+  }
+  {
+    // Frame G represents the model frame of model top::arm_mjcf_no_worldbody
+    const auto& arm_mjcf_no_worldobdy_model_frame =
+        plant.GetFrameByName("__model__", arm_mjcf_no_worldobdy_model_instance);
+    const RigidTransformd X_WG =
+        arm_mjcf_no_worldobdy_model_frame.CalcPoseInWorld(*context);
+    EXPECT_TRUE(
+        CompareMatrices(X_WT.GetAsMatrix4(), X_WG.GetAsMatrix4(), kEps));
+
+    const RigidTransformd X_WL2_expected(RollPitchYawd(0.1, 0.2, 0.3),
+                                         Vector3d(11, 22, 4));
     const auto& arm_L2 = plant.GetFrameByName("L2", arm_mjcf_model_instance);
     const RigidTransformd X_WL2 = arm_L2.CalcPoseInWorld(*context);
     EXPECT_TRUE(CompareMatrices(X_WL2_expected.GetAsMatrix4(),

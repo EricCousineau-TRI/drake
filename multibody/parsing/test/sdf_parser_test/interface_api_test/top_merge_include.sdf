@@ -63,5 +63,14 @@
         <uri>package://interface_api_test/arm.xml</uri>
       </include>
     </model>
+
+    <model name="arm_mjcf_no_worldbody">
+      <pose relative_to="arm_sdf"/>
+      <include merge="true">
+        <pose>10 20 0 0 0 0</pose>
+        <uri>package://interface_api_test/arm_no_worldbody.xml</uri>
+      </include>
+    </model>
+
   </model>
 </sdf>
