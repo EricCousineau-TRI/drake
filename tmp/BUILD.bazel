@@ -1,0 +1,14 @@
+load("//tools/skylark:pybind.bzl", "pybind_py_library")
+
+pybind_py_library(
+    name = "cc_py",
+    cc_so_name = "cc",
+    cc_srcs = ["cc_py.cc"],
+    py_imports = ["."],
+)
+
+py_test(
+    name = "cc_py_test",
+    srcs = ["cc_py_test.py"],
+    deps = [":cc_py"],
+)
