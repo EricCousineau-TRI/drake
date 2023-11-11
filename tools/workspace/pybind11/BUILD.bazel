@@ -3,6 +3,7 @@ load("//tools/lint:lint.bzl", "add_lint_tests")
 load(
     "//tools/skylark:pybind.bzl",
     "generate_pybind_documentation_header",
+    "pybind_py_library",
 )
 load("//tools/skylark:drake_py.bzl", "drake_py_unittest")
 load(
@@ -92,6 +93,20 @@ drake_py_unittest(
         "test/sample_header_documentation.expected.h",
         "test/sample_header_documentation.h",
     ],
+)
+
+
+pybind_py_library(
+    name = "eigen_dtype_object_noconvert_py",
+    cc_so_name = "test/eigen_dtype_object_noconvert",
+    cc_srcs = ["test/eigen_dtype_object_noconvert_py.cc"],
+    testonly = 1,
+    py_imports = ["."],
+)
+
+drake_py_unittest(
+    name = "eigen_dtype_object_noconvert_test",
+    deps = [":eigen_dtype_object_noconvert_py"],
 )
 
 generate_pybind_documentation_header(
