@@ -1,0 +1,7 @@
+py_binary(
+    name = "drake_ipopt_issue",
+    srcs = ["drake_ipopt_issue.py"],
+    deps = [
+        "//bindings/pydrake",
+    ],
+)
