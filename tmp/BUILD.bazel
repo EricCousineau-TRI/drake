@@ -1,0 +1,16 @@
+load("//tools/skylark:pybind.bzl", "pybind_py_library")
+
+pybind_py_library(
+    name = "pybind_lifecycle_py",
+    cc_so_name = "pybind_lifecycle",
+    cc_srcs = ["pybind_lifecycle_py.cc"],
+)
+
+py_test(
+    name = "pybind_lifecycle_test",
+    srcs = ["test/pybind_lifecycle_test.py"],
+    deps = [
+        ":pybind_lifecycle_py",
+        "//bindings/pydrake",
+    ],
+)
